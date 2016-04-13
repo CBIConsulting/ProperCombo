@@ -1,5 +1,7 @@
 import ComboField from "./components/combofield";
 
-require("../css/style.scss");
+if (process.env.APP_ENV === 'browser-env') {
+	require("../css/style.scss");
+}
 
 export default ComboField;

@@ -1,5 +1,5 @@
 import React from 'react';
-import Search from "../../src/jsx/propercombo";
+import Combo from "../../src/jsx/propercombo";
 
 function getDefaultProps() {
 	return {
@@ -13,23 +13,28 @@ class App extends React.Component {
 		super(props);
 
 		this.state = {
-			dev: this.props.dev
+			data: []
 		}
+	}
+
+	componentWillMount() {
+		let data = [];
+
+		for (let i = 100; i > 0; i--) {
+			data.push({'value':i, 'label':'Item ' + i});
+		}
+
+		this.setState({
+			data: data
+		});
 	}
 
 	render() {
 		return (
 	    	<div style={{position: 'absolute', width: '100%', top: '20%'}}>
-	    		<div style={{position: 'absolute', top: 0, left: '10%',  width: '40%'}}>
-		        	<div style={{position: 'absolute', top: 0, bottom: 0, width: '100%'}}>
-		        		<h2>{this.state.dev}</h2>
-		        	</div>
+	    		<div style={{position: 'absolute', top: 0, left: '20%',  width: '20%'}}>
+		        	<Combo data={this.state.data} multiSelect={true} lang={'SPA'} />
 		        </div>
-		      	<div style={{position: 'absolute', top: 0, left: '33%',  width: '25%'}}>
-		        	<div id="canvas" style={{position: 'absolute', top: 0, bottom: 0, width:' 75%'}}>
-		        		<img src="http://ardalis.com/wp-content/uploads/2015/11/one-does-not-simply-estimate-task-duration.jpg"/>
-		        	</div>
-		      	</div>
 		    </div>
 	    );
 

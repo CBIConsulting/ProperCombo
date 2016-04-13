@@ -1,4 +1,4 @@
-var ProperCombo =
+var App =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -47,25 +47,130 @@ var ProperCombo =
 
 	"use strict";
 
+	var _app = __webpack_require__(1);
+
+	var _app2 = _interopRequireDefault(_app);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	var body = document.getElementById('body');
+	ReactDOM.render(React.createElement(_app2["default"], null), body);
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
 
-	var _combofield = __webpack_require__(1);
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _propercombo = __webpack_require__(3);
+
+	var _propercombo2 = _interopRequireDefault(_propercombo);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	function getDefaultProps() {
+		return {
+			dev: "In process of development..."
+		};
+	}
+
+	var App = function (_React$Component) {
+		_inherits(App, _React$Component);
+
+		function App(props) {
+			_classCallCheck(this, App);
+
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
+
+			_this.state = {
+				data: []
+			};
+			return _this;
+		}
+
+		_createClass(App, [{
+			key: "componentWillMount",
+			value: function componentWillMount() {
+				var data = [];
+
+				for (var i = 100; i > 0; i--) {
+					data.push({ 'value': i, 'label': 'Item ' + i });
+				}
+
+				this.setState({
+					data: data
+				});
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				return _react2["default"].createElement(
+					"div",
+					{ style: { position: 'absolute', width: '100%', top: '20%' } },
+					_react2["default"].createElement(
+						"div",
+						{ style: { position: 'absolute', top: 0, left: '20%', width: '20%' } },
+						_react2["default"].createElement(_propercombo2["default"], { data: this.state.data, multiSelect: true, lang: 'SPA' })
+					)
+				);
+			}
+		}]);
+
+		return App;
+	}(_react2["default"].Component);
+
+	App.defaultProps = getDefaultProps();
+
+	exports["default"] = App;
+	module.exports = exports['default'];
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = React;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _combofield = __webpack_require__(4);
 
 	var _combofield2 = _interopRequireDefault(_combofield);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	if (true) {
-		__webpack_require__(101);
+	if (false) {
+		require("../css/style.scss");
 	}
 
 	exports["default"] = _combofield2["default"];
 	module.exports = exports['default'];
 
 /***/ },
-/* 1 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -80,19 +185,19 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(5);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _messages = __webpack_require__(4);
+	var _messages = __webpack_require__(6);
 
 	var _messages2 = _interopRequireDefault(_messages);
 
-	var _reactPropersearch = __webpack_require__(5);
+	var _reactPropersearch = __webpack_require__(7);
 
 	var _reactPropersearch2 = _interopRequireDefault(_reactPropersearch);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(11);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -104,7 +209,6 @@ var ProperCombo =
 
 	function getDefaultProps() {
 		return {
-			maxHeight: 100, // Then scroll
 			data: [],
 			messages: _messages2['default'],
 			lang: 'ENG',
@@ -315,26 +419,17 @@ var ProperCombo =
 					{ key: this.state.uniqueId, className: className },
 					_react2['default'].createElement(
 						'div',
-						{ key: this.state.uniqueId + '-field', className: 'proper-combo-virtual' },
+						{ key: this.state.uniqueId + '-field', ref: this.state.uniqueId + '-field', className: 'proper-combo-virtualField', onClick: this.onVirtualClick.bind(this) },
 						_react2['default'].createElement(
-							'div',
+							_react2['default'].addons.CSSTransitionGroup,
 							{
-								key: this.state.uniqueId + '-fieldllist',
-								style: { maxHeight: this.props.maxHeight + ' !important' },
-								className: 'proper-combo-virtualField',
-								ref: this.state.uniqueId + '-fieldllist',
-								onClick: this.onVirtualClick.bind(this) },
-							_react2['default'].createElement(
-								_react2['default'].addons.CSSTransitionGroup,
-								{
-									key: this.state.uniqueId + '-fieldllist-elements',
-									className: 'proper-combo-virtualField-list',
-									transitionName: 'list',
-									component: 'ul',
-									transitionEnterTimeout: 250,
-									transitionLeaveTimeout: 250 },
-								elementsList
-							)
+								key: this.state.uniqueId + '-field-elements',
+								className: 'proper-combo-virtualField-list',
+								transitionName: 'list',
+								component: 'ul',
+								transitionEnterTimeout: 250,
+								transitionLeaveTimeout: 250 },
+							elementsList
 						),
 						_react2['default'].createElement(
 							'button',
@@ -368,19 +463,13 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	module.exports = React;
-
-/***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = _;
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -413,7 +502,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -422,7 +511,7 @@ var ProperCombo =
 		value: true
 	});
 
-	var _search = __webpack_require__(6);
+	var _search = __webpack_require__(8);
 
 	var _search2 = _interopRequireDefault(_search);
 
@@ -436,7 +525,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -453,31 +542,31 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _immutable = __webpack_require__(7);
+	var _immutable = __webpack_require__(9);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(5);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _searchList = __webpack_require__(8);
+	var _searchList = __webpack_require__(10);
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
-	var _searchField = __webpack_require__(98);
+	var _searchField = __webpack_require__(100);
 
 	var _searchField2 = _interopRequireDefault(_searchField);
 
-	var _messages2 = __webpack_require__(99);
+	var _messages2 = __webpack_require__(101);
 
 	var _messages3 = _interopRequireDefault(_messages2);
 
-	var _normalize = __webpack_require__(100);
+	var _normalize = __webpack_require__(102);
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(11);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -487,7 +576,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(47);
+	var Set = __webpack_require__(49);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -722,8 +811,7 @@ var ProperCombo =
 							} else {
 								_this2.setState({
 									selection: new Set(),
-									allSelected: false,
-									ready: true
+									allSelected: false
 								});
 							}
 
@@ -734,14 +822,6 @@ var ProperCombo =
 					}();
 
 					if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-				}
-
-				if (!nextState.ready) {
-					this.setState({
-						ready: true
-					});
-
-					return false;
 				}
 
 				return somethingChanged;
@@ -1232,7 +1312,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6219,7 +6299,7 @@ var ProperCombo =
 	}));
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6234,15 +6314,15 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(5);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(11);
 
-	var _reactVirtualized = __webpack_require__(14);
+	var _reactVirtualized = __webpack_require__(16);
 
-	var _reactDimensions = __webpack_require__(46);
+	var _reactDimensions = __webpack_require__(48);
 
 	var _reactDimensions2 = _interopRequireDefault(_reactDimensions);
 
@@ -6254,7 +6334,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(47);
+	var Set = __webpack_require__(49);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -6641,7 +6721,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6651,19 +6731,19 @@ var ProperCombo =
 	});
 	exports.shallowEqualImmutable = exports.shouldComponentUpdate = exports.immutableRenderDecorator = exports.default = undefined;
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(12);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
-	var _shallowEqualImmutable = __webpack_require__(11);
+	var _shallowEqualImmutable = __webpack_require__(13);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
-	var _immutableRenderMixin = __webpack_require__(12);
+	var _immutableRenderMixin = __webpack_require__(14);
 
 	var _immutableRenderMixin2 = _interopRequireDefault(_immutableRenderMixin);
 
-	var _immutableRenderDecorator = __webpack_require__(13);
+	var _immutableRenderDecorator = __webpack_require__(15);
 
 	var _immutableRenderDecorator2 = _interopRequireDefault(_immutableRenderDecorator);
 
@@ -6675,7 +6755,7 @@ var ProperCombo =
 	exports.shallowEqualImmutable = _shallowEqualImmutable2.default;
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6685,7 +6765,7 @@ var ProperCombo =
 	});
 	exports.default = shouldComponentUpdate;
 
-	var _shallowEqualImmutable = __webpack_require__(11);
+	var _shallowEqualImmutable = __webpack_require__(13);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
@@ -6696,7 +6776,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6709,7 +6789,7 @@ var ProperCombo =
 
 	exports.default = shallowEqualImmutable;
 
-	var _immutable = __webpack_require__(7);
+	var _immutable = __webpack_require__(9);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
@@ -6745,7 +6825,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6754,7 +6834,7 @@ var ProperCombo =
 	  value: true
 	});
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(12);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6765,7 +6845,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6782,7 +6862,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(12);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6825,7 +6905,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6834,7 +6914,7 @@ var ProperCombo =
 	  value: true
 	});
 
-	var _ArrowKeyStepper = __webpack_require__(15);
+	var _ArrowKeyStepper = __webpack_require__(17);
 
 	Object.defineProperty(exports, 'ArrowKeyStepper', {
 	  enumerable: true,
@@ -6843,7 +6923,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _AutoSizer = __webpack_require__(20);
+	var _AutoSizer = __webpack_require__(22);
 
 	Object.defineProperty(exports, 'AutoSizer', {
 	  enumerable: true,
@@ -6852,7 +6932,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _ColumnSizer = __webpack_require__(23);
+	var _ColumnSizer = __webpack_require__(25);
 
 	Object.defineProperty(exports, 'ColumnSizer', {
 	  enumerable: true,
@@ -6861,7 +6941,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _FlexTable = __webpack_require__(34);
+	var _FlexTable = __webpack_require__(36);
 
 	Object.defineProperty(exports, 'FlexTable', {
 	  enumerable: true,
@@ -6888,7 +6968,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(27);
 
 	Object.defineProperty(exports, 'Grid', {
 	  enumerable: true,
@@ -6897,7 +6977,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _InfiniteLoader = __webpack_require__(40);
+	var _InfiniteLoader = __webpack_require__(42);
 
 	Object.defineProperty(exports, 'InfiniteLoader', {
 	  enumerable: true,
@@ -6906,7 +6986,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _ScrollSync = __webpack_require__(42);
+	var _ScrollSync = __webpack_require__(44);
 
 	Object.defineProperty(exports, 'ScrollSync', {
 	  enumerable: true,
@@ -6915,7 +6995,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _VirtualScroll = __webpack_require__(44);
+	var _VirtualScroll = __webpack_require__(46);
 
 	Object.defineProperty(exports, 'VirtualScroll', {
 	  enumerable: true,
@@ -6925,7 +7005,7 @@ var ProperCombo =
 	});
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6935,7 +7015,7 @@ var ProperCombo =
 	});
 	exports.ArrowKeyStepper = exports.default = undefined;
 
-	var _ArrowKeyStepper2 = __webpack_require__(16);
+	var _ArrowKeyStepper2 = __webpack_require__(18);
 
 	var _ArrowKeyStepper3 = _interopRequireDefault(_ArrowKeyStepper2);
 
@@ -6945,7 +7025,7 @@ var ProperCombo =
 	exports.ArrowKeyStepper = _ArrowKeyStepper3.default;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6960,7 +7040,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7092,13 +7172,13 @@ var ProperCombo =
 	exports.default = ArrowKeyStepper;
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(18);
+	module.exports = __webpack_require__(20);
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7114,7 +7194,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var shallowEqual = __webpack_require__(19);
+	var shallowEqual = __webpack_require__(21);
 
 	/**
 	 * Does a shallow comparison for props and state.
@@ -7127,7 +7207,7 @@ var ProperCombo =
 	module.exports = shallowCompare;
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports) {
 
 	/**
@@ -7182,7 +7262,7 @@ var ProperCombo =
 	module.exports = shallowEqual;
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7192,7 +7272,7 @@ var ProperCombo =
 	});
 	exports.AutoSizer = exports.default = undefined;
 
-	var _AutoSizer2 = __webpack_require__(21);
+	var _AutoSizer2 = __webpack_require__(23);
 
 	var _AutoSizer3 = _interopRequireDefault(_AutoSizer2);
 
@@ -7202,7 +7282,7 @@ var ProperCombo =
 	exports.AutoSizer = _AutoSizer3.default;
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7217,7 +7297,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7259,7 +7339,7 @@ var ProperCombo =
 	    value: function componentDidMount() {
 	      // Defer requiring resize handler in order to support server-side rendering.
 	      // See issue #41
-	      this._detectElementResize = __webpack_require__(22);
+	      this._detectElementResize = __webpack_require__(24);
 	      this._detectElementResize.addResizeListener(this._parentNode, this._onResize);
 
 	      this._onResize();
@@ -7373,7 +7453,7 @@ var ProperCombo =
 	exports.default = AutoSizer;
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7540,7 +7620,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7550,7 +7630,7 @@ var ProperCombo =
 	});
 	exports.ColumnSizer = exports.default = undefined;
 
-	var _ColumnSizer2 = __webpack_require__(24);
+	var _ColumnSizer2 = __webpack_require__(26);
 
 	var _ColumnSizer3 = _interopRequireDefault(_ColumnSizer2);
 
@@ -7560,7 +7640,7 @@ var ProperCombo =
 	exports.ColumnSizer = _ColumnSizer3.default;
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7573,11 +7653,11 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(27);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -7701,7 +7781,7 @@ var ProperCombo =
 	exports.default = ColumnSizer;
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7711,7 +7791,7 @@ var ProperCombo =
 	});
 	exports.Grid = exports.default = undefined;
 
-	var _Grid2 = __webpack_require__(26);
+	var _Grid2 = __webpack_require__(28);
 
 	var _Grid3 = _interopRequireDefault(_Grid2);
 
@@ -7721,7 +7801,7 @@ var ProperCombo =
 	exports.Grid = _Grid3.default;
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7732,17 +7812,17 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _GridUtils = __webpack_require__(27);
+	var _GridUtils = __webpack_require__(29);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _raf = __webpack_require__(29);
+	var _raf = __webpack_require__(31);
 
 	var _raf2 = _interopRequireDefault(_raf);
 
-	var _scrollbarSize = __webpack_require__(32);
+	var _scrollbarSize = __webpack_require__(34);
 
 	var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
 
@@ -7750,7 +7830,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -8570,7 +8650,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -8877,7 +8957,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -8931,10 +9011,10 @@ var ProperCombo =
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(30)
+	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(32)
 	  , root = typeof window === 'undefined' ? global : window
 	  , vendors = ['moz', 'webkit']
 	  , suffix = 'AnimationFrame'
@@ -9010,7 +9090,7 @@ var ProperCombo =
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Generated by CoffeeScript 1.7.1
@@ -9046,10 +9126,10 @@ var ProperCombo =
 
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33)))
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -9146,12 +9226,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var canUseDOM = __webpack_require__(33);
+	var canUseDOM = __webpack_require__(35);
 
 	var size;
 
@@ -9176,14 +9256,14 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
 	module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9193,19 +9273,19 @@ var ProperCombo =
 	});
 	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.default = undefined;
 
-	var _FlexTable2 = __webpack_require__(35);
+	var _FlexTable2 = __webpack_require__(37);
 
 	var _FlexTable3 = _interopRequireDefault(_FlexTable2);
 
-	var _FlexColumn2 = __webpack_require__(36);
+	var _FlexColumn2 = __webpack_require__(38);
 
 	var _FlexColumn3 = _interopRequireDefault(_FlexColumn2);
 
-	var _SortDirection2 = __webpack_require__(38);
+	var _SortDirection2 = __webpack_require__(40);
 
 	var _SortDirection3 = _interopRequireDefault(_SortDirection2);
 
-	var _SortIndicator2 = __webpack_require__(37);
+	var _SortIndicator2 = __webpack_require__(39);
 
 	var _SortIndicator3 = _interopRequireDefault(_SortIndicator2);
 
@@ -9218,7 +9298,7 @@ var ProperCombo =
 	exports.SortIndicator = _SortIndicator3.default;
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9231,11 +9311,11 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _FlexColumn = __webpack_require__(36);
+	var _FlexColumn = __webpack_require__(38);
 
 	var _FlexColumn2 = _interopRequireDefault(_FlexColumn);
 
@@ -9243,17 +9323,17 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(39);
+	var _reactDom = __webpack_require__(41);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(27);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
-	var _SortDirection = __webpack_require__(38);
+	var _SortDirection = __webpack_require__(40);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -9733,7 +9813,7 @@ var ProperCombo =
 	exports.default = FlexTable;
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9749,7 +9829,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _SortIndicator = __webpack_require__(37);
+	var _SortIndicator = __webpack_require__(39);
 
 	var _SortIndicator2 = _interopRequireDefault(_SortIndicator);
 
@@ -9899,7 +9979,7 @@ var ProperCombo =
 	exports.default = Column;
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9913,11 +9993,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _SortDirection = __webpack_require__(38);
+	var _SortDirection = __webpack_require__(40);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -9952,7 +10032,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9977,13 +10057,13 @@ var ProperCombo =
 	exports.default = SortDirection;
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports) {
 
 	module.exports = ReactDOM;
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9993,7 +10073,7 @@ var ProperCombo =
 	});
 	exports.InfiniteLoader = exports.default = undefined;
 
-	var _InfiniteLoader2 = __webpack_require__(41);
+	var _InfiniteLoader2 = __webpack_require__(43);
 
 	var _InfiniteLoader3 = _interopRequireDefault(_InfiniteLoader2);
 
@@ -10003,7 +10083,7 @@ var ProperCombo =
 	exports.InfiniteLoader = _InfiniteLoader3.default;
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10019,7 +10099,7 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10217,7 +10297,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10227,7 +10307,7 @@ var ProperCombo =
 	});
 	exports.ScrollSync = exports.default = undefined;
 
-	var _ScrollSync2 = __webpack_require__(43);
+	var _ScrollSync2 = __webpack_require__(45);
 
 	var _ScrollSync3 = _interopRequireDefault(_ScrollSync2);
 
@@ -10237,7 +10317,7 @@ var ProperCombo =
 	exports.ScrollSync = _ScrollSync3.default;
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10250,7 +10330,7 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10343,7 +10423,7 @@ var ProperCombo =
 	exports.default = ScrollSync;
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10353,7 +10433,7 @@ var ProperCombo =
 	});
 	exports.VirtualScroll = exports.default = undefined;
 
-	var _VirtualScroll2 = __webpack_require__(45);
+	var _VirtualScroll2 = __webpack_require__(47);
 
 	var _VirtualScroll3 = _interopRequireDefault(_VirtualScroll2);
 
@@ -10363,7 +10443,7 @@ var ProperCombo =
 	exports.VirtualScroll = _VirtualScroll3.default;
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10374,7 +10454,7 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(27);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -10382,11 +10462,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(19);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10562,7 +10642,7 @@ var ProperCombo =
 	exports.default = VirtualScroll;
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10734,16 +10814,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(48)() ? Set : __webpack_require__(49);
+	module.exports = __webpack_require__(50)() ? Set : __webpack_require__(51);
 
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10773,22 +10853,22 @@ var ProperCombo =
 
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear          = __webpack_require__(50)
-	  , eIndexOf       = __webpack_require__(52)
-	  , setPrototypeOf = __webpack_require__(58)
-	  , callable       = __webpack_require__(63)
-	  , d              = __webpack_require__(64)
-	  , ee             = __webpack_require__(76)
-	  , Symbol         = __webpack_require__(77)
-	  , iterator       = __webpack_require__(82)
-	  , forOf          = __webpack_require__(86)
-	  , Iterator       = __webpack_require__(96)
-	  , isNative       = __webpack_require__(97)
+	var clear          = __webpack_require__(52)
+	  , eIndexOf       = __webpack_require__(54)
+	  , setPrototypeOf = __webpack_require__(60)
+	  , callable       = __webpack_require__(65)
+	  , d              = __webpack_require__(66)
+	  , ee             = __webpack_require__(78)
+	  , Symbol         = __webpack_require__(79)
+	  , iterator       = __webpack_require__(84)
+	  , forOf          = __webpack_require__(88)
+	  , Iterator       = __webpack_require__(98)
+	  , isNative       = __webpack_require__(99)
 
 	  , call = Function.prototype.call
 	  , defineProperty = Object.defineProperty, getPrototypeOf = Object.getPrototypeOf
@@ -10859,7 +10939,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Inspired by Google Closure:
@@ -10868,7 +10948,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var value = __webpack_require__(51);
+	var value = __webpack_require__(53);
 
 	module.exports = function () {
 		value(this).length = 0;
@@ -10877,7 +10957,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10889,13 +10969,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toPosInt = __webpack_require__(53)
-	  , value    = __webpack_require__(51)
+	var toPosInt = __webpack_require__(55)
+	  , value    = __webpack_require__(53)
 
 	  , indexOf = Array.prototype.indexOf
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -10924,12 +11004,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toInteger = __webpack_require__(54)
+	var toInteger = __webpack_require__(56)
 
 	  , max = Math.max;
 
@@ -10937,12 +11017,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var sign = __webpack_require__(55)
+	var sign = __webpack_require__(57)
 
 	  , abs = Math.abs, floor = Math.floor;
 
@@ -10955,18 +11035,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(56)()
+	module.exports = __webpack_require__(58)()
 		? Math.sign
-		: __webpack_require__(57);
+		: __webpack_require__(59);
 
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10979,7 +11059,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10992,18 +11072,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(59)()
+	module.exports = __webpack_require__(61)()
 		? Object.setPrototypeOf
-		: __webpack_require__(60);
+		: __webpack_require__(62);
 
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11020,7 +11100,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Big thanks to @WebReflection for sorting this out
@@ -11028,8 +11108,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var isObject      = __webpack_require__(61)
-	  , value         = __webpack_require__(51)
+	var isObject      = __webpack_require__(63)
+	  , value         = __webpack_require__(53)
 
 	  , isPrototypeOf = Object.prototype.isPrototypeOf
 	  , defineProperty = Object.defineProperty
@@ -11095,11 +11175,11 @@ var ProperCombo =
 		return false;
 	}())));
 
-	__webpack_require__(62);
+	__webpack_require__(64);
 
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11112,7 +11192,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Workaround for http://code.google.com/p/v8/issues/detail?id=2804
@@ -11121,8 +11201,8 @@ var ProperCombo =
 
 	var create = Object.create, shim;
 
-	if (!__webpack_require__(59)()) {
-		shim = __webpack_require__(60);
+	if (!__webpack_require__(61)()) {
+		shim = __webpack_require__(62);
 	}
 
 	module.exports = (function () {
@@ -11154,7 +11234,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11166,15 +11246,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign        = __webpack_require__(65)
-	  , normalizeOpts = __webpack_require__(71)
-	  , isCallable    = __webpack_require__(72)
-	  , contains      = __webpack_require__(73)
+	var assign        = __webpack_require__(67)
+	  , normalizeOpts = __webpack_require__(73)
+	  , isCallable    = __webpack_require__(74)
+	  , contains      = __webpack_require__(75)
 
 	  , d;
 
@@ -11235,18 +11315,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(66)()
+	module.exports = __webpack_require__(68)()
 		? Object.assign
-		: __webpack_require__(67);
+		: __webpack_require__(69);
 
 
 /***/ },
-/* 66 */
+/* 68 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11261,13 +11341,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 67 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keys  = __webpack_require__(68)
-	  , value = __webpack_require__(51)
+	var keys  = __webpack_require__(70)
+	  , value = __webpack_require__(53)
 
 	  , max = Math.max;
 
@@ -11289,18 +11369,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 68 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(69)()
+	module.exports = __webpack_require__(71)()
 		? Object.keys
-		: __webpack_require__(70);
+		: __webpack_require__(72);
 
 
 /***/ },
-/* 69 */
+/* 71 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11314,7 +11394,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 70 */
+/* 72 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11327,7 +11407,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 71 */
+/* 73 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11350,7 +11430,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 72 */
+/* 74 */
 /***/ function(module, exports) {
 
 	// Deprecated
@@ -11361,18 +11441,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 73 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(74)()
+	module.exports = __webpack_require__(76)()
 		? String.prototype.contains
-		: __webpack_require__(75);
+		: __webpack_require__(77);
 
 
 /***/ },
-/* 74 */
+/* 76 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11386,7 +11466,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 75 */
+/* 77 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11399,13 +11479,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 76 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var d        = __webpack_require__(64)
-	  , callable = __webpack_require__(63)
+	var d        = __webpack_require__(66)
+	  , callable = __webpack_require__(65)
 
 	  , apply = Function.prototype.apply, call = Function.prototype.call
 	  , create = Object.create, defineProperty = Object.defineProperty
@@ -11537,16 +11617,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(78)() ? Symbol : __webpack_require__(79);
+	module.exports = __webpack_require__(80)() ? Symbol : __webpack_require__(81);
 
 
 /***/ },
-/* 78 */
+/* 80 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11570,15 +11650,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 79 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// ES2015 Symbol polyfill for environments that do not support it (or partially support it_
 
 	'use strict';
 
-	var d              = __webpack_require__(64)
-	  , validateSymbol = __webpack_require__(80)
+	var d              = __webpack_require__(66)
+	  , validateSymbol = __webpack_require__(82)
 
 	  , create = Object.create, defineProperties = Object.defineProperties
 	  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
@@ -11683,12 +11763,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 80 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isSymbol = __webpack_require__(81);
+	var isSymbol = __webpack_require__(83);
 
 	module.exports = function (value) {
 		if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
@@ -11697,7 +11777,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 81 */
+/* 83 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11708,12 +11788,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 82 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isIterable = __webpack_require__(83);
+	var isIterable = __webpack_require__(85);
 
 	module.exports = function (value) {
 		if (!isIterable(value)) throw new TypeError(value + " is not iterable");
@@ -11722,14 +11802,14 @@ var ProperCombo =
 
 
 /***/ },
-/* 83 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(84)
-	  , isString       = __webpack_require__(85)
-	  , iteratorSymbol = __webpack_require__(77).iterator
+	var isArguments    = __webpack_require__(86)
+	  , isString       = __webpack_require__(87)
+	  , iteratorSymbol = __webpack_require__(79).iterator
 
 	  , isArray = Array.isArray;
 
@@ -11743,7 +11823,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 84 */
+/* 86 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11756,7 +11836,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 85 */
+/* 87 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11772,15 +11852,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 86 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments = __webpack_require__(84)
-	  , callable    = __webpack_require__(63)
-	  , isString    = __webpack_require__(85)
-	  , get         = __webpack_require__(87)
+	var isArguments = __webpack_require__(86)
+	  , callable    = __webpack_require__(65)
+	  , isString    = __webpack_require__(87)
+	  , get         = __webpack_require__(89)
 
 	  , isArray = Array.isArray, call = Function.prototype.call
 	  , some = Array.prototype.some;
@@ -11824,17 +11904,17 @@ var ProperCombo =
 
 
 /***/ },
-/* 87 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(84)
-	  , isString       = __webpack_require__(85)
-	  , ArrayIterator  = __webpack_require__(88)
-	  , StringIterator = __webpack_require__(95)
-	  , iterable       = __webpack_require__(82)
-	  , iteratorSymbol = __webpack_require__(77).iterator;
+	var isArguments    = __webpack_require__(86)
+	  , isString       = __webpack_require__(87)
+	  , ArrayIterator  = __webpack_require__(90)
+	  , StringIterator = __webpack_require__(97)
+	  , iterable       = __webpack_require__(84)
+	  , iteratorSymbol = __webpack_require__(79).iterator;
 
 	module.exports = function (obj) {
 		if (typeof iterable(obj)[iteratorSymbol] === 'function') return obj[iteratorSymbol]();
@@ -11845,15 +11925,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 88 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(58)
-	  , contains       = __webpack_require__(73)
-	  , d              = __webpack_require__(64)
-	  , Iterator       = __webpack_require__(89)
+	var setPrototypeOf = __webpack_require__(60)
+	  , contains       = __webpack_require__(75)
+	  , d              = __webpack_require__(66)
+	  , Iterator       = __webpack_require__(91)
 
 	  , defineProperty = Object.defineProperty
 	  , ArrayIterator;
@@ -11881,18 +11961,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 89 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear    = __webpack_require__(50)
-	  , assign   = __webpack_require__(65)
-	  , callable = __webpack_require__(63)
-	  , value    = __webpack_require__(51)
-	  , d        = __webpack_require__(64)
-	  , autoBind = __webpack_require__(90)
-	  , Symbol   = __webpack_require__(77)
+	var clear    = __webpack_require__(52)
+	  , assign   = __webpack_require__(67)
+	  , callable = __webpack_require__(65)
+	  , value    = __webpack_require__(53)
+	  , d        = __webpack_require__(66)
+	  , autoBind = __webpack_require__(92)
+	  , Symbol   = __webpack_require__(79)
 
 	  , defineProperty = Object.defineProperty
 	  , defineProperties = Object.defineProperties
@@ -11977,15 +12057,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 90 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var copy       = __webpack_require__(91)
-	  , map        = __webpack_require__(92)
-	  , callable   = __webpack_require__(63)
-	  , validValue = __webpack_require__(51)
+	var copy       = __webpack_require__(93)
+	  , map        = __webpack_require__(94)
+	  , callable   = __webpack_require__(65)
+	  , validValue = __webpack_require__(53)
 
 	  , bind = Function.prototype.bind, defineProperty = Object.defineProperty
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -12014,13 +12094,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 91 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign = __webpack_require__(65)
-	  , value  = __webpack_require__(51);
+	var assign = __webpack_require__(67)
+	  , value  = __webpack_require__(53);
 
 	module.exports = function (obj) {
 		var copy = Object(value(obj));
@@ -12030,13 +12110,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 92 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var callable = __webpack_require__(63)
-	  , forEach  = __webpack_require__(93)
+	var callable = __webpack_require__(65)
+	  , forEach  = __webpack_require__(95)
 
 	  , call = Function.prototype.call;
 
@@ -12051,16 +12131,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 93 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(94)('forEach');
+	module.exports = __webpack_require__(96)('forEach');
 
 
 /***/ },
-/* 94 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Internal method, used by iteration functions.
@@ -12069,8 +12149,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var callable = __webpack_require__(63)
-	  , value    = __webpack_require__(51)
+	var callable = __webpack_require__(65)
+	  , value    = __webpack_require__(53)
 
 	  , bind = Function.prototype.bind, call = Function.prototype.call, keys = Object.keys
 	  , propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
@@ -12095,7 +12175,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 95 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Thanks @mathiasbynens
@@ -12103,9 +12183,9 @@ var ProperCombo =
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(58)
-	  , d              = __webpack_require__(64)
-	  , Iterator       = __webpack_require__(89)
+	var setPrototypeOf = __webpack_require__(60)
+	  , d              = __webpack_require__(66)
+	  , Iterator       = __webpack_require__(91)
 
 	  , defineProperty = Object.defineProperty
 	  , StringIterator;
@@ -12138,16 +12218,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 96 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf    = __webpack_require__(58)
-	  , contains          = __webpack_require__(73)
-	  , d                 = __webpack_require__(64)
-	  , Iterator          = __webpack_require__(89)
-	  , toStringTagSymbol = __webpack_require__(77).toStringTag
+	var setPrototypeOf    = __webpack_require__(60)
+	  , contains          = __webpack_require__(75)
+	  , d                 = __webpack_require__(66)
+	  , Iterator          = __webpack_require__(91)
+	  , toStringTagSymbol = __webpack_require__(79).toStringTag
 
 	  , defineProperty = Object.defineProperty
 	  , SetIterator;
@@ -12174,7 +12254,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 97 */
+/* 99 */
 /***/ function(module, exports) {
 
 	// Exports true if environment provides native `Set` implementation,
@@ -12189,7 +12269,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 98 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12204,11 +12284,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(5);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(11);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -12493,7 +12573,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 99 */
+/* 101 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12524,7 +12604,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 100 */
+/* 102 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12564,12 +12644,6 @@ var ProperCombo =
 		}
 	};
 	module.exports = exports['default'];
-
-/***/ },
-/* 101 */
-/***/ function(module, exports) {
-
-	// removed by extract-text-webpack-plugin
 
 /***/ }
 /******/ ]);

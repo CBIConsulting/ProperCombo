@@ -14,8 +14,8 @@ module.exports = {
     loaders: [
       {
         test: /\.js$/,
-        // exclude: /node_modules/,
-        loaders: ["babel-loader"],
+        exclude: /node_modules/,
+        loaders: ["babel-loader"]
       },
       {
         test: /\.jsx$/,
@@ -30,7 +30,7 @@ module.exports = {
       {
         test: /\.scss$/,
         loader: ExtractTextPlugin.extract('css!sass?includePaths[]='+path.resolve(__dirname, "./node_modules/compass-mixins/lib")),
-       // exclude: /node_modules/
+        exclude: /node_modules/
       }
     ],
   },
@@ -50,6 +50,12 @@ module.exports = {
     new ExtractTextPlugin('propercombo.css', {
       allChunks: true
     }),
-    new webpack.optimize.DedupePlugin()
+    new webpack.optimize.DedupePlugin(),
+    new webpack.DefinePlugin({
+        'process.env': {
+            NODE_ENV: JSON.stringify('production'),
+            APP_ENV: JSON.stringify('browser-env')
+        },
+    })
   ]
 }

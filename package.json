@@ -7,8 +7,9 @@
     "test": "webpack && karma start --single-run --no-auto-watch karma.conf.js",
     "watch": "karma start --auto-watch --no-single-run karma.conf.js",
     "start": "webpack-dev-server --hot --inline --config webpack.config.example.js",
-    "build": "webpack",
-    "release": "webpack --config webpack.config.min.js"
+    "build": "babel src/jsx --out-dir lib && webpack && cp -rvf src/css/* css/",
+    "release": "webpack --config webpack.config.min.js",
+    "build-example": "webpack --config webpack.config.example.dist.js"
   },
   "repository": {
     "type": "git",
@@ -62,11 +63,12 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "immutable": "^3.7.6",
-    "react-propersearch": "^0.1.4",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
+    "immutable": "^3.7.6",
+    "react-addons-shallow-compare": "^0.14.7",
     "react-immutable-render-mixin": "^0.9.5",
+    "react-propersearch": "^0.1.9",
     "underscore": "^1.8.3"
   }
 }

@@ -1,0 +1,167 @@
+@import "compass";
+@import "react-virtualized";
+@import "react-propersearch";
+
+.proper-combo {
+	.proper-search-input {
+		background-color: #F1EEEE !important;
+	}
+
+	.proper-combo-virtual {
+		position: relative;
+
+		.proper-combo-virtualField {
+		    will-change: transform;
+		    flex-wrap: wrap;
+		    background: #fff;
+		    width: 100%;
+		    border: 2px solid #E0E0E0;
+		    background-clip: padding-box;
+		    font-family: Slack-Lato,appleLogo,sans-serif;
+		    margin: 0;
+		    color: #3d3c40;
+		    -webkit-appearance: none;
+		    box-shadow: none;
+		    outline: 0;
+		    min-height: 32px !important;
+		    overflow: auto;
+		    padding: 2px;
+		    padding-right: 20px;
+		    border-radius: 6px 6px 6px 6px;
+
+		    ul.proper-combo-virtualField-list {
+		    	-webkit-box-orient: horizontal;
+			    -webkit-box-direction: normal;
+			    -webkit-flex-direction: row;
+			    -ms-flex-direction: row;
+			    flex-direction: row;
+			    -webkit-flex-wrap: wrap;
+			    -ms-flex-wrap: wrap;
+			    flex-wrap: wrap;
+			    -webkit-padding-start: 0;
+			    -webkit-margin-before: 0;
+				-webkit-margin-after: 0;
+				-webkit-margin-start: 0;
+				-webkit-margin-end: 0;
+
+			    .proper-combo-virtualField-list-element {
+			    	display: inline-block;
+				    padding: 0 10px;
+				    margin-right: 3px;
+				    margin-bottom: 2px;
+				    padding-right: 23px;
+				    font-size: 13px;
+				    line-height: 22px;
+				    color: #757575;
+				    background-color: #c6def7;
+
+				    span {
+				    	font-smoothing: antialiased;
+						-webkit-font-smoothing: antialiased;
+						-webkit-text-size-adjust: 100%;
+						-ms-text-size-adjust: 100%;
+						text-size-adjust: 100%;
+				    }
+
+				    .proper-combo-virtualField-list-element-delete {
+				    	position: absolute;
+					    display: inline-block;
+					    width: 17px;
+					    height: 12px;
+					    font-size: small;
+					    margin-left: 7px;
+    					margin-top: 5px;
+					    vertical-align: middle;
+					    cursor: pointer;
+
+					    /*SVG*/
+				    	.list-element-delete-icon {
+							vertical-align: top;
+						    /*background: #bdbdbd;*/
+						    /*border-radius: 3px;*/
+
+				    		.list-element-delete-icon-stroke {
+				    			fill: transparent;
+							    stroke-width: 5px;
+							    stroke: #7B7B7B;
+				    		}
+				    	}
+				    }
+			    }
+		    }
+		}
+
+		.proper-combo-virtualField-add {
+			position: absolute;
+		    right: 5%;
+		    top: 27%;
+		    vertical-align: middle;
+		    background: transparent;
+		    color: #AFADAD;
+		    border: none;
+		    padding: 0;
+		    text-align: center;
+		    text-shadow: none;
+		    cursor: pointer;
+
+			i:hover {
+			    color: #757575;
+			}
+
+			&:hover, &:focus,
+			&:active {
+			  	background: transparent;
+			  	outline: none;
+			}
+		}
+	}
+
+	.proper-combo-content {
+		position: absolute;
+   	 	width: 100%;
+		overflow: auto;
+		display: block;
+		z-index: 1000;
+		background: #fff;
+		padding: 2px;
+		padding-top: 0;
+		margin-top: 0;
+	}
+
+	.content-leave {
+		opacity: 1;
+		transition: opacity .4s linear;
+	}
+
+	.content-leave.content-leave-active {
+	  	opacity: 0.01;
+	}
+
+	.content-appear, .content-enter {
+	  	opacity: 0.01;
+	}
+
+	.content-appear.content-appear-active,
+	.content-enter.content-enter-active {
+	  	opacity: 1;
+ 		transition: opacity .4s linear;
+	}
+
+	.list-leave{
+		opacity: 1;
+		transition: opacity .25s linear;
+	}
+
+	.list-leave.list-leave-active {
+	  	opacity: 0.01;
+	}
+
+	.list-enter {
+	  	opacity: 0.01;
+	}
+
+	.list-enter.list-enter-active {
+	  	opacity: 1;
+ 		transition: opacity .25s linear;
+	}
+}

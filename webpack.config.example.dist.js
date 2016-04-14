@@ -31,5 +31,12 @@ module.exports = {
     filename: "app.js",
     path: __dirname + "/examples/dist"
   },
-  plugins: []
+  plugins: [
+    new webpack.DefinePlugin({
+        'process.env': {
+            NODE_ENV: JSON.stringify('production'),
+            APP_ENV: JSON.stringify('example')
+        },
+    })
+  ]
 }

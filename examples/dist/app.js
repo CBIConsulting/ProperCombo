@@ -66,6 +66,8 @@ var App =
 		value: true
 	});
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _react = __webpack_require__(2);
@@ -75,6 +77,12 @@ var App =
 	var _propercombo = __webpack_require__(3);
 
 	var _propercombo2 = _interopRequireDefault(_propercombo);
+
+	var _normalize = __webpack_require__(102);
+
+	var _normalize2 = _interopRequireDefault(_normalize);
+
+	var _reactImmutableRenderMixin = __webpack_require__(12);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -86,7 +94,8 @@ var App =
 
 	function getDefaultProps() {
 		return {
-			dev: "In process of development..."
+			listHeight: 200,
+			listRowHeight: 35
 		};
 	}
 
@@ -99,7 +108,23 @@ var App =
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
 
 			_this.state = {
-				data: []
+				data: [],
+				fieldsSet: null,
+				selection: null,
+				language: 'ENG',
+				idField: 'value',
+				displayField: 'label',
+				defaultSearch: '',
+				multiSelect: true,
+				listHeight: _this.props.listHeight,
+				listRowHeight: _this.props.listRowHeight,
+				placeholder: 'Search placeHolder',
+				filterOff: false,
+				dataSize: 100,
+				shouldUpdate: true,
+				secondaryDisplay: 'name',
+				maxHeight: '100',
+				maxSelection: 200
 			};
 			return _this;
 		}
@@ -107,26 +132,597 @@ var App =
 		_createClass(App, [{
 			key: "componentWillMount",
 			value: function componentWillMount() {
-				var data = [];
+				var data = [],
+				    fieldsSet = null;
 
-				for (var i = 100; i > 0; i--) {
-					data.push({ 'value': i, 'label': 'Item ' + i });
-				}
+				for (var i = this.state.dataSize; i > 0; i--) {
+					data.push({ itemID: 'item-' + i, display: this.formater.bind(this), name: 'Tést ' + i, moreFields: 'moreFields values' });
+				};
+
+				fieldsSet = new Set(_.keys(data[0]));
 
 				this.setState({
-					data: data
+					data: data,
+					fieldsSet: fieldsSet,
+					idField: 'itemID',
+					displayField: 'display',
+					secondaryDisplay: 'name'
+				});
+			}
+		}, {
+			key: "shouldComponentUpdate",
+			value: function shouldComponentUpdate(nextProps, nextState) {
+				var _this2 = this;
+
+				var stateChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state, nextState);
+				var propsChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props, nextProps);
+				var somethingChanged = propsChanged || stateChanged;
+
+				if (nextState.dataSize != this.state.dataSize) {
+					var _ret = function () {
+						var data = _this2.state.data,
+						    dataItem = {},
+						    fields = new Set(_.keys(data[0])),
+						    newData = [];
+						var displayField = nextState.displayField,
+						    idField = nextState.idField;
+
+						fields["delete"](idField);
+						fields["delete"](displayField);
+						fields["delete"]('name');
+
+						for (var i = nextState.dataSize; i > 0; i--) {
+							dataItem = {};
+							dataItem[idField] = 'item-' + i;
+							dataItem[displayField] = _this2.formater.bind(_this2);
+							dataItem['name'] = 'Tést ' + i;
+
+							fields.forEach(function (field) {
+								dataItem[field] = data[0].field;
+							});
+
+							newData.push(dataItem);
+						};
+
+						fields = new Set(_.keys(newData[0]));
+
+						_this2.setState({
+							data: newData,
+							fieldsSet: fields
+						});
+
+						return {
+							v: false
+						};
+					}();
+
+					if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+				}
+
+				if (!nextState.shouldUpdate) {
+					this.setState({
+						shouldUpdate: true
+					});
+
+					return false;
+				}
+
+				if (this.state.shouldUpdate != nextState.shouldUpdate) {
+					return false;
+				}
+
+				// If something change update form
+				if (somethingChanged) {
+					this.refs.listHeight.value = nextState.listHeight;
+					this.refs.listElementHeight.value = nextState.listRowHeight;
+					this.refs.idField.value = nextState.idField;
+					this.refs.displayField.value = nextState.displayField;
+					this.refs.dataSize.value = nextState.dataSize;
+					this.refs.listElementHeight.value = nextState.listRowHeight;
+					this.refs.lang.value = nextState.language;
+					this.refs.multi.value = nextState.multiSelect;
+				}
+
+				return somethingChanged;
+			}
+		}, {
+			key: "afterSelect",
+			value: function afterSelect(data, selection) {
+				console.info('Data: ', data);
+				console.info('Selection: ', selection);
+
+				this.setState({
+					selection: selection,
+					shouldUpdate: false
+				});
+			}
+		}, {
+			key: "filter",
+			value: function filter(listElement, value) {
+				var data = listElement.name;
+				data = _normalize2["default"].normalize(data);
+				return data.indexOf(value) >= 0;
+			}
+		}, {
+			key: "formater",
+			value: function formater(listElement) {
+				var _this3 = this;
+
+				return _react2["default"].createElement(
+					"button",
+					{ className: "btn btn-default", onClick: function onClick(e) {
+							_this3.onButtonClick(e, listElement.name);
+						} },
+					listElement.name
+				);
+			}
+		}, {
+			key: "onButtonClick",
+			value: function onButtonClick(e, name) {
+				console.log('Button ' + name + ' has been clicked');
+			}
+		}, {
+			key: "onChangeData",
+			value: function onChangeData(e) {
+				e.preventDefault();
+				var data = [],
+				    fieldsSet = null,
+				    language = '',
+				    random = Math.floor(Math.random() * 10);
+				var selection = ['item-' + random, 'item-' + (random + 1)];
+				var defaultSearch = 'Item ' + random,
+				    placeholder = 'Search Placeholder ' + random;
+				var listHeight = this.props.listHeight + random,
+				    listRowHeight = this.props.listRowHeight + random;
+				var multiSelect = !this.state.multiSelect,
+				    dataSize = Math.floor(Math.random() * 1000) + 10;
+
+				if (random % 2 == 0) language = 'ENG';else language = 'SPA';
+
+				for (var i = dataSize; i > 0; i--) {
+					data.push({ value: 'item-' + i, label: 'Item ' + i, name: 'Teeést ' + i, fieldx: 'xxx ' + i, fieldy: 'yyy ' + i });
+				}
+
+				fieldsSet = new Set(_.keys(data[0]));
+
+				this.setState({
+					data: data,
+					fieldsSet: fieldsSet,
+					idField: 'value',
+					displayField: 'label',
+					language: language,
+					defaultSelection: selection,
+					defaultSearch: defaultSearch,
+					listHeight: listHeight,
+					listRowHeight: listRowHeight,
+					multiSelect: multiSelect,
+					filter: null,
+					placeholder: placeholder,
+					afterSelect: this.afterSelect.bind(this),
+					dataSize: dataSize
+				});
+			}
+		}, {
+			key: "onChangeSize",
+			value: function onChangeSize(e) {
+				e.preventDefault();
+				var size = this.refs.dataSize.value;
+				size = parseInt(size);
+
+				if (!isNaN(size)) {
+					this.setState({
+						dataSize: size
+					});
+				} else {
+					this.refs.dataSize.value = this.state.dataSize;
+				}
+			}
+		}, {
+			key: "onChangeIdField",
+			value: function onChangeIdField(e) {
+				e.preventDefault();
+				var fieldsSet = this.state.fieldsSet,
+				    newIdField = this.refs.idField.value;
+
+				// Data has this field so update state otherwise set field to current state value
+				// (SEARCH Component has prevent this and throws an error message in console and don't update the idField if that field doesn't exist in data)
+				if (fieldsSet.has(newIdField)) {
+					this.setState({
+						idField: newIdField
+					});
+				} else {
+					console.error('The data has no field with the name ' + newIdField + '. The fields of the data are: ', fieldsSet);
+					this.refs.idField.value = this.state.idField;
+				}
+			}
+		}, {
+			key: "onChangeDisplay",
+			value: function onChangeDisplay(e) {
+				e.preventDefault();
+				var fieldsSet = this.state.fieldsSet,
+				    newDisplayField = this.refs.displayField.value;
+
+				// Data has this field so update state otherwise set field to current state value
+				// (SEARCH Component has prevent this and throws an error message in console and don't update the displayField if that field doesn't exist in data)
+				if (fieldsSet.has(newDisplayField)) {
+					this.setState({
+						displayField: newDisplayField
+					});
+				} else {
+					console.error('The data has no field with the name ' + newDisplayField + '. The fields of the data are: ', fieldsSet);
+					this.refs.displayField.value = this.state.displayField;
+				}
+			}
+		}, {
+			key: "onChangeSecDisplay",
+			value: function onChangeSecDisplay(e) {
+				e.preventDefault();
+				var fieldsSet = this.state.fieldsSet,
+				    newSecondaryDisplay = this.refs.secondaryDisplay.value;
+
+				// Data has this field so update state otherwise set field to current state value
+				// (SEARCH Component has prevent this and throws an error message in console and don't update the displayField if that field doesn't exist in data)
+				if (fieldsSet.has(newSecondaryDisplay)) {
+					this.setState({
+						secondaryDisplay: newSecondaryDisplay
+					});
+				} else {
+					console.error('The data has no field with the name ' + newSecondaryDisplay + '. The fields of the data are: ', fieldsSet);
+					this.refs.secondaryDisplay.value = this.state.secondaryDisplay;
+				}
+			}
+		}, {
+			key: "onChangeListHeight",
+			value: function onChangeListHeight(e) {
+				e.preventDefault();
+				var height = this.refs.listHeight.value;
+				height = parseInt(height);
+
+				if (!isNaN(height)) {
+					this.setState({
+						listHeight: height
+					});
+				} else {
+					this.refs.listHeight.value = this.state.listHeight;
+				}
+			}
+		}, {
+			key: "onChangeElementHeight",
+			value: function onChangeElementHeight(e) {
+				e.preventDefault();
+				var height = this.refs.listElementHeight.value;
+				height = parseInt(height);
+
+				if (!isNaN(height)) {
+					this.setState({
+						listRowHeight: height
+					});
+				} else {
+					this.refs.listElementHeight.value = this.state.listRowHeight;
+				}
+			}
+		}, {
+			key: "onChangeMaxHeight",
+			value: function onChangeMaxHeight(e) {
+				e.preventDefault();
+				var height = this.refs.maxHeight.value;
+				height = parseInt(height);
+
+				if (!isNaN(height)) {
+					this.setState({
+						maxHeight: height
+					});
+				} else {
+					this.refs.maxHeight.value = this.state.maxHeight;
+				}
+			}
+		}, {
+			key: "onChangeMaxSelection",
+			value: function onChangeMaxSelection(e) {
+				e.preventDefault();
+				var height = this.refs.maxSelection.value;
+				height = parseInt(height);
+
+				if (!isNaN(height)) {
+					this.setState({
+						maxSelection: height
+					});
+				} else {
+					this.refs.maxSelection.value = this.state.maxSelection;
+				}
+			}
+		}, {
+			key: "onChangeMultiselect",
+			value: function onChangeMultiselect(e) {
+				e.preventDefault();
+				var multi = null,
+				    selection = this.state.selection ? this.state.selection[0] : null;
+				if (this.refs.multi.value == 'true') multi = true;else multi = false;
+
+				this.setState({
+					multiSelect: multi,
+					selection: selection
+				});
+			}
+		}, {
+			key: "onChangeLang",
+			value: function onChangeLang(e) {
+				e.preventDefault();
+
+				this.setState({
+					language: this.refs.lang.value
 				});
 			}
 		}, {
 			key: "render",
 			value: function render() {
+				var filter = !this.state.filterOff ? this.filter.bind(this) : null;
+				var multiSelect = this.state.multiSelect,
+				    language = this.state.language;
+
 				return _react2["default"].createElement(
 					"div",
 					{ style: { position: 'absolute', width: '100%', top: '20%' } },
 					_react2["default"].createElement(
 						"div",
-						{ style: { position: 'absolute', top: 0, left: '20%', width: '20%' } },
-						_react2["default"].createElement(_propercombo2["default"], { data: this.state.data, multiSelect: true, lang: 'SPA' })
+						{ style: { position: 'absolute', top: 0, left: '10%', width: '20%' } },
+						_react2["default"].createElement(
+							"div",
+							{ style: { position: 'absolute', top: 0, bottom: 0, width: '100%' } },
+							_react2["default"].createElement(
+								"form",
+								{ className: "form-horizontal", role: "form" },
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" List elements: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "dataSize", type: "text", className: "form-control", placeholder: "Number of elements", defaultValue: this.state.dataSize, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeSize.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Id-Field: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "idField", type: "text", className: "form-control", placeholder: "Id Field", defaultValue: this.state.idField, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeIdField.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Display-Field: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "displayField", type: "text", className: "form-control", placeholder: "Display Field", defaultValue: this.state.displayField, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeDisplay.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Secondary-Display: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "secondaryDisplay", type: "text", className: "form-control", placeholder: "Secondary Display Field", defaultValue: this.state.secondaryDisplay, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeSecDisplay.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" List Height: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "listHeight", type: "text", className: "form-control", placeholder: "List Height", defaultValue: this.state.listHeight, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeListHeight.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" List Element Height: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "listElementHeight", type: "text", className: "form-control", id: "listElementHeight", placeholder: "List Element Height", defaultValue: this.state.listRowHeight, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeElementHeight.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Virtual Field Max.Height: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "maxHeight", type: "text", className: "form-control", placeholder: "Virtual Field Max.Height", defaultValue: this.state.maxHeight, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeMaxHeight.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Max. Size in virtual field: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement("input", { ref: "maxSelection", type: "text", className: "form-control", placeholder: "Max. Selection", defaultValue: this.state.maxSelection, style: { marginRight: '30px' } }),
+										_react2["default"].createElement(
+											"button",
+											{ className: "btn btn-default", onClick: this.onChangeMaxSelection.bind(this) },
+											_react2["default"].createElement("i", { style: { color: 'red' }, className: "fa fa-arrow-right", "aria-hidden": "true" })
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Multiselect "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement(
+											"select",
+											{ ref: "multi", className: "form-control", id: "multiselect_id", defaultValue: multiSelect, onChange: this.onChangeMultiselect.bind(this) },
+											_react2["default"].createElement(
+												"option",
+												{ value: true },
+												"Yes"
+											),
+											_react2["default"].createElement(
+												"option",
+												{ value: false },
+												"No"
+											)
+										)
+									)
+								),
+								_react2["default"].createElement(
+									"div",
+									{ className: "form-group" },
+									_react2["default"].createElement(
+										"label",
+										null,
+										" Language: "
+									),
+									_react2["default"].createElement(
+										"div",
+										{ className: "form-inline" },
+										_react2["default"].createElement(
+											"select",
+											{ ref: "lang", className: "form-control input", id: "language", defaultValue: language, onChange: this.onChangeLang.bind(this) },
+											_react2["default"].createElement(
+												"option",
+												{ value: "SPA" },
+												"Spanish"
+											),
+											_react2["default"].createElement(
+												"option",
+												{ value: "ENG" },
+												"English"
+											)
+										)
+									)
+								)
+							)
+						)
+					),
+					_react2["default"].createElement(
+						"div",
+						{ style: { position: 'absolute', top: 0, left: '33%', width: '25%' } },
+						_react2["default"].createElement(
+							"div",
+							{ id: "canvas", style: { position: 'absolute', top: 0, bottom: 0, width: ' 75%' } },
+							_react2["default"].createElement(_propercombo2["default"], {
+								data: this.state.data,
+								idField: this.state.idField,
+								displayField: this.state.displayField,
+								listHeight: this.state.listHeight,
+								listRowHeight: this.state.listRowHeight,
+								lang: this.state.language,
+								filter: filter,
+								multiSelect: this.state.multiSelect,
+								defaultSelection: this.state.selection,
+								defaultSearch: this.state.defaultSearch,
+								placeholder: this.state.placeholder,
+								afterSelect: this.afterSelect.bind(this),
+								secondaryDisplay: this.state.secondaryDisplay,
+								maxHeight: this.state.maxHeight,
+								maxSelection: this.state.maxSelection
+							}),
+							_react2["default"].createElement(
+								"div",
+								{ id: "canvas-behind-content", style: { position: 'relative', top: 0, left: '-5%', width: ' 110%', height: '400px', backgroundColor: '#2196F3' } },
+								_react2["default"].createElement(
+									"h2",
+									{ style: { position: 'relative', top: '40%', left: '20%', color: '#FFC107' } },
+									" Element Behind "
+								)
+							)
+						),
+						_react2["default"].createElement(
+							"div",
+							{ id: "canvas2", style: { position: 'absolute', top: 0, bottom: 0, right: 0, width: '20%' } },
+							_react2["default"].createElement(
+								"button",
+								{ className: "btn btn-default", onClick: this.onChangeData.bind(this) },
+								" Random Data "
+							)
+						)
 					)
 				);
 			}
@@ -185,19 +781,23 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(5);
+	var _reactDom = __webpack_require__(5);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _underscore = __webpack_require__(6);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _messages = __webpack_require__(6);
+	var _messages4 = __webpack_require__(7);
 
-	var _messages2 = _interopRequireDefault(_messages);
+	var _messages5 = _interopRequireDefault(_messages4);
 
-	var _reactPropersearch = __webpack_require__(7);
+	var _reactPropersearch = __webpack_require__(8);
 
 	var _reactPropersearch2 = _interopRequireDefault(_reactPropersearch);
 
-	var _reactImmutableRenderMixin = __webpack_require__(11);
+	var _reactImmutableRenderMixin = __webpack_require__(12);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -209,10 +809,13 @@ var App =
 
 	function getDefaultProps() {
 		return {
+			maxHeight: 100, // Then scroll
+			maxSelection: 200,
+			secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 			data: [],
-			messages: _messages2['default'],
+			messages: _messages5['default'],
 			lang: 'ENG',
-			defaultSelection: null,
+			defaultSelection: [],
 			multiSelect: false,
 			listWidth: null,
 			listHeight: 200,
@@ -249,9 +852,9 @@ var App =
 			_this.state = {
 				selectedData: null,
 				selection: _this.props.defaultSelection,
-				uniqueId: _underscore2['default'].uniqueId('comboField-'),
-				show: false,
-				items: ['Start from here']
+				uniqueId: _underscore2['default'].uniqueId('comboField_'),
+				secondaryDisplay: _this.props.secondaryDisplay,
+				show: false
 			};
 			return _this;
 		}
@@ -262,6 +865,22 @@ var App =
 				var stateChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state, nextState);
 				var propsChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props, nextProps);
 				var somethingChanged = propsChanged || stateChanged;
+
+				if (this.props.secondaryDisplay != nextProps.secondaryDisplay) {
+					var fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
+					var _messages = this.props.messages[this.props.lang];
+
+					// Change secondaryDisplay but that field doesn't exist in the data
+					if (!fieldsSet.has(nextProps.secondaryDisplay)) {
+						console.error(_messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + _messages.errorData);
+					} else {
+						this.setState({
+							secondaryDisplay: nextProps.secondaryDisplay
+						});
+					}
+
+					return false;
+				}
 
 				return somethingChanged;
 			}
@@ -284,7 +903,11 @@ var App =
 			key: 'onVirtualClick',
 			value: function onVirtualClick(e) {
 				e.preventDefault();
-				console.log(e.target);
+				if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
+					this.setState({
+						show: !this.state.show
+					});
+				}
 			}
 		}, {
 			key: 'addNewItems',
@@ -297,8 +920,11 @@ var App =
 			}
 		}, {
 			key: 'onRemoveElement',
-			value: function onRemoveElement(id, e) {
+			value: function onRemoveElement() {
 				var _this2 = this;
+
+				var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+				var e = arguments[1];
 
 				e.preventDefault();
 
@@ -306,12 +932,17 @@ var App =
 				    data = _underscore2['default'].clone(this.state.selectedData),
 				    index = 0;
 
-				_underscore2['default'].each(data, function (element) {
-					if (element[_this2.props.idField] == id) index = data.indexOf(element);
-				});
+				if (!_underscore2['default'].isNull(id)) {
+					_underscore2['default'].each(data, function (element) {
+						if (element[_this2.props.idField] == id) index = data.indexOf(element);
+					});
 
-				data.splice(index, 1);
-				selection.splice(selection.indexOf(id.toString()), 1);
+					data.splice(index, 1);
+					selection.splice(selection.indexOf(id.toString()), 1);
+				} else {
+					data = [];
+					selection = [];
+				}
 
 				this.setState({
 					selectedData: data,
@@ -366,37 +997,70 @@ var App =
 
 				var data = this.state.selectedData,
 				    list = [],
-				    item = void 0;
+				    display = null,
+				    item = void 0,
+				    size = 0;
 
-				_underscore2['default'].each(data, function (element, index) {
+				if (data) size = data.length;
+
+				if (this.props.data.length == size) {
+					var _messages2 = this.props.messages[this.props.lang];
+
 					item = _react2['default'].createElement(
 						'div',
-						{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
+						{ key: 'datalist-element-1', className: 'proper-combo-virtualField-list-element' },
 						_react2['default'].createElement(
 							'span',
 							null,
-							element[_this3.props.displayField]
+							_messages2.allData + ' (' + size + ')'
 						),
+						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
+					);
+
+					list.push(item);
+				} else if (size > this.props.maxSelection) {
+					var _messages3 = this.props.messages[this.props.lang];
+
+					item = _react2['default'].createElement(
+						'div',
+						{ key: 'datalist-element-1', className: 'proper-combo-virtualField-list-element' },
 						_react2['default'].createElement(
 							'span',
-							{ className: 'proper-combo-virtualField-list-element-delete' },
-							_react2['default'].createElement(
-								'svg',
-								{ viewBox: '0 0 40 40', className: 'list-element-delete-icon', onClick: _this3.onRemoveElement.bind(_this3, element[_this3.props.idField]) },
-								_react2['default'].createElement('path', { className: 'list-element-delete-icon-stroke', d: 'M 12,12 L 28,28 M 28,12 L 12,28' })
-							)
-						)
+							null,
+							size + ' ' + _messages3.dataToBig
+						),
+						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
 					);
+
 					list.push(item);
-				});
+				} else {
+					_underscore2['default'].each(data, function (element, index) {
+						if (!_underscore2['default'].isNull(_this3.props.secondaryDisplay)) {
+							display = element[_this3.props.secondaryDisplay];
+						} else {
+							display = element[_this3.props.displayField];
+						}
+
+						if (typeof display == 'function') {
+							display = display(element);
+						}
+
+						item = _react2['default'].createElement(
+							'div',
+							{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
+							_react2['default'].createElement(
+								'span',
+								null,
+								display
+							),
+							_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: _this3.onRemoveElement.bind(_this3, element[_this3.props.idField]) })
+						);
+
+						list.push(item);
+					});
+				}
 
 				return list;
-			}
-		}, {
-			key: 'saveAndContinue',
-			value: function saveAndContinue(e) {
-				e.preventDefault();
-				this.setState({ items: this.state.items.concat([Date.now()]) });
 			}
 		}, {
 			key: 'render',
@@ -405,6 +1069,7 @@ var App =
 				    elementsList = this.getList(),
 				    className = "proper-combo",
 				    contentClass = "proper-combo-content";
+				var maxHeight = this.props.maxHeight;
 
 				if (this.props.className) {
 					className += ' ' + this.props.className;
@@ -419,17 +1084,21 @@ var App =
 					{ key: this.state.uniqueId, className: className },
 					_react2['default'].createElement(
 						'div',
-						{ key: this.state.uniqueId + '-field', ref: this.state.uniqueId + '-field', className: 'proper-combo-virtualField', onClick: this.onVirtualClick.bind(this) },
+						{ key: this.state.uniqueId + '-field', className: 'proper-combo-virtual' },
 						_react2['default'].createElement(
-							_react2['default'].addons.CSSTransitionGroup,
-							{
-								key: this.state.uniqueId + '-field-elements',
-								className: 'proper-combo-virtualField-list',
-								transitionName: 'list',
-								component: 'ul',
-								transitionEnterTimeout: 250,
-								transitionLeaveTimeout: 250 },
-							elementsList
+							'div',
+							{ key: this.state.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.state.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
+							_react2['default'].createElement(
+								_react2['default'].addons.CSSTransitionGroup,
+								{
+									key: this.state.uniqueId + '-fieldllist-elements',
+									className: 'proper-combo-virtualField-list',
+									transitionName: 'list',
+									component: 'ul',
+									transitionEnterTimeout: 250,
+									transitionLeaveTimeout: 250 },
+								elementsList
+							)
 						),
 						_react2['default'].createElement(
 							'button',
@@ -466,10 +1135,16 @@ var App =
 /* 5 */
 /***/ function(module, exports) {
 
-	module.exports = _;
+	module.exports = ReactDOM;
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	module.exports = _;
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -483,26 +1158,32 @@ var App =
 			none: 'Deseleccionar Todo',
 			loading: 'Cargando...',
 			noData: 'No se encontró ningún elemento',
-			errorIdField: 'No se pudo cambiar el `idField´, el campo',
-			errorDisplayField: 'No se pudo cambiar el `displayField´, el campo',
-			errorData: 'no existe en el array de datos o no ha cambiado',
-			placeholder: 'Buscar...'
+			errorIdField: 'No se pudo cambiar el `idField´,',
+			errorDisplayField: 'No se pudo cambiar el `displayField´,',
+			errorSecondaryDisplay: 'No se pudo cambiar el `secondaryDisplay´,',
+			errorData: 'el campo no existe en el array de datos o no ha cambiado',
+			placeholder: 'Buscar...',
+			dataToBig: 'elementos seleccionados',
+			allData: 'Todos los elementos seleccionados'
 		},
 		'ENG': {
 			all: 'Select All',
 			none: 'Unselect All',
 			loading: 'Loading...',
 			noData: 'No data found',
-			errorIdField: "Couldn\'t change the `idField´, the field",
-			errorDisplayField: "Couldn\'t change the `displayField´, the field",
-			errorData: 'doesn\'t exist in the data array or has no changes',
-			placeholder: 'Search...'
+			errorIdField: "Couldn\'t change the `idField´,",
+			errorDisplayField: "Couldn\'t change the `displayField´,",
+			errorSecondaryDisplay: "Couldn\'t change the `secondaryDisplay´,",
+			errorData: 'the field doesn\'t exist in the data array or has no changes',
+			placeholder: 'Search...',
+			dataToBig: 'selected elements',
+			allData: 'All elements selected'
 		}
 	};
 	module.exports = exports['default'];
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -511,7 +1192,7 @@ var App =
 		value: true
 	});
 
-	var _search = __webpack_require__(8);
+	var _search = __webpack_require__(9);
 
 	var _search2 = _interopRequireDefault(_search);
 
@@ -525,7 +1206,7 @@ var App =
 	module.exports = exports['default'];
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -542,15 +1223,15 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _immutable = __webpack_require__(9);
+	var _immutable = __webpack_require__(10);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
-	var _underscore = __webpack_require__(5);
+	var _underscore = __webpack_require__(6);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _searchList = __webpack_require__(10);
+	var _searchList = __webpack_require__(11);
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
@@ -566,7 +1247,7 @@ var App =
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
-	var _reactImmutableRenderMixin = __webpack_require__(11);
+	var _reactImmutableRenderMixin = __webpack_require__(12);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -811,7 +1492,8 @@ var App =
 							} else {
 								_this2.setState({
 									selection: new Set(),
-									allSelected: false
+									allSelected: false,
+									ready: true
 								});
 							}
 
@@ -822,6 +1504,14 @@ var App =
 					}();
 
 					if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+				}
+
+				if (!nextState.ready) {
+					this.setState({
+						ready: true
+					});
+
+					return false;
 				}
 
 				return somethingChanged;
@@ -1312,7 +2002,7 @@ var App =
 	module.exports = exports['default'];
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6299,7 +6989,7 @@ var App =
 	}));
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6314,13 +7004,13 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(5);
+	var _underscore = __webpack_require__(6);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(11);
+	var _reactImmutableRenderMixin = __webpack_require__(12);
 
-	var _reactVirtualized = __webpack_require__(16);
+	var _reactVirtualized = __webpack_require__(17);
 
 	var _reactDimensions = __webpack_require__(48);
 
@@ -6721,7 +7411,7 @@ var App =
 	module.exports = exports['default'];
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6731,19 +7421,19 @@ var App =
 	});
 	exports.shallowEqualImmutable = exports.shouldComponentUpdate = exports.immutableRenderDecorator = exports.default = undefined;
 
-	var _shouldComponentUpdate = __webpack_require__(12);
+	var _shouldComponentUpdate = __webpack_require__(13);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
-	var _shallowEqualImmutable = __webpack_require__(13);
+	var _shallowEqualImmutable = __webpack_require__(14);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
-	var _immutableRenderMixin = __webpack_require__(14);
+	var _immutableRenderMixin = __webpack_require__(15);
 
 	var _immutableRenderMixin2 = _interopRequireDefault(_immutableRenderMixin);
 
-	var _immutableRenderDecorator = __webpack_require__(15);
+	var _immutableRenderDecorator = __webpack_require__(16);
 
 	var _immutableRenderDecorator2 = _interopRequireDefault(_immutableRenderDecorator);
 
@@ -6755,7 +7445,7 @@ var App =
 	exports.shallowEqualImmutable = _shallowEqualImmutable2.default;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6765,7 +7455,7 @@ var App =
 	});
 	exports.default = shouldComponentUpdate;
 
-	var _shallowEqualImmutable = __webpack_require__(13);
+	var _shallowEqualImmutable = __webpack_require__(14);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
@@ -6776,7 +7466,7 @@ var App =
 	}
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6789,7 +7479,7 @@ var App =
 
 	exports.default = shallowEqualImmutable;
 
-	var _immutable = __webpack_require__(9);
+	var _immutable = __webpack_require__(10);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
@@ -6825,7 +7515,7 @@ var App =
 	}
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6834,7 +7524,7 @@ var App =
 	  value: true
 	});
 
-	var _shouldComponentUpdate = __webpack_require__(12);
+	var _shouldComponentUpdate = __webpack_require__(13);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6845,7 +7535,7 @@ var App =
 	};
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6862,7 +7552,7 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _shouldComponentUpdate = __webpack_require__(12);
+	var _shouldComponentUpdate = __webpack_require__(13);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6905,7 +7595,7 @@ var App =
 	}
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6914,7 +7604,7 @@ var App =
 	  value: true
 	});
 
-	var _ArrowKeyStepper = __webpack_require__(17);
+	var _ArrowKeyStepper = __webpack_require__(18);
 
 	Object.defineProperty(exports, 'ArrowKeyStepper', {
 	  enumerable: true,
@@ -6923,7 +7613,7 @@ var App =
 	  }
 	});
 
-	var _AutoSizer = __webpack_require__(22);
+	var _AutoSizer = __webpack_require__(23);
 
 	Object.defineProperty(exports, 'AutoSizer', {
 	  enumerable: true,
@@ -6932,7 +7622,7 @@ var App =
 	  }
 	});
 
-	var _ColumnSizer = __webpack_require__(25);
+	var _ColumnSizer = __webpack_require__(26);
 
 	Object.defineProperty(exports, 'ColumnSizer', {
 	  enumerable: true,
@@ -6941,7 +7631,7 @@ var App =
 	  }
 	});
 
-	var _FlexTable = __webpack_require__(36);
+	var _FlexTable = __webpack_require__(37);
 
 	Object.defineProperty(exports, 'FlexTable', {
 	  enumerable: true,
@@ -6968,7 +7658,7 @@ var App =
 	  }
 	});
 
-	var _Grid = __webpack_require__(27);
+	var _Grid = __webpack_require__(28);
 
 	Object.defineProperty(exports, 'Grid', {
 	  enumerable: true,
@@ -7005,7 +7695,7 @@ var App =
 	});
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7015,7 +7705,7 @@ var App =
 	});
 	exports.ArrowKeyStepper = exports.default = undefined;
 
-	var _ArrowKeyStepper2 = __webpack_require__(18);
+	var _ArrowKeyStepper2 = __webpack_require__(19);
 
 	var _ArrowKeyStepper3 = _interopRequireDefault(_ArrowKeyStepper2);
 
@@ -7025,7 +7715,7 @@ var App =
 	exports.ArrowKeyStepper = _ArrowKeyStepper3.default;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7040,7 +7730,7 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7172,13 +7862,13 @@ var App =
 	exports.default = ArrowKeyStepper;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(20);
+	module.exports = __webpack_require__(21);
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7194,7 +7884,7 @@ var App =
 
 	'use strict';
 
-	var shallowEqual = __webpack_require__(21);
+	var shallowEqual = __webpack_require__(22);
 
 	/**
 	 * Does a shallow comparison for props and state.
@@ -7207,7 +7897,7 @@ var App =
 	module.exports = shallowCompare;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	/**
@@ -7262,7 +7952,7 @@ var App =
 	module.exports = shallowEqual;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7272,7 +7962,7 @@ var App =
 	});
 	exports.AutoSizer = exports.default = undefined;
 
-	var _AutoSizer2 = __webpack_require__(23);
+	var _AutoSizer2 = __webpack_require__(24);
 
 	var _AutoSizer3 = _interopRequireDefault(_AutoSizer2);
 
@@ -7282,7 +7972,7 @@ var App =
 	exports.AutoSizer = _AutoSizer3.default;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7297,7 +7987,7 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7339,7 +8029,7 @@ var App =
 	    value: function componentDidMount() {
 	      // Defer requiring resize handler in order to support server-side rendering.
 	      // See issue #41
-	      this._detectElementResize = __webpack_require__(24);
+	      this._detectElementResize = __webpack_require__(25);
 	      this._detectElementResize.addResizeListener(this._parentNode, this._onResize);
 
 	      this._onResize();
@@ -7453,7 +8143,7 @@ var App =
 	exports.default = AutoSizer;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7620,7 +8310,7 @@ var App =
 	};
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7630,7 +8320,7 @@ var App =
 	});
 	exports.ColumnSizer = exports.default = undefined;
 
-	var _ColumnSizer2 = __webpack_require__(26);
+	var _ColumnSizer2 = __webpack_require__(27);
 
 	var _ColumnSizer3 = _interopRequireDefault(_ColumnSizer2);
 
@@ -7640,7 +8330,7 @@ var App =
 	exports.ColumnSizer = _ColumnSizer3.default;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7653,11 +8343,11 @@ var App =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(27);
+	var _Grid = __webpack_require__(28);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -7781,7 +8471,7 @@ var App =
 	exports.default = ColumnSizer;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7791,7 +8481,7 @@ var App =
 	});
 	exports.Grid = exports.default = undefined;
 
-	var _Grid2 = __webpack_require__(28);
+	var _Grid2 = __webpack_require__(29);
 
 	var _Grid3 = _interopRequireDefault(_Grid2);
 
@@ -7801,7 +8491,7 @@ var App =
 	exports.Grid = _Grid3.default;
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7812,17 +8502,17 @@ var App =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _GridUtils = __webpack_require__(29);
+	var _GridUtils = __webpack_require__(30);
 
-	var _classnames = __webpack_require__(30);
+	var _classnames = __webpack_require__(31);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _raf = __webpack_require__(31);
+	var _raf = __webpack_require__(32);
 
 	var _raf2 = _interopRequireDefault(_raf);
 
-	var _scrollbarSize = __webpack_require__(34);
+	var _scrollbarSize = __webpack_require__(35);
 
 	var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
 
@@ -7830,7 +8520,7 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -8650,7 +9340,7 @@ var App =
 	}
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -8957,7 +9647,7 @@ var App =
 	}
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -9011,10 +9701,10 @@ var App =
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(32)
+	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(33)
 	  , root = typeof window === 'undefined' ? global : window
 	  , vendors = ['moz', 'webkit']
 	  , suffix = 'AnimationFrame'
@@ -9090,7 +9780,7 @@ var App =
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Generated by CoffeeScript 1.7.1
@@ -9126,10 +9816,10 @@ var App =
 
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -9226,12 +9916,12 @@ var App =
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var canUseDOM = __webpack_require__(35);
+	var canUseDOM = __webpack_require__(36);
 
 	var size;
 
@@ -9256,14 +9946,14 @@ var App =
 	};
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
 	module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9273,19 +9963,19 @@ var App =
 	});
 	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.default = undefined;
 
-	var _FlexTable2 = __webpack_require__(37);
+	var _FlexTable2 = __webpack_require__(38);
 
 	var _FlexTable3 = _interopRequireDefault(_FlexTable2);
 
-	var _FlexColumn2 = __webpack_require__(38);
+	var _FlexColumn2 = __webpack_require__(39);
 
 	var _FlexColumn3 = _interopRequireDefault(_FlexColumn2);
 
-	var _SortDirection2 = __webpack_require__(40);
+	var _SortDirection2 = __webpack_require__(41);
 
 	var _SortDirection3 = _interopRequireDefault(_SortDirection2);
 
-	var _SortIndicator2 = __webpack_require__(39);
+	var _SortIndicator2 = __webpack_require__(40);
 
 	var _SortIndicator3 = _interopRequireDefault(_SortIndicator2);
 
@@ -9298,7 +9988,7 @@ var App =
 	exports.SortIndicator = _SortIndicator3.default;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9311,11 +10001,11 @@ var App =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _classnames = __webpack_require__(30);
+	var _classnames = __webpack_require__(31);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _FlexColumn = __webpack_require__(38);
+	var _FlexColumn = __webpack_require__(39);
 
 	var _FlexColumn2 = _interopRequireDefault(_FlexColumn);
 
@@ -9323,17 +10013,17 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(41);
+	var _reactDom = __webpack_require__(5);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(27);
+	var _Grid = __webpack_require__(28);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
-	var _SortDirection = __webpack_require__(40);
+	var _SortDirection = __webpack_require__(41);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -9813,7 +10503,7 @@ var App =
 	exports.default = FlexTable;
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9829,7 +10519,7 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _SortIndicator = __webpack_require__(39);
+	var _SortIndicator = __webpack_require__(40);
 
 	var _SortIndicator2 = _interopRequireDefault(_SortIndicator);
 
@@ -9979,7 +10669,7 @@ var App =
 	exports.default = Column;
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9993,11 +10683,11 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(30);
+	var _classnames = __webpack_require__(31);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _SortDirection = __webpack_require__(40);
+	var _SortDirection = __webpack_require__(41);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -10032,7 +10722,7 @@ var App =
 	};
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10055,12 +10745,6 @@ var App =
 	};
 
 	exports.default = SortDirection;
-
-/***/ },
-/* 41 */
-/***/ function(module, exports) {
-
-	module.exports = ReactDOM;
 
 /***/ },
 /* 42 */
@@ -10099,7 +10783,7 @@ var App =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10330,7 +11014,7 @@ var App =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10454,7 +11138,7 @@ var App =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Grid = __webpack_require__(27);
+	var _Grid = __webpack_require__(28);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -10462,11 +11146,11 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(30);
+	var _classnames = __webpack_require__(31);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _reactAddonsShallowCompare = __webpack_require__(19);
+	var _reactAddonsShallowCompare = __webpack_require__(20);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -12284,11 +12968,11 @@ var App =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(5);
+	var _underscore = __webpack_require__(6);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(11);
+	var _reactImmutableRenderMixin = __webpack_require__(12);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 

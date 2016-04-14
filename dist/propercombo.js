@@ -80,19 +80,23 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _reactDom = __webpack_require__(3);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _underscore = __webpack_require__(4);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _messages = __webpack_require__(4);
+	var _messages4 = __webpack_require__(5);
 
-	var _messages2 = _interopRequireDefault(_messages);
+	var _messages5 = _interopRequireDefault(_messages4);
 
-	var _reactPropersearch = __webpack_require__(5);
+	var _reactPropersearch = __webpack_require__(6);
 
 	var _reactPropersearch2 = _interopRequireDefault(_reactPropersearch);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(10);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -105,10 +109,12 @@ var ProperCombo =
 	function getDefaultProps() {
 		return {
 			maxHeight: 100, // Then scroll
+			maxSelection: 200,
+			secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 			data: [],
-			messages: _messages2['default'],
+			messages: _messages5['default'],
 			lang: 'ENG',
-			defaultSelection: null,
+			defaultSelection: [],
 			multiSelect: false,
 			listWidth: null,
 			listHeight: 200,
@@ -145,9 +151,9 @@ var ProperCombo =
 			_this.state = {
 				selectedData: null,
 				selection: _this.props.defaultSelection,
-				uniqueId: _underscore2['default'].uniqueId('comboField-'),
-				show: false,
-				items: ['Start from here']
+				uniqueId: _underscore2['default'].uniqueId('comboField_'),
+				secondaryDisplay: _this.props.secondaryDisplay,
+				show: false
 			};
 			return _this;
 		}
@@ -158,6 +164,22 @@ var ProperCombo =
 				var stateChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state, nextState);
 				var propsChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props, nextProps);
 				var somethingChanged = propsChanged || stateChanged;
+
+				if (this.props.secondaryDisplay != nextProps.secondaryDisplay) {
+					var fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
+					var _messages = this.props.messages[this.props.lang];
+
+					// Change secondaryDisplay but that field doesn't exist in the data
+					if (!fieldsSet.has(nextProps.secondaryDisplay)) {
+						console.error(_messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + _messages.errorData);
+					} else {
+						this.setState({
+							secondaryDisplay: nextProps.secondaryDisplay
+						});
+					}
+
+					return false;
+				}
 
 				return somethingChanged;
 			}
@@ -180,7 +202,11 @@ var ProperCombo =
 			key: 'onVirtualClick',
 			value: function onVirtualClick(e) {
 				e.preventDefault();
-				console.log(e.target);
+				if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
+					this.setState({
+						show: !this.state.show
+					});
+				}
 			}
 		}, {
 			key: 'addNewItems',
@@ -193,8 +219,11 @@ var ProperCombo =
 			}
 		}, {
 			key: 'onRemoveElement',
-			value: function onRemoveElement(id, e) {
+			value: function onRemoveElement() {
 				var _this2 = this;
+
+				var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+				var e = arguments[1];
 
 				e.preventDefault();
 
@@ -202,12 +231,17 @@ var ProperCombo =
 				    data = _underscore2['default'].clone(this.state.selectedData),
 				    index = 0;
 
-				_underscore2['default'].each(data, function (element) {
-					if (element[_this2.props.idField] == id) index = data.indexOf(element);
-				});
+				if (!_underscore2['default'].isNull(id)) {
+					_underscore2['default'].each(data, function (element) {
+						if (element[_this2.props.idField] == id) index = data.indexOf(element);
+					});
 
-				data.splice(index, 1);
-				selection.splice(selection.indexOf(id.toString()), 1);
+					data.splice(index, 1);
+					selection.splice(selection.indexOf(id.toString()), 1);
+				} else {
+					data = [];
+					selection = [];
+				}
 
 				this.setState({
 					selectedData: data,
@@ -262,37 +296,70 @@ var ProperCombo =
 
 				var data = this.state.selectedData,
 				    list = [],
-				    item = void 0;
+				    display = null,
+				    item = void 0,
+				    size = 0;
 
-				_underscore2['default'].each(data, function (element, index) {
+				if (data) size = data.length;
+
+				if (this.props.data.length == size) {
+					var _messages2 = this.props.messages[this.props.lang];
+
 					item = _react2['default'].createElement(
 						'div',
-						{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
+						{ key: 'datalist-element-1', className: 'proper-combo-virtualField-list-element' },
 						_react2['default'].createElement(
 							'span',
 							null,
-							element[_this3.props.displayField]
+							_messages2.allData + ' (' + size + ')'
 						),
+						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
+					);
+
+					list.push(item);
+				} else if (size > this.props.maxSelection) {
+					var _messages3 = this.props.messages[this.props.lang];
+
+					item = _react2['default'].createElement(
+						'div',
+						{ key: 'datalist-element-1', className: 'proper-combo-virtualField-list-element' },
 						_react2['default'].createElement(
 							'span',
-							{ className: 'proper-combo-virtualField-list-element-delete' },
-							_react2['default'].createElement(
-								'svg',
-								{ viewBox: '0 0 40 40', className: 'list-element-delete-icon', onClick: _this3.onRemoveElement.bind(_this3, element[_this3.props.idField]) },
-								_react2['default'].createElement('path', { className: 'list-element-delete-icon-stroke', d: 'M 12,12 L 28,28 M 28,12 L 12,28' })
-							)
-						)
+							null,
+							size + ' ' + _messages3.dataToBig
+						),
+						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
 					);
+
 					list.push(item);
-				});
+				} else {
+					_underscore2['default'].each(data, function (element, index) {
+						if (!_underscore2['default'].isNull(_this3.props.secondaryDisplay)) {
+							display = element[_this3.props.secondaryDisplay];
+						} else {
+							display = element[_this3.props.displayField];
+						}
+
+						if (typeof display == 'function') {
+							display = display(element);
+						}
+
+						item = _react2['default'].createElement(
+							'div',
+							{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
+							_react2['default'].createElement(
+								'span',
+								null,
+								display
+							),
+							_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: _this3.onRemoveElement.bind(_this3, element[_this3.props.idField]) })
+						);
+
+						list.push(item);
+					});
+				}
 
 				return list;
-			}
-		}, {
-			key: 'saveAndContinue',
-			value: function saveAndContinue(e) {
-				e.preventDefault();
-				this.setState({ items: this.state.items.concat([Date.now()]) });
 			}
 		}, {
 			key: 'render',
@@ -301,6 +368,7 @@ var ProperCombo =
 				    elementsList = this.getList(),
 				    className = "proper-combo",
 				    contentClass = "proper-combo-content";
+				var maxHeight = this.props.maxHeight;
 
 				if (this.props.className) {
 					className += ' ' + this.props.className;
@@ -318,12 +386,7 @@ var ProperCombo =
 						{ key: this.state.uniqueId + '-field', className: 'proper-combo-virtual' },
 						_react2['default'].createElement(
 							'div',
-							{
-								key: this.state.uniqueId + '-fieldllist',
-								style: { maxHeight: this.props.maxHeight + ' !important' },
-								className: 'proper-combo-virtualField',
-								ref: this.state.uniqueId + '-fieldllist',
-								onClick: this.onVirtualClick.bind(this) },
+							{ key: this.state.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.state.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
 							_react2['default'].createElement(
 								_react2['default'].addons.CSSTransitionGroup,
 								{
@@ -377,10 +440,16 @@ var ProperCombo =
 /* 3 */
 /***/ function(module, exports) {
 
-	module.exports = _;
+	module.exports = ReactDOM;
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	module.exports = _;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -394,26 +463,32 @@ var ProperCombo =
 			none: 'Deseleccionar Todo',
 			loading: 'Cargando...',
 			noData: 'No se encontró ningún elemento',
-			errorIdField: 'No se pudo cambiar el `idField´, el campo',
-			errorDisplayField: 'No se pudo cambiar el `displayField´, el campo',
-			errorData: 'no existe en el array de datos o no ha cambiado',
-			placeholder: 'Buscar...'
+			errorIdField: 'No se pudo cambiar el `idField´,',
+			errorDisplayField: 'No se pudo cambiar el `displayField´,',
+			errorSecondaryDisplay: 'No se pudo cambiar el `secondaryDisplay´,',
+			errorData: 'el campo no existe en el array de datos o no ha cambiado',
+			placeholder: 'Buscar...',
+			dataToBig: 'elementos seleccionados',
+			allData: 'Todos los elementos seleccionados'
 		},
 		'ENG': {
 			all: 'Select All',
 			none: 'Unselect All',
 			loading: 'Loading...',
 			noData: 'No data found',
-			errorIdField: "Couldn\'t change the `idField´, the field",
-			errorDisplayField: "Couldn\'t change the `displayField´, the field",
-			errorData: 'doesn\'t exist in the data array or has no changes',
-			placeholder: 'Search...'
+			errorIdField: "Couldn\'t change the `idField´,",
+			errorDisplayField: "Couldn\'t change the `displayField´,",
+			errorSecondaryDisplay: "Couldn\'t change the `secondaryDisplay´,",
+			errorData: 'the field doesn\'t exist in the data array or has no changes',
+			placeholder: 'Search...',
+			dataToBig: 'selected elements',
+			allData: 'All elements selected'
 		}
 	};
 	module.exports = exports['default'];
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -422,7 +497,7 @@ var ProperCombo =
 		value: true
 	});
 
-	var _search = __webpack_require__(6);
+	var _search = __webpack_require__(7);
 
 	var _search2 = _interopRequireDefault(_search);
 
@@ -436,7 +511,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -453,15 +528,15 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _immutable = __webpack_require__(7);
+	var _immutable = __webpack_require__(8);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(4);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _searchList = __webpack_require__(8);
+	var _searchList = __webpack_require__(9);
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
@@ -477,7 +552,7 @@ var ProperCombo =
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(10);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -1232,7 +1307,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6219,7 +6294,7 @@ var ProperCombo =
 	}));
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6234,13 +6309,13 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(4);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(10);
 
-	var _reactVirtualized = __webpack_require__(14);
+	var _reactVirtualized = __webpack_require__(15);
 
 	var _reactDimensions = __webpack_require__(46);
 
@@ -6641,7 +6716,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6651,19 +6726,19 @@ var ProperCombo =
 	});
 	exports.shallowEqualImmutable = exports.shouldComponentUpdate = exports.immutableRenderDecorator = exports.default = undefined;
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(11);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
-	var _shallowEqualImmutable = __webpack_require__(11);
+	var _shallowEqualImmutable = __webpack_require__(12);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
-	var _immutableRenderMixin = __webpack_require__(12);
+	var _immutableRenderMixin = __webpack_require__(13);
 
 	var _immutableRenderMixin2 = _interopRequireDefault(_immutableRenderMixin);
 
-	var _immutableRenderDecorator = __webpack_require__(13);
+	var _immutableRenderDecorator = __webpack_require__(14);
 
 	var _immutableRenderDecorator2 = _interopRequireDefault(_immutableRenderDecorator);
 
@@ -6675,7 +6750,7 @@ var ProperCombo =
 	exports.shallowEqualImmutable = _shallowEqualImmutable2.default;
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6685,7 +6760,7 @@ var ProperCombo =
 	});
 	exports.default = shouldComponentUpdate;
 
-	var _shallowEqualImmutable = __webpack_require__(11);
+	var _shallowEqualImmutable = __webpack_require__(12);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
@@ -6696,7 +6771,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6709,7 +6784,7 @@ var ProperCombo =
 
 	exports.default = shallowEqualImmutable;
 
-	var _immutable = __webpack_require__(7);
+	var _immutable = __webpack_require__(8);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
@@ -6745,7 +6820,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6754,7 +6829,7 @@ var ProperCombo =
 	  value: true
 	});
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(11);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6765,7 +6840,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6782,7 +6857,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _shouldComponentUpdate = __webpack_require__(10);
+	var _shouldComponentUpdate = __webpack_require__(11);
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
@@ -6825,7 +6900,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6834,7 +6909,7 @@ var ProperCombo =
 	  value: true
 	});
 
-	var _ArrowKeyStepper = __webpack_require__(15);
+	var _ArrowKeyStepper = __webpack_require__(16);
 
 	Object.defineProperty(exports, 'ArrowKeyStepper', {
 	  enumerable: true,
@@ -6843,7 +6918,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _AutoSizer = __webpack_require__(20);
+	var _AutoSizer = __webpack_require__(21);
 
 	Object.defineProperty(exports, 'AutoSizer', {
 	  enumerable: true,
@@ -6852,7 +6927,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _ColumnSizer = __webpack_require__(23);
+	var _ColumnSizer = __webpack_require__(24);
 
 	Object.defineProperty(exports, 'ColumnSizer', {
 	  enumerable: true,
@@ -6861,7 +6936,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _FlexTable = __webpack_require__(34);
+	var _FlexTable = __webpack_require__(35);
 
 	Object.defineProperty(exports, 'FlexTable', {
 	  enumerable: true,
@@ -6888,7 +6963,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(26);
 
 	Object.defineProperty(exports, 'Grid', {
 	  enumerable: true,
@@ -6925,7 +7000,7 @@ var ProperCombo =
 	});
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6935,7 +7010,7 @@ var ProperCombo =
 	});
 	exports.ArrowKeyStepper = exports.default = undefined;
 
-	var _ArrowKeyStepper2 = __webpack_require__(16);
+	var _ArrowKeyStepper2 = __webpack_require__(17);
 
 	var _ArrowKeyStepper3 = _interopRequireDefault(_ArrowKeyStepper2);
 
@@ -6945,7 +7020,7 @@ var ProperCombo =
 	exports.ArrowKeyStepper = _ArrowKeyStepper3.default;
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -6960,7 +7035,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7092,13 +7167,13 @@ var ProperCombo =
 	exports.default = ArrowKeyStepper;
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(18);
+	module.exports = __webpack_require__(19);
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7114,7 +7189,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var shallowEqual = __webpack_require__(19);
+	var shallowEqual = __webpack_require__(20);
 
 	/**
 	 * Does a shallow comparison for props and state.
@@ -7127,7 +7202,7 @@ var ProperCombo =
 	module.exports = shallowCompare;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	/**
@@ -7182,7 +7257,7 @@ var ProperCombo =
 	module.exports = shallowEqual;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7192,7 +7267,7 @@ var ProperCombo =
 	});
 	exports.AutoSizer = exports.default = undefined;
 
-	var _AutoSizer2 = __webpack_require__(21);
+	var _AutoSizer2 = __webpack_require__(22);
 
 	var _AutoSizer3 = _interopRequireDefault(_AutoSizer2);
 
@@ -7202,7 +7277,7 @@ var ProperCombo =
 	exports.AutoSizer = _AutoSizer3.default;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7217,7 +7292,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -7259,7 +7334,7 @@ var ProperCombo =
 	    value: function componentDidMount() {
 	      // Defer requiring resize handler in order to support server-side rendering.
 	      // See issue #41
-	      this._detectElementResize = __webpack_require__(22);
+	      this._detectElementResize = __webpack_require__(23);
 	      this._detectElementResize.addResizeListener(this._parentNode, this._onResize);
 
 	      this._onResize();
@@ -7373,7 +7448,7 @@ var ProperCombo =
 	exports.default = AutoSizer;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7540,7 +7615,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7550,7 +7625,7 @@ var ProperCombo =
 	});
 	exports.ColumnSizer = exports.default = undefined;
 
-	var _ColumnSizer2 = __webpack_require__(24);
+	var _ColumnSizer2 = __webpack_require__(25);
 
 	var _ColumnSizer3 = _interopRequireDefault(_ColumnSizer2);
 
@@ -7560,7 +7635,7 @@ var ProperCombo =
 	exports.ColumnSizer = _ColumnSizer3.default;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7573,11 +7648,11 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(26);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -7701,7 +7776,7 @@ var ProperCombo =
 	exports.default = ColumnSizer;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7711,7 +7786,7 @@ var ProperCombo =
 	});
 	exports.Grid = exports.default = undefined;
 
-	var _Grid2 = __webpack_require__(26);
+	var _Grid2 = __webpack_require__(27);
 
 	var _Grid3 = _interopRequireDefault(_Grid2);
 
@@ -7721,7 +7796,7 @@ var ProperCombo =
 	exports.Grid = _Grid3.default;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7732,17 +7807,17 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _GridUtils = __webpack_require__(27);
+	var _GridUtils = __webpack_require__(28);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(29);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _raf = __webpack_require__(29);
+	var _raf = __webpack_require__(30);
 
 	var _raf2 = _interopRequireDefault(_raf);
 
-	var _scrollbarSize = __webpack_require__(32);
+	var _scrollbarSize = __webpack_require__(33);
 
 	var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
 
@@ -7750,7 +7825,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -8570,7 +8645,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -8877,7 +8952,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -8931,10 +9006,10 @@ var ProperCombo =
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(30)
+	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(31)
 	  , root = typeof window === 'undefined' ? global : window
 	  , vendors = ['moz', 'webkit']
 	  , suffix = 'AnimationFrame'
@@ -9010,7 +9085,7 @@ var ProperCombo =
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Generated by CoffeeScript 1.7.1
@@ -9046,10 +9121,10 @@ var ProperCombo =
 
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(32)))
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -9146,12 +9221,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var canUseDOM = __webpack_require__(33);
+	var canUseDOM = __webpack_require__(34);
 
 	var size;
 
@@ -9176,14 +9251,14 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports) {
 
 	'use strict';
 	module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9193,19 +9268,19 @@ var ProperCombo =
 	});
 	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.default = undefined;
 
-	var _FlexTable2 = __webpack_require__(35);
+	var _FlexTable2 = __webpack_require__(36);
 
 	var _FlexTable3 = _interopRequireDefault(_FlexTable2);
 
-	var _FlexColumn2 = __webpack_require__(36);
+	var _FlexColumn2 = __webpack_require__(37);
 
 	var _FlexColumn3 = _interopRequireDefault(_FlexColumn2);
 
-	var _SortDirection2 = __webpack_require__(38);
+	var _SortDirection2 = __webpack_require__(39);
 
 	var _SortDirection3 = _interopRequireDefault(_SortDirection2);
 
-	var _SortIndicator2 = __webpack_require__(37);
+	var _SortIndicator2 = __webpack_require__(38);
 
 	var _SortIndicator3 = _interopRequireDefault(_SortIndicator2);
 
@@ -9218,7 +9293,7 @@ var ProperCombo =
 	exports.SortIndicator = _SortIndicator3.default;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9231,11 +9306,11 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(29);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _FlexColumn = __webpack_require__(36);
+	var _FlexColumn = __webpack_require__(37);
 
 	var _FlexColumn2 = _interopRequireDefault(_FlexColumn);
 
@@ -9243,17 +9318,17 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(39);
+	var _reactDom = __webpack_require__(3);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(26);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
-	var _SortDirection = __webpack_require__(38);
+	var _SortDirection = __webpack_require__(39);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -9733,7 +9808,7 @@ var ProperCombo =
 	exports.default = FlexTable;
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9749,7 +9824,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _SortIndicator = __webpack_require__(37);
+	var _SortIndicator = __webpack_require__(38);
 
 	var _SortIndicator2 = _interopRequireDefault(_SortIndicator);
 
@@ -9899,7 +9974,7 @@ var ProperCombo =
 	exports.default = Column;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9913,11 +9988,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(29);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _SortDirection = __webpack_require__(38);
+	var _SortDirection = __webpack_require__(39);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -9952,7 +10027,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9975,12 +10050,6 @@ var ProperCombo =
 	};
 
 	exports.default = SortDirection;
-
-/***/ },
-/* 39 */
-/***/ function(module, exports) {
-
-	module.exports = ReactDOM;
 
 /***/ },
 /* 40 */
@@ -10019,7 +10088,7 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10250,7 +10319,7 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -10374,7 +10443,7 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Grid = __webpack_require__(25);
+	var _Grid = __webpack_require__(26);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -10382,11 +10451,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(28);
+	var _classnames = __webpack_require__(29);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _reactAddonsShallowCompare = __webpack_require__(17);
+	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
@@ -12204,11 +12273,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _underscore = __webpack_require__(3);
+	var _underscore = __webpack_require__(4);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactImmutableRenderMixin = __webpack_require__(9);
+	var _reactImmutableRenderMixin = __webpack_require__(10);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 

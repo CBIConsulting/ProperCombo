@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import messages from "../lang/messages";
 import Search from "react-propersearch";
@@ -7,10 +8,12 @@ import {shallowEqualImmutable} from 'react-immutable-render-mixin';
 function getDefaultProps() {
 	return {
 		maxHeight: 100, // Then scroll
+		maxSelection: 200,
+		secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 		data: [],
 		messages: messages,
 		lang: 'ENG',
-		defaultSelection: null,
+		defaultSelection: [],
 		multiSelect: false,
 		listWidth: null,
 		listHeight: 200,
@@ -44,9 +47,9 @@ class ComboField extends React.Component {
 		this.state = {
 			selectedData: null,
 			selection: this.props.defaultSelection,
-			uniqueId: _.uniqueId('comboField-'),
-			show: false,
-			items: ['Start from here']
+			uniqueId: _.uniqueId('comboField_'),
+			secondaryDisplay: this.props.secondaryDisplay,
+			show: false
 		}
 	}
 
@@ -54,6 +57,22 @@ class ComboField extends React.Component {
 		let stateChanged = !shallowEqualImmutable(this.state, nextState);
 		let propsChanged = !shallowEqualImmutable(this.props, nextProps);
 		let somethingChanged = propsChanged || stateChanged;
+
+		if (this.props.secondaryDisplay != nextProps.secondaryDisplay) {
+			let fieldsSet = new Set(_.keys(nextProps.data[0]));
+			let messages = this.props.messages[this.props.lang];
+
+			// Change secondaryDisplay but that field doesn't exist in the data
+			if (!fieldsSet.has(nextProps.secondaryDisplay)) {
+				console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
+			} else {
+				this.setState({
+					secondaryDisplay: nextProps.secondaryDisplay
+				});
+			}
+
+			return false;
+		}
 
 		return somethingChanged;
 	}
@@ -71,10 +90,13 @@ class ComboField extends React.Component {
 		}
 	}
 
-
 	onVirtualClick(e) {
 		e.preventDefault();
-		console.log(e.target)
+		if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
+			this.setState({
+				show: !this.state.show
+			});
+		}
 	}
 
 	addNewItems(e) {
@@ -85,17 +107,22 @@ class ComboField extends React.Component {
 		});
 	}
 
-	onRemoveElement(id, e) {
+	onRemoveElement(id = null, e) {
 		e.preventDefault();
 
 		let selection = _.clone(this.state.selection), data = _.clone(this.state.selectedData), index = 0;
 
-		_.each(data, element => {
-			if (element[this.props.idField] == id) index = data.indexOf(element);
-		});
+		if (!_.isNull(id)) {
+			_.each(data, element => {
+				if (element[this.props.idField] == id) index = data.indexOf(element);
+			});
 
-		data.splice(index,1);
-		selection.splice(selection.indexOf(id.toString()), 1);
+			data.splice(index,1);
+			selection.splice(selection.indexOf(id.toString()), 1);
+		} else {
+			data = [];
+			selection = [];
+		}
 
 	    this.setState({
 	    	selectedData: data,
@@ -143,33 +170,63 @@ class ComboField extends React.Component {
 	}
 
 	getList() {
-		let data = this.state.selectedData, list = [], item;
+		let data = this.state.selectedData, list = [], display = null,item, size = 0;
 
-		_.each(data, (element, index) => {
+		if (data) size = data.length;
+
+		if (this.props.data.length == size) {
+			let messages = this.props.messages[this.props.lang];
+
 			item = (
-				<div key={'datalist-element-' + index} className="proper-combo-virtualField-list-element">
-					<span>{element[this.props.displayField]}</span>
-					<span className="proper-combo-virtualField-list-element-delete">
-						<svg viewBox="0 0 40 40" className="list-element-delete-icon" onClick={this.onRemoveElement.bind(this, element[this.props.idField])}>
-							<path className="list-element-delete-icon-stroke" d="M 12,12 L 28,28 M 28,12 L 12,28"></path>
-						</svg>
-					</span>
+				<div key={'datalist-element-1'} className="proper-combo-virtualField-list-element">
+					<span>{messages.allData + ' (' + size + ')'}</span>
+					<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, null)}/>
 				</div>
-			)
-			list.push(item);
-		});
+			);
 
+			list.push(item);
+
+		} else if (size > this.props.maxSelection) {
+			let messages = this.props.messages[this.props.lang];
+
+			item = (
+				<div key={'datalist-element-1'} className="proper-combo-virtualField-list-element">
+					<span>{size + ' ' + messages.dataToBig}</span>
+					<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, null)}/>
+				</div>
+			);
+
+			list.push(item);
+
+		} else {
+			_.each(data, (element, index) => {
+				if (!_.isNull(this.props.secondaryDisplay)) {
+					display = element[this.props.secondaryDisplay];
+				} else {
+					display = element[this.props.displayField];
+				}
+
+				if (typeof display == 'function') {
+					display = display(element);
+				}
+
+				item = (
+					<div key={'datalist-element-' + index} className="proper-combo-virtualField-list-element">
+						<span>{display}</span>
+						<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, element[this.props.idField])}/>
+					</div>
+				);
+
+				list.push(item);
+			});
+		}
 
 		return list;
 	}
 
-	saveAndContinue(e) {
-        e.preventDefault();
-        this.setState({items: this.state.items.concat([Date.now()])});
-    }
-
 	render() {
 		let	content = this.getContent(), elementsList = this.getList(), className = "proper-combo", contentClass = "proper-combo-content";
+		let maxHeight = this.props.maxHeight;
 
 		if (this.props.className) {
 			className += ' ' + this.props.className;
@@ -181,8 +238,8 @@ class ComboField extends React.Component {
 
 		return (
 			<div key={this.state.uniqueId} className={className}>
-				<div key={this.state.uniqueId + '-field'} className="proper-combo-virtual" style={{maxHeight:this.props.maxHeight}}>
-					<div key={this.state.uniqueId + '-fieldllist'} className="proper-combo-virtualField" ref={this.state.uniqueId + '-fieldllist'} onClick={this.onVirtualClick.bind(this)}>
+				<div key={this.state.uniqueId + '-field'} className="proper-combo-virtual">
+					<div key={this.state.uniqueId + '-fieldllist'} className="proper-combo-virtualField" ref={this.state.uniqueId + '_fieldllist'} style={{maxHeight:maxHeight}} onClick={this.onVirtualClick.bind(this)}>
 						<React.addons.CSSTransitionGroup
 							key={this.state.uniqueId + '-fieldllist-elements'}
 							className="proper-combo-virtualField-list"

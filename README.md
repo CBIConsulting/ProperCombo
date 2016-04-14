@@ -57,10 +57,10 @@ Check your http://localhost:8080/ or  `open http://localhost:8080/`
 `npm test`
 
 ### Component properties
-This module has the same properties as ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and...
-maxHeight: Max. height of the virtual field when it receive new elements, after overcome the max height a scroll bar will appear (Number) Default 100 (px)
-maxSelection: Max. elements rendered inside the virtual field, after this number of elements if the user select more elements the virtual field will show a item with the number of selected elements (Integer) Default 200
-secondaryDisplay: Field that will be used to render the items inside the virtual field. It you don't set this field then the field used will be the display field (String) Default 'label'
+* This module has the same properties as ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and...
+* maxHeight: Max. height of the virtual field when it receive new elements, after overcome the max height a scroll bar will appear (Number) Default 100 (px)
+* maxSelection: Max. elements rendered inside the virtual field, after this number of elements if the user select more elements the virtual field will show a item with the number of selected elements (Integer) Default 200
+* secondaryDisplay: Field that will be used to render the items inside the virtual field. It you don't set this field then the field used will be the display field (String) Default 'label'
 
 ### Basic Example
 

@@ -35,7 +35,7 @@ http://cbiconsulting.github.io/ProperCombo/
 
 
 ## Preview
-![screen shot 2016-04-14 at 18 45 00] (examples/screenshots/example_screenshot.png "Example of ProperCombo with multiselect")
+![screen shot 2016-04-14 at 18 45 00] (examples/screenshots/example_screenshoot.png "Example of ProperCombo with multiselect")
 
 ## Use this module in your projects
 ```

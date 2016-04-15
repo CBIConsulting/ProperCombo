@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import messages from "../lang/messages";
+import Messages from "../lang/messages";
 import Search from "react-propersearch";
 import {shallowEqualImmutable} from 'react-immutable-render-mixin';
 
@@ -11,7 +11,7 @@ function getDefaultProps() {
 		maxSelection: 200,
 		secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 		data: [],
-		messages: messages,
+		messages: Messages,
 		lang: 'ENG',
 		defaultSelection: [],
 		multiSelect: false,
@@ -39,6 +39,29 @@ function getDefaultProps() {
 	}
 }
 
+
+/**
+ * A virtual field that show a ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and display the selected items in boxes inside the field
+ *
+ * Simple example usage:
+ *
+ * 	let data = [];
+ * 	data.push({
+ *	  	value: 1,
+ *	  	label: 'Apple'
+ * 	});
+ *
+ *	let afterSelect = (data, selection) => {
+ *		console.info(data);
+ *		console.info(selection);
+ *	}
+ *
+ * 	<ComboField
+ *		data={data}
+ *		afterSelect={afterSelect}
+ *	/>
+ * ```
+ */
 class ComboField extends React.Component {
 
 	constructor(props) {
@@ -58,12 +81,13 @@ class ComboField extends React.Component {
 		let propsChanged = !shallowEqualImmutable(this.props, nextProps);
 		let somethingChanged = propsChanged || stateChanged;
 
+		// If the secondary display change then check if that field
 		if (this.props.secondaryDisplay != nextProps.secondaryDisplay) {
 			let fieldsSet = new Set(_.keys(nextProps.data[0]));
 			let messages = this.props.messages[this.props.lang];
 
-			// Change secondaryDisplay but that field doesn't exist in the data
-			if (!fieldsSet.has(nextProps.secondaryDisplay)) {
+			// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
+			if (!fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
 				console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
 			} else {
 				this.setState({
@@ -77,6 +101,13 @@ class ComboField extends React.Component {
 		return somethingChanged;
 	}
 
+/**
+ * Function called each time the selection has changed. Apply an update in the components state then render again an update the child and
+ * send the selection and the selected data to a function in props which name is the same (if exist)
+ *
+ * @param (Set)		selection 	The selected values using the values of the selected data.
+ * @param (Array)	data 		The selected data
+ */
  	afterSelect(data, selection) {
 		this.setState({
 			selectedData: data,
@@ -84,12 +115,24 @@ class ComboField extends React.Component {
 		}, this.sendSelection(data,selection));
 	}
 
+/**
+ * Send the selection and the selected data to a function in props which name is the afterSelect() (if exist)
+ *
+ * @param (Set)		selection 	The selected values using the values of the selected data.
+ * @param (Array)	data 		The selected data
+ */
 	sendSelection(data, selection) {
 		if (typeof this.props.afterSelect == 'function') {
 			this.props.afterSelect.call(this, data, selection);
 		}
 	}
 
+/**
+ * Function called when the someone click in the empty part of the virtual field. Change the `show´ state of the
+ * component.
+ *
+ * @param (Object)	e 	Event which call this function
+ */
 	onVirtualClick(e) {
 		e.preventDefault();
 		if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
@@ -99,6 +142,12 @@ class ComboField extends React.Component {
 		}
 	}
 
+/**
+ * Function called when the someone click to the icon in the right of the virtual field. Change the `show´ state of the
+ * component.
+ *
+ * @param (Object)	e 	Event which call this function
+ */
 	addNewItems(e) {
 		e.preventDefault();
 
@@ -107,16 +156,27 @@ class ComboField extends React.Component {
 		});
 	}
 
+/**
+ * Function called when the someone click in the close btn inside each element of the virtual field (selected elements).
+ * Remove's the element from the selection and data arrays.
+ *
+ * @param (Integer)	id 	Id of the element which has to be removed from the virtual field. If it's null that means
+ *						to many selected or all selected (then unSelect all)
+ * @param (Object)	e 	Event which call the function
+ */
 	onRemoveElement(id = null, e) {
 		e.preventDefault();
 
 		let selection = _.clone(this.state.selection), data = _.clone(this.state.selectedData), index = 0;
 
+		// Not all selected or to many elements selected
 		if (!_.isNull(id)) {
+			// Find the index of the element
 			_.each(data, element => {
 				if (element[this.props.idField] == id) index = data.indexOf(element);
 			});
 
+			// Then remove it
 			data.splice(index,1);
 			selection.splice(selection.indexOf(id.toString()), 1);
 		} else {
@@ -130,6 +190,11 @@ class ComboField extends React.Component {
 		});
 	}
 
+/**
+ * Build the ProperSearch component to be rendered
+ *
+ * @return (Search) search The built ProperSearch component with all it's props set up.
+ */
 	getContent() {
 		let search = null, placeholder = this.props.placeholder;
 
@@ -169,11 +234,18 @@ class ComboField extends React.Component {
 		return search;
 	}
 
+/**
+ * Build the list of elements inside the virtual field. Each element is a div with a span inside which has the display field
+ * of the selected element and an icon to remove it.
+ *
+ * @return (Array)	list 	Array of elements to be rendered inside the virtual field
+ */
 	getList() {
 		let data = this.state.selectedData, list = [], display = null,item, size = 0;
 
 		if (data) size = data.length;
 
+		// If all selected then the list will have just one item / element with the size
 		if (this.props.data.length == size) {
 			let messages = this.props.messages[this.props.lang];
 
@@ -186,9 +258,10 @@ class ComboField extends React.Component {
 
 			list.push(item);
 
-		} else if (size > this.props.maxSelection) {
+		} else if (size > this.props.maxSelection) { // If there are more selected elements than the limit (default 200)
 			let messages = this.props.messages[this.props.lang];
 
+			// Just one element with the number of selected elements and a message.
 			item = (
 				<div key={'datalist-element-1'} className="proper-combo-virtualField-list-element">
 					<span>{size + ' ' + messages.dataToBig}</span>
@@ -199,6 +272,8 @@ class ComboField extends React.Component {
 			list.push(item);
 
 		} else {
+			// Between 1 element selected and all elements - 1 or maxSelection -1. Build the array of elements using to display the field of data which name is in
+			// props.secondaryDisplay or in props.displayField if the first doesn't exist.
 			_.each(data, (element, index) => {
 				if (!_.isNull(this.props.secondaryDisplay)) {
 					display = element[this.props.secondaryDisplay];
@@ -206,6 +281,7 @@ class ComboField extends React.Component {
 					display = element[this.props.displayField];
 				}
 
+				// If that props contain a function then call it sending the entire element data
 				if (typeof display == 'function') {
 					display = display(element);
 				}
@@ -235,7 +311,7 @@ class ComboField extends React.Component {
 		if (!this.state.show) {
 			content = null;
 		}
-
+		// CSSTransitionGroups for animations Content and List
 		return (
 			<div key={this.state.uniqueId} className={className}>
 				<div key={this.state.uniqueId + '-field'} className="proper-combo-virtual">

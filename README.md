@@ -27,7 +27,8 @@ Features of ProperCombo:
 The compile and compressed ProperCombo distribution file can be found in the dist folder along with the css file. Add the default stylesheet `dist/propercombo.min.css`, then import it into any module.
 
 ## Live Demo
-http://cbiconsulting.github.io/ProperCombo/
+##### [Code](https://github.com/CBIConsulting/ProperCombo/tree/gh-pages/examples/jsx/app.js)
+##### [Demo](http://cbiconsulting.github.io/ProperCombo/)
 
 ## External dependencies
 * React and React DOM

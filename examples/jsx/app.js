@@ -18,7 +18,7 @@ class App extends React.Component {
 		this.state = {
 			data: [],
 			fieldsSet: null,
-			selection: null,
+			selection: ['item-100', 'item-99'],
 			language: 'ENG',
 			idField: 'value',
 			displayField: 'label',
@@ -60,7 +60,7 @@ class App extends React.Component {
 		let somethingChanged = propsChanged || stateChanged;
 
 		if (nextState.dataSize != this.state.dataSize) {
-			let data = this.state.data, dataItem = {}, fields = new Set(_.keys(data[0])), newData = [];
+			let data = nextState.data, dataItem = {}, fields = new Set(_.keys(data[0])), newData = [];
 			let displayField = nextState.displayField, idField = nextState.idField;
 
 			fields.delete(idField);
@@ -74,7 +74,7 @@ class App extends React.Component {
 				dataItem['name'] = 'Tést ' + i;
 
 				fields.forEach(field => {
-					dataItem[field] = data[0].field;
+					dataItem[field] = data[0][field];
 				});
 
 				newData.push(dataItem);
@@ -144,8 +144,8 @@ class App extends React.Component {
 	onChangeData (e) {
 		e.preventDefault();
 		let data = [], fieldsSet = null, language = '', random = Math.floor(Math.random()* 10);
-		let selection = ['item-'+ random,'item-' + (random+1)];
-		let defaultSearch = 'Item '+ random, placeholder = 'Search Placeholder ' + random;
+		let selection = ['item-' + random, 'item-2' + (random + 1)];
+		let defaultSearch = 'test '+ random, placeholder = 'Search Placeholder ' + random;
 		let listHeight = this.props.listHeight + random, listRowHeight = this.props.listRowHeight + random;
 		let multiSelect = !this.state.multiSelect, dataSize = (Math.floor(Math.random()* 1000) + 10);
 
@@ -164,7 +164,7 @@ class App extends React.Component {
 			idField: 'value',
 			displayField: 'label',
 			language: language,
-			defaultSelection: selection,
+			selection: selection,
 			defaultSearch: defaultSearch,
 			listHeight: listHeight,
 			listRowHeight: listRowHeight,
@@ -174,7 +174,6 @@ class App extends React.Component {
 			afterSelect: this.afterSelect.bind(this),
 			dataSize: dataSize
 		});
-
 	}
 
 	onChangeSize(e) {
@@ -320,131 +319,136 @@ class App extends React.Component {
 		let multiSelect = this.state.multiSelect, language = this.state.language;
 
 	    return (
-	    	<div style={{position: 'absolute', width: '100%', top: '20%'}}>
-		      <div style={{position: 'absolute', top: 0, left: '10%',  width: '20%'}}>
-		        <div style={{position: 'absolute', top: 0, bottom: 0, width: '100%'}}>
-		          	<form className="form-horizontal" role="form">
-		          		<div className="form-group">
-			                <label> List elements: </label>
-			                <div className="form-inline">
-			                	<input ref="dataSize" type="text" className="form-control" placeholder="Number of elements" defaultValue={this.state.dataSize} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeSize.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-		          		<div className="form-group">
-			                <label> Id-Field: </label>
-			                <div className="form-inline">
-			                	<input ref="idField" type="text" className="form-control" placeholder="Id Field" defaultValue={this.state.idField} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeIdField.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> Display-Field: </label>
-			                <div className="form-inline">
-			                	<input ref="displayField" type="text" className="form-control" placeholder="Display Field" defaultValue={this.state.displayField} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeDisplay.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> Secondary-Display: </label>
-			                <div className="form-inline">
-			                	<input ref="secondaryDisplay" type="text" className="form-control" placeholder="Secondary Display Field" defaultValue={this.state.secondaryDisplay} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeSecDisplay.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> List Height: </label>
-			                <div className="form-inline">
-			                	<input ref="listHeight" type="text" className="form-control" placeholder="List Height" defaultValue={this.state.listHeight} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeListHeight.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> List Element Height: </label>
-			                <div className="form-inline">
-			                	<input ref="listElementHeight" type="text" className="form-control" id="listElementHeight" placeholder="List Element Height" defaultValue={this.state.listRowHeight} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeElementHeight.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> Virtual Field Max.Height: </label>
-			                <div className="form-inline">
-			                	<input ref="maxHeight" type="text" className="form-control" placeholder="Virtual Field Max.Height" defaultValue={this.state.maxHeight} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeMaxHeight.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> Max. Size in virtual field: </label>
-			                <div className="form-inline">
-			                	<input ref="maxSelection" type="text" className="form-control" placeholder="Max. Selection" defaultValue={this.state.maxSelection} style={{marginRight: '30px'}}/>
-			            		<button className="btn btn-default" onClick={this.onChangeMaxSelection.bind(this)}>
-			            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
-			            		</button>
-			            	</div>
-			            </div>
-			            <div className="form-group">
-			                <label> Multiselect </label>
-			                <div className="form-inline">
-			                  <select ref="multi" className="form-control" id="multiselect_id" defaultValue={multiSelect} onChange={this.onChangeMultiselect.bind(this)}>
-			                    <option value={true}>Yes</option>
-			                    <option value={false}>No</option>
-			                  </select>
-			                </div>
-			            </div>
-			            <div className="form-group">
-			                <label> Language: </label>
-			               	<div className="form-inline">
-			                  <select ref="lang" className="form-control input" id="language" defaultValue={language}  onChange={this.onChangeLang.bind(this)}>
-			                    <option value="SPA">Spanish</option>
-			                    <option value="ENG">English</option>
-			                  </select>
-			                </div>
-			            </div>
-		          </form>
-		        </div>
-		      </div>
-		      <div style={{position: 'absolute', top: 0, left: '33%',  width: '25%'}}>
-		        <div id="canvas" style={{position: 'absolute', top: 0, bottom: 0, width:' 75%'}}>
-		        	<Combo
-						data={this.state.data}
-						idField={this.state.idField}
-						displayField={this.state.displayField}
-						listHeight={this.state.listHeight}
-						listRowHeight={this.state.listRowHeight}
-						lang={this.state.language}
-						filter={filter}
-						multiSelect={this.state.multiSelect}
-						defaultSelection={this.state.selection}
-						defaultSearch={this.state.defaultSearch}
-						placeholder={this.state.placeholder}
-						afterSelect={this.afterSelect.bind(this)}
-						secondaryDisplay={this.state.secondaryDisplay}
-						maxHeight={this.state.maxHeight}
-						maxSelection={this.state.maxSelection}
-					/>
-					<div id="canvas-behind-content" style={{position: 'relative', top: 0, left: '-5%', width:' 110%', height: '400px', backgroundColor:'#2196F3'}}>
-						<h2 style={{position: 'relative', top: '40%', left: '20%', color:'#FFC107'}}> Element Behind </h2>
-					</div>
-		        </div>
-		        <div id="canvas2" style={{position: 'absolute', top: 0, bottom: 0, right: 0, width: '20%'}}>
-		        	<button className="btn btn-default" onClick={this.onChangeData.bind(this)}> Random Data </button>
-		        </div>
-		      </div>
-		    </div>
+	    	<div>
+	    		<div style={{position: 'absolute', 'width': '100%',top: '5%', left: '40%'}}>
+	    			<h1><a href="https://github.com/CBIConsulting/ProperCombo/blob/dev/examples/jsx/app.js"> Code </a></h1>
+	    		</div>
+		    	<div style={{position: 'absolute', width: '100%', top: '20%'}}>
+			      	<div style={{position: 'absolute', top: 0, left: '10%',  width: '20%'}}>
+				        <div style={{position: 'absolute', top: 0, bottom: 0, width: '100%'}}>
+				          	<form className="form-horizontal" role="form">
+				          		<div className="form-group">
+					                <label> List elements: </label>
+					                <div className="form-inline">
+					                	<input ref="dataSize" type="text" className="form-control" placeholder="Number of elements" defaultValue={this.state.dataSize} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeSize.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+				          		<div className="form-group">
+					                <label> Id-Field: </label>
+					                <div className="form-inline">
+					                	<input ref="idField" type="text" className="form-control" placeholder="Id Field" defaultValue={this.state.idField} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeIdField.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> Display-Field: </label>
+					                <div className="form-inline">
+					                	<input ref="displayField" type="text" className="form-control" placeholder="Display Field" defaultValue={this.state.displayField} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeDisplay.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> Secondary-Display: </label>
+					                <div className="form-inline">
+					                	<input ref="secondaryDisplay" type="text" className="form-control" placeholder="Secondary Display Field" defaultValue={this.state.secondaryDisplay} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeSecDisplay.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> List Height: </label>
+					                <div className="form-inline">
+					                	<input ref="listHeight" type="text" className="form-control" placeholder="List Height" defaultValue={this.state.listHeight} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeListHeight.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> List Element Height: </label>
+					                <div className="form-inline">
+					                	<input ref="listElementHeight" type="text" className="form-control" id="listElementHeight" placeholder="List Element Height" defaultValue={this.state.listRowHeight} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeElementHeight.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> Virtual Field Max.Height: </label>
+					                <div className="form-inline">
+					                	<input ref="maxHeight" type="text" className="form-control" placeholder="Virtual Field Max.Height" defaultValue={this.state.maxHeight} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeMaxHeight.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> Max. Size in virtual field: </label>
+					                <div className="form-inline">
+					                	<input ref="maxSelection" type="text" className="form-control" placeholder="Max. Selection" defaultValue={this.state.maxSelection} style={{marginRight: '30px'}}/>
+					            		<button className="btn btn-default" onClick={this.onChangeMaxSelection.bind(this)}>
+					            			<i style={{color:'red'}} className="fa fa-arrow-right" aria-hidden="true"/>
+					            		</button>
+					            	</div>
+					            </div>
+					            <div className="form-group">
+					                <label> Multiselect </label>
+					                <div className="form-inline">
+					                  <select ref="multi" className="form-control" id="multiselect_id" defaultValue={multiSelect} onChange={this.onChangeMultiselect.bind(this)}>
+					                    <option value={true}>Yes</option>
+					                    <option value={false}>No</option>
+					                  </select>
+					                </div>
+					            </div>
+					            <div className="form-group">
+					                <label> Language: </label>
+					               	<div className="form-inline">
+					                  <select ref="lang" className="form-control input" id="language" defaultValue={language}  onChange={this.onChangeLang.bind(this)}>
+					                    <option value="SPA">Spanish</option>
+					                    <option value="ENG">English</option>
+					                  </select>
+					                </div>
+					            </div>
+				          	</form>
+			        	</div>
+			      	</div>
+			      	<div style={{position: 'absolute', top: 0, left: '33%',  width: '25%'}}>
+				        <div id="canvas" style={{position: 'absolute', top: 0, bottom: 0, width:' 75%'}}>
+				        	<Combo
+								data={this.state.data}
+								idField={this.state.idField}
+								displayField={this.state.displayField}
+								listHeight={this.state.listHeight}
+								listRowHeight={this.state.listRowHeight}
+								lang={this.state.language}
+								filter={filter}
+								multiSelect={this.state.multiSelect}
+								defaultSelection={this.state.selection}
+								defaultSearch={this.state.defaultSearch}
+								placeholder={this.state.placeholder}
+								afterSelect={this.afterSelect.bind(this)}
+								secondaryDisplay={this.state.secondaryDisplay}
+								maxHeight={this.state.maxHeight}
+								maxSelection={this.state.maxSelection}
+							/>
+							<div id="canvas-behind-content" style={{position: 'relative', top: 0, left: '-5%', width:' 110%', height: '400px', backgroundColor:'#2196F3'}}>
+								<h2 style={{position: 'relative', top: '40%', left: '20%', color:'#FFC107'}}> Element Behind </h2>
+							</div>
+				        </div>
+				        <div id="canvas2" style={{position: 'absolute', top: 0, bottom: 0, right: 0, width: '20%'}}>
+				        	<button className="btn btn-default" onClick={this.onChangeData.bind(this)}> Random Data </button>
+				        </div>
+			     	</div>
+			    </div>
+			</div>
 	    );
 	}
 }

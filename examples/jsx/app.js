@@ -144,8 +144,8 @@ class App extends React.Component {
 	onChangeData (e) {
 		e.preventDefault();
 		let data = [], fieldsSet = null, language = '', random = Math.floor(Math.random()* 10);
-		let selection = ['item-'+ random,'item-' + (random+1)];
-		let defaultSearch = 'Item '+ random, placeholder = 'Search Placeholder ' + random;
+		let selection = ['item-' + random, 'item-2' + (random + 1)];
+		let defaultSearch = 'test '+ random, placeholder = 'Search Placeholder ' + random;
 		let listHeight = this.props.listHeight + random, listRowHeight = this.props.listRowHeight + random;
 		let multiSelect = !this.state.multiSelect, dataSize = (Math.floor(Math.random()* 1000) + 10);
 
@@ -164,7 +164,7 @@ class App extends React.Component {
 			idField: 'value',
 			displayField: 'label',
 			language: language,
-			defaultSelection: selection,
+			selection: selection,
 			defaultSearch: defaultSearch,
 			listHeight: listHeight,
 			listRowHeight: listRowHeight,

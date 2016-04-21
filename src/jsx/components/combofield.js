@@ -4,6 +4,7 @@ import _ from 'underscore';
 import Messages from "../lang/messages";
 import Search from "react-propersearch";
 import {shallowEqualImmutable} from 'react-immutable-render-mixin';
+const Set = require('es6-set');
 
 function getDefaultProps() {
 	return {
@@ -35,7 +36,8 @@ function getDefaultProps() {
 		listShowIcon: true,
 		filter: null, // Optional function (to be used when the displayField is an function too)
 		filterField: null, // By default it will be the displayField
-		afterSelect: null // Function
+		afterSelect: null, // Function
+		uniqueId: _.uniqueId('comboField_')
 	}
 }
 
@@ -70,9 +72,16 @@ class ComboField extends React.Component {
 		this.state = {
 			selectedData: null,
 			selection: this.props.defaultSelection,
-			uniqueId: _.uniqueId('comboField_'),
+			uniqueId: this.props.uniqueId,
 			secondaryDisplay: this.props.secondaryDisplay,
 			show: false
+		}
+	}
+
+	componentWillMount() {
+		let selection = this.state.selection;
+		if (!_.isNull(selection) && selection.length > 0)  {
+			this.prepareData(selection, this.props.data, this.props.idField); // Update selectedData in component's state
 		}
 	}
 
@@ -81,38 +90,70 @@ class ComboField extends React.Component {
 		let propsChanged = !shallowEqualImmutable(this.props, nextProps);
 		let somethingChanged = propsChanged || stateChanged;
 
-		// If the secondary display change then check if that field
-		if (this.props.secondaryDisplay != nextProps.secondaryDisplay) {
-			let fieldsSet = new Set(_.keys(nextProps.data[0]));
-			let messages = this.props.messages[this.props.lang];
+		if (propsChanged) {
+			let dataChanged = !shallowEqualImmutable(this.props.data, nextProps.data);
+			let idFieldChanged = !shallowEqualImmutable(this.props.idField, nextProps.idField);
+			let selectionChanged = !shallowEqualImmutable(this.props.defaultSelection, nextProps.defaultSelection);
+			let secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
 
-			// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
-			if (!fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
-				console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
-			} else {
-				this.setState({
-					secondaryDisplay: nextProps.secondaryDisplay
-				});
+			if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
+				this.prepareData(nextProps.defaultSelection, nextProps.data, nextProps.idField);
+
+				// If the secondary display change then check if that field
+				if (secondaryDisplayChanged) {
+					let fieldsSet = new Set(_.keys(nextProps.data[0]));
+					let messages = this.props.messages[this.props.lang];
+
+					// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
+					if (!fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
+						console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
+					} else {
+						this.setState({
+							secondaryDisplay: nextProps.secondaryDisplay
+						});
+					}
+				}
+
+				return false;
 			}
-
-			return false;
 		}
 
 		return somethingChanged;
+	}
+
+	prepareData(selection, newData, idField) {
+		if (!_.isNull(selection) && !_.isNull(newData)) {
+			let data = _.indexBy(newData, idField), selectedData = [];
+			let dataKeys = new Set(_.keys(data));
+
+			selection.forEach( (element) => {
+				if (dataKeys.has(element)) {
+					selectedData.push(data[element]);
+				}
+			});
+
+			this.setState({
+				selectedData: selectedData
+			});
+		}
 	}
 
 /**
  * Function called each time the selection has changed. Apply an update in the components state then render again an update the child and
  * send the selection and the selected data to a function in props which name is the same (if exist)
  *
- * @param (Set)		selection 	The selected values using the values of the selected data.
+ * @param (Array)	selection 	The selected elements using the idField of data.
  * @param (Array)	data 		The selected data
  */
  	afterSelect(data, selection) {
-		this.setState({
-			selectedData: data,
-			selection: selection
-		}, this.sendSelection(data,selection));
+ 		let selectionChanged = !shallowEqualImmutable(this.state.selection, selection);
+
+	   	if (selectionChanged) {
+			this.setState({
+				selectedData: data,
+				selection: selection
+			}, this.sendSelection(data,selection));
+		}
 	}
 
 /**
@@ -170,7 +211,7 @@ class ComboField extends React.Component {
 		let selection = _.clone(this.state.selection), data = _.clone(this.state.selectedData), index = 0;
 
 		// Not all selected or to many elements selected
-		if (!_.isNull(id)) {
+		if (!_.isNull(id) && selection.length > 1) {
 			// Find the index of the element
 			_.each(data, element => {
 				if (element[this.props.idField] == id) index = data.indexOf(element);
@@ -187,7 +228,7 @@ class ComboField extends React.Component {
 	    this.setState({
 	    	selectedData: data,
 			selection: selection
-		});
+		}, this.sendSelection(data,selection));
 	}
 
 /**
@@ -196,7 +237,8 @@ class ComboField extends React.Component {
  * @return (Search) search The built ProperSearch component with all it's props set up.
  */
 	getContent() {
-		let search = null, placeholder = this.props.placeholder;
+		let CSSTransition = process.env.NODE_ENV === 'Test' ? null : React.addons.CSSTransitionGroup;
+		let search = null, placeholder = this.props.placeholder, contentClass = "proper-combo-content";
 
 		if (_.isNull(placeholder)) {
 			placeholder = this.props.messages[this.props.lang].placeholder;
@@ -231,7 +273,24 @@ class ComboField extends React.Component {
 			afterSelect={this.afterSelect.bind(this)}
 		/>;
 
-		return search;
+		if (CSSTransition) {
+			return (
+				<CSSTransition
+					key={this.state.uniqueId + '-content'}
+					className={contentClass}
+					transitionName='content'
+					component='div'
+					transitionAppear={true}
+					transitionAppearTimeout={400}
+					transitionEnterTimeout={400}
+					transitionLeaveTimeout={400}>
+					{search}
+				</CSSTransition>
+			);
+		} else { // Test - No Animations
+			return <div key={this.state.uniqueId + '-content'} className={contentClass}> {search} </div>
+		}
+
 	}
 
 /**
@@ -241,6 +300,7 @@ class ComboField extends React.Component {
  * @return (Array)	list 	Array of elements to be rendered inside the virtual field
  */
 	getList() {
+		let CSSTransition = process.env.NODE_ENV === 'Test' ? null : React.addons.CSSTransitionGroup;
 		let data = this.state.selectedData, list = [], display = null,item, size = 0;
 
 		if (data) size = data.length;
@@ -296,13 +356,27 @@ class ComboField extends React.Component {
 				list.push(item);
 			});
 		}
+		if (CSSTransition) {
+			return (
+				<CSSTransition
+					key={this.state.uniqueId + '-fieldllist-elements'}
+					className='proper-combo-virtualField-list'
+					transitionName='list'
+					component='ul'
+					transitionEnterTimeout={250}
+					transitionLeaveTimeout={250}>
+					{list}
+				</CSSTransition>
+			);
+		} else {
+			return <ul key={this.state.uniqueId + '-fieldllist-elements'} className='proper-combo-virtualField-list'> {list} </ul>
+		}
 
 		return list;
 	}
 
 	render() {
-		let	content = this.getContent(), elementsList = this.getList(), className = "proper-combo", contentClass = "proper-combo-content";
-		let maxHeight = this.props.maxHeight;
+		let	content = this.getContent(), elementsList = this.getList(), className = "proper-combo", maxHeight = this.props.maxHeight;
 
 		if (this.props.className) {
 			className += ' ' + this.props.className;
@@ -311,37 +385,19 @@ class ComboField extends React.Component {
 		if (!this.state.show) {
 			content = null;
 		}
+
 		// CSSTransitionGroups for animations Content and List
 		return (
 			<div key={this.state.uniqueId} className={className}>
-				<div key={this.state.uniqueId + '-field'} className="proper-combo-virtual">
-					<div key={this.state.uniqueId + '-fieldllist'} className="proper-combo-virtualField" ref={this.state.uniqueId + '_fieldllist'} style={{maxHeight:maxHeight}} onClick={this.onVirtualClick.bind(this)}>
-						<React.addons.CSSTransitionGroup
-							key={this.state.uniqueId + '-fieldllist-elements'}
-							className="proper-combo-virtualField-list"
-							transitionName="list"
-							component='ul'
-							transitionEnterTimeout={250}
-							transitionLeaveTimeout={250}>
-							{elementsList}
-						</React.addons.CSSTransitionGroup>
+				<div key={this.state.uniqueId + '-field'} className='proper-combo-virtual'>
+					<div key={this.state.uniqueId + '-fieldllist'} className='proper-combo-virtualField' ref={this.state.uniqueId + '_fieldllist'} style={{maxHeight:maxHeight}} onClick={this.onVirtualClick.bind(this)}>
+						{elementsList}
 					</div>
-					<button className={"proper-combo-virtualField-add"} onClick={this.addNewItems.bind(this)}>
-						<i className="fa fa-chevron-down"></i>
+					<button className={'proper-combo-virtualField-add'} onClick={this.addNewItems.bind(this)}>
+						<i className='fa fa-chevron-down'></i>
 					</button>
 				</div>
-				<React.addons.CSSTransitionGroup
-					key={this.state.uniqueId + '-content'}
-					className={contentClass}
-					transitionName="content"
-					component='div'
-					transitionAppear={true}
-					transitionAppearTimeout={400}
-					transitionEnterTimeout={400}
-					transitionLeaveTimeout={400}>
-
-					{content}
-				</React.addons.CSSTransitionGroup>
+				{content}
 			</div>
 		);
 	}

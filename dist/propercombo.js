@@ -202,6 +202,7 @@ var ProperCombo =
 				selection: _this.props.defaultSelection,
 				uniqueId: _this.props.uniqueId,
 				secondaryDisplay: _this.props.secondaryDisplay,
+				idField: _this.props.idField,
 				show: false
 			};
 			return _this;
@@ -229,15 +230,31 @@ var ProperCombo =
 					var secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
 
 					if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
-						this.prepareData(nextProps.defaultSelection, nextProps.data, nextProps.idField);
+						if (dataChanged || idFieldChanged || selectionChanged) {
+							var selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
+							var data = dataChanged ? nextProps.data : this.props.data;
+							var idField = idFieldChanged ? nextProps.idField : this.props.idField;
+							var fieldsSet = new Set(_underscore2['default'].keys(data[0]));
+
+							if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
+
+							if (_underscore2['default'].isNull(selection) || _underscore2['default'].isNull(data)) {
+								this.setState({
+									selection: selection,
+									idField: idField
+								});
+							} else {
+								this.prepareData(selection, data, idField);
+							}
+						}
 
 						// If the secondary display change then check if that field
 						if (secondaryDisplayChanged) {
-							var fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
+							var _fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
 							var messages = this.props.messages[this.props.lang];
 
 							// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
-							if (!fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
+							if (!_fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
 								console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
 							} else {
 								this.setState({
@@ -270,7 +287,9 @@ var ProperCombo =
 						});
 
 						_this2.setState({
-							selectedData: selectedData
+							selectedData: selectedData,
+							selection: selection,
+							idField: idField
 						});
 					})();
 				}
@@ -371,15 +390,17 @@ var ProperCombo =
 				    index = 0;
 
 				// Not all selected or to many elements selected
-				if (!_underscore2['default'].isNull(id) && selection.length > 1) {
-					// Find the index of the element
-					_underscore2['default'].each(data, function (element) {
-						if (element[_this3.props.idField] == id) index = data.indexOf(element);
-					});
+				if (!_underscore2['default'].isNull(id)) {
+					if (selection.length > 0) {
+						// Find the index of the element
+						_underscore2['default'].each(data, function (element) {
+							if (element[_this3.props.idField] == id) index = data.indexOf(element);
+						});
 
-					// Then remove it
-					data.splice(index, 1);
-					selection.splice(selection.indexOf(id.toString()), 1);
+						// Then remove it
+						data.splice(index, 1);
+						selection.splice(selection.indexOf(id.toString()), 1);
+					}
 				} else {
 					data = [];
 					selection = [];
@@ -414,7 +435,7 @@ var ProperCombo =
 					className: this.props.searchClassName,
 					data: this.props.data,
 					messages: this.props.messages,
-					idField: this.props.idField,
+					idField: this.state.idField,
 					displayField: this.props.displayField,
 					lang: this.props.lang,
 					filter: this.props.filter,

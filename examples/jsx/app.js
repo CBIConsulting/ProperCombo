@@ -18,7 +18,7 @@ class App extends React.Component {
 		this.state = {
 			data: [],
 			fieldsSet: null,
-			selection: null,
+			selection: ['item-100', 'item-99'],
 			language: 'ENG',
 			idField: 'value',
 			displayField: 'label',
@@ -60,7 +60,7 @@ class App extends React.Component {
 		let somethingChanged = propsChanged || stateChanged;
 
 		if (nextState.dataSize != this.state.dataSize) {
-			let data = this.state.data, dataItem = {}, fields = new Set(_.keys(data[0])), newData = [];
+			let data = nextState.data, dataItem = {}, fields = new Set(_.keys(data[0])), newData = [];
 			let displayField = nextState.displayField, idField = nextState.idField;
 
 			fields.delete(idField);
@@ -74,7 +74,7 @@ class App extends React.Component {
 				dataItem['name'] = 'Tést ' + i;
 
 				fields.forEach(field => {
-					dataItem[field] = data[0].field;
+					dataItem[field] = data[0][field];
 				});
 
 				newData.push(dataItem);
@@ -174,7 +174,6 @@ class App extends React.Component {
 			afterSelect: this.afterSelect.bind(this),
 			dataSize: dataSize
 		});
-
 	}
 
 	onChangeSize(e) {

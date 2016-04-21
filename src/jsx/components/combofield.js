@@ -74,6 +74,7 @@ class ComboField extends React.Component {
 			selection: this.props.defaultSelection,
 			uniqueId: this.props.uniqueId,
 			secondaryDisplay: this.props.secondaryDisplay,
+			idField: this.props.idField,
 			show: false
 		}
 	}
@@ -97,7 +98,23 @@ class ComboField extends React.Component {
 			let secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
 
 			if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
-				this.prepareData(nextProps.defaultSelection, nextProps.data, nextProps.idField);
+				if (dataChanged || idFieldChanged || selectionChanged) {
+					let selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
+					let data = dataChanged ? nextProps.data : this.props.data;
+					let idField = idFieldChanged ? nextProps.idField : this.props.idField;
+					let fieldsSet = new Set(_.keys(data[0]));
+
+					if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
+
+					if (_.isNull(selection) || _.isNull(data)) {
+						this.setState({
+							selection: selection,
+							idField: idField
+						});
+					} else {
+						this.prepareData(selection, data, idField);
+					}
+				}
 
 				// If the secondary display change then check if that field
 				if (secondaryDisplayChanged) {
@@ -133,7 +150,9 @@ class ComboField extends React.Component {
 			});
 
 			this.setState({
-				selectedData: selectedData
+				selectedData: selectedData,
+				selection: selection,
+				idField: idField
 			});
 		}
 	}
@@ -211,15 +230,17 @@ class ComboField extends React.Component {
 		let selection = _.clone(this.state.selection), data = _.clone(this.state.selectedData), index = 0;
 
 		// Not all selected or to many elements selected
-		if (!_.isNull(id) && selection.length > 1) {
-			// Find the index of the element
-			_.each(data, element => {
-				if (element[this.props.idField] == id) index = data.indexOf(element);
-			});
+		if (!_.isNull(id)) {
+			if (selection.length > 0) {
+				// Find the index of the element
+				_.each(data, element => {
+					if (element[this.props.idField] == id) index = data.indexOf(element);
+				});
 
-			// Then remove it
-			data.splice(index,1);
-			selection.splice(selection.indexOf(id.toString()), 1);
+				// Then remove it
+				data.splice(index,1);
+				selection.splice(selection.indexOf(id.toString()), 1);
+			}
 		} else {
 			data = [];
 			selection = [];
@@ -249,7 +270,7 @@ class ComboField extends React.Component {
 			className={this.props.searchClassName}
 			data={this.props.data}
 			messages={this.props.messages}
-			idField={this.props.idField}
+			idField={this.state.idField}
 			displayField={this.props.displayField}
 			lang={this.props.lang}
 			filter={this.props.filter}

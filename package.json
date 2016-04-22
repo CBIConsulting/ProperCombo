@@ -1,7 +1,7 @@
 {
   "name": "react-propercombo",
-  "version": "0.1.0",
-  "description": "A virtual field that unfold a ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and display the selected items in boxes inside the field",
+  "version": "0.1.1",
+  "description": "A virtual field that show/hide a ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and display the selected items in boxes inside the field",
   "main": "index.js",
   "scripts": {
     "test": "webpack && karma start --single-run --no-auto-watch karma.conf.js",
@@ -63,10 +63,9 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
+    "es6-set": "^0.1.4",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "immutable": "^3.7.6",
-    "react-addons-shallow-compare": "^0.14.7",
     "react-immutable-render-mixin": "^0.9.5",
     "react-propersearch": "^0.1.9",
     "underscore": "^1.8.3"

@@ -143,11 +143,17 @@ class ComboField extends React.Component {
 			let data = _.indexBy(newData, idField), selectedData = [];
 			let dataKeys = new Set(_.keys(data));
 
-			selection.forEach( (element) => {
-				if (dataKeys.has(element)) {
-					selectedData.push(data[element]);
+			if (_.isArray(selection)) {
+				selection.forEach( (element) => {
+					if (dataKeys.has(element)) {
+						selectedData.push(data[element]);
+					}
+				});
+			} else if (typeof selection === 'string') {
+				if (dataKeys.has(selection)) {
+					selectedData.push(data[selection]);
 				}
-			});
+			}
 
 			this.setState({
 				selectedData: selectedData,
@@ -331,10 +337,10 @@ class ComboField extends React.Component {
 			let messages = this.props.messages[this.props.lang];
 
 			item = (
-				<div key={'datalist-element-1'} className="proper-combo-virtualField-list-element">
-					<span>{messages.allData + ' (' + size + ')'}</span>
+				<li key={'datalist-element-0'} className="proper-combo-virtualField-list-element">
+					<span key={'msg-0'}>{messages.allData + ' (' + size + ')'}</span>
 					<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, null)}/>
-				</div>
+				</li>
 			);
 
 			list.push(item);
@@ -344,10 +350,10 @@ class ComboField extends React.Component {
 
 			// Just one element with the number of selected elements and a message.
 			item = (
-				<div key={'datalist-element-1'} className="proper-combo-virtualField-list-element">
-					<span>{size + ' ' + messages.dataToBig}</span>
+				<li key={'datalist-element-0'} className="proper-combo-virtualField-list-element">
+					<span key={'msg-0'}>{size + ' ' + messages.dataToBig}</span>
 					<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, null)}/>
-				</div>
+				</li>
 			);
 
 			list.push(item);
@@ -368,10 +374,10 @@ class ComboField extends React.Component {
 				}
 
 				item = (
-					<div key={'datalist-element-' + index} className="proper-combo-virtualField-list-element">
-						<span>{display}</span>
+					<li key={'datalist-element-' + index} className="proper-combo-virtualField-list-element">
+						<span key={'msg-' + index}>{display}</span>
 						<i aria-hidden="true" className="fa fa-times proper-combo-virtualField-list-element-delete" onClick={this.onRemoveElement.bind(this, element[this.props.idField])}/>
-					</div>
+					</li>
 				);
 
 				list.push(item);

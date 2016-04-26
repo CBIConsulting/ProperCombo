@@ -60,31 +60,21 @@ class App extends React.Component {
 		let somethingChanged = propsChanged || stateChanged;
 
 		if (nextState.dataSize != this.state.dataSize) {
-			let data = nextState.data, dataItem = {}, fields = new Set(_.keys(data[0])), newData = [];
-			let displayField = nextState.displayField, idField = nextState.idField;
+			let newData = [];
 
-			fields.delete(idField);
-			fields.delete(displayField);
-			fields.delete('name');
-
-			for (let i = nextState.dataSize; i > 0; i--) {
-				dataItem = {};
-				dataItem[idField] = 'item-' + i;
-				dataItem[displayField] = this.formater.bind(this);
-				dataItem['name'] = 'Tést ' + i;
-
-				fields.forEach(field => {
-					dataItem[field] = data[0][field];
+			for (let i = nextState.dataSize; i >= 0; i--) {
+				newData.push({
+					[nextState.idField]: 'item-' + i,
+					[nextState.displayField]: 'Item ' + i,
+					name: 'Teeést ' + i,
+					fieldx: 'xxx ' + i,
+					fieldy: 'yyy ' + i
 				});
-
-				newData.push(dataItem);
-			};
-
-			fields = new Set(_.keys(newData[0]))
+			}
 
 			this.setState({
 				data: newData,
-				fieldsSet: fields
+				fieldsSet: new Set(_.keys(newData[0]))
 			});
 
 			return false;

@@ -767,7 +767,8 @@ var ProperCombo =
 			listWidth: null,
 			listHeight: 200,
 			listRowHeight: 26,
-			afterSelect: null,
+			afterSelect: null, // Function Get selection and data
+			afterSelectGetSelection: null, // Function Get just selection (no data)
 			afterSearch: null,
 			onEnter: null, // Optional - To do when key down Enter - SearchField
 			fieldClass: null,
@@ -844,7 +845,7 @@ var ProperCombo =
 		_createClass(Search, [{
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				this.setDefaultSelection(this.props.defaultSelection, true);
+				this.setDefaultSelection(this.props.defaultSelection);
 
 				this.setState({
 					ready: true
@@ -1162,26 +1163,26 @@ var ProperCombo =
 	   * In case that the new selection array be different than the selection array in the components state, then update
 	   * the components state with the new data.
 	   *
-	   * @param {array}	newSelection	 	The selected rows
-	   * @param {boolean}	isFirstSelection  	If that's the first selection (then don't send the selection) or not
+	   * @param {array}	newSelection	The selected rows
+	   * @param {boolean}	sendSelection 	If the selection must be sent or not
 	   */
 
 		}, {
 			key: 'triggerSelection',
 			value: function triggerSelection() {
 				var newSelection = arguments.length <= 0 || arguments[0] === undefined ? new Set() : arguments[0];
-				var isFirstSelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+				var sendSelection = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-				if (isFirstSelection) {
-					this.setState({
-						selection: newSelection,
-						allSelected: this.isAllSelected(this.state.data, newSelection)
-					});
-				} else {
+				if (sendSelection) {
 					this.setState({
 						selection: newSelection,
 						allSelected: this.isAllSelected(this.state.data, newSelection)
 					}, this.sendSelection);
+				} else {
+					this.setState({
+						selection: newSelection,
+						allSelected: this.isAllSelected(this.state.data, newSelection)
+					});
 				}
 			}
 
@@ -1215,14 +1216,11 @@ var ProperCombo =
 	   * Set up the default selection if exist
 	   *
 	   * @param {array || string ... number} defSelection 	Default selection to be applied to the list
-	   * @param {boolean}	isFirstSelection  	If that's the first selection (then don't send the selection) or not
 	   */
 
 		}, {
 			key: 'setDefaultSelection',
 			value: function setDefaultSelection(defSelection) {
-				var isFirstSelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
 				if (defSelection) {
 					var selection = null;
 
@@ -1236,7 +1234,7 @@ var ProperCombo =
 						}
 					}
 
-					this.triggerSelection(selection, isFirstSelection);
+					this.triggerSelection(selection, false);
 				}
 			}
 
@@ -1260,26 +1258,49 @@ var ProperCombo =
 				// The data will be inmutable inside the component
 				var data = newData || _immutable2['default'].fromJS(this.props.data),
 				    index = 0,
-				    field = idField || this.state.idField;
+				    rdataIndex = 0,
+				    idSet = new Set(),
+				    field = idField || this.state.idField,
+				    fieldValue = undefined;
 				var indexed = [],
-				    parsed = [];
+				    parsed = [],
+				    parsedJSON = undefined,
+				    hasNulls = false;
 
 				// Parsing data to add new fields (selected or not, field, rowIndex)
 				parsed = data.map(function (row) {
-					if (!row.get(field, false)) {
-						row = row.set(field, _underscore2['default'].uniqueId());
-					} else {
-						row = row.set(field, row.get(field).toString());
+					fieldValue = row.get(field, false);
+
+					if (!fieldValue) {
+						fieldValue = _underscore2['default'].uniqueId();
 					}
 
-					if (!row.get('_selected', false)) {
-						row = row.set('_selected', false);
+					// No rows with same idField. The idField must be unique
+					if (!idSet.has(fieldValue)) {
+						idSet.add(fieldValue);
+						row = row.set(field, fieldValue.toString());
+
+						if (!row.get('_selected', false)) {
+							row = row.set('_selected', false);
+						}
+
+						row = row.set('_rowIndex', index++); // data row index
+						row = row.set('_rawDataIndex', rdataIndex++); // rawData row index
+
+						return row;
 					}
 
-					row = row.set('_rowIndex', index++);
-
-					return row;
+					rdataIndex++; // add 1 to jump over duplicate values
+					hasNulls = true;
+					return null;
 				});
+
+				// Clear null values if exist
+				if (hasNulls) {
+					parsed = parsed.filter(function (element) {
+						return !_underscore2['default'].isNull(element);
+					});
+				}
 
 				// Prepare indexed data.
 				indexed = _underscore2['default'].indexBy(parsed.toJSON(), field);
@@ -1387,40 +1408,53 @@ var ProperCombo =
 			value: function sendSelection() {
 				var _this6 = this;
 
-				if (typeof this.props.afterSelect == 'function') {
+				var hasAfterSelect = typeof this.props.afterSelect == 'function',
+				    hasGetSelection = typeof this.props.afterSelectGetSelection == 'function';
+
+				if (hasAfterSelect || hasGetSelection) {
 					(function () {
 						var selectionArray = [],
-						    selectedData = [],
-						    properId = null,
-						    rowIndex = null,
-						    filteredData = null;
-						var _state = _this6.state;
-						var indexedData = _state.indexedData;
-						var initialData = _state.initialData;
-						var rawData = _state.rawData;
-						var data = _state.data;
-						var selection = _state.selection;
-
-						// Get the data (initialData) that match with the selection
-
-						filteredData = initialData.filter(function (element) {
-							return selection.has(element.get(_this6.state.idField));
-						});
-
-						// Then from the filtered data get the raw data that match with the selection
-						selectedData = filteredData.map(function (row) {
-							properId = row.get(_this6.state.idField);
-							rowIndex = _this6.state.initialIndexed[properId]._rowIndex;
-
-							return rawData.get(rowIndex);
-						});
+						    selection = _this6.state.selection;
 
 						// Parse the selection to return it as an array instead of a Set obj
 						selection.forEach(function (item) {
 							selectionArray.push(item);
 						});
 
-						_this6.props.afterSelect.call(_this6, selectedData.toJSON(), selectionArray);
+						if (hasGetSelection) {
+							// When you just need the selection but no data
+							_this6.props.afterSelectGetSelection.call(_this6, selectionArray, selection); // selection array / selection Set()
+						}
+
+						if (hasAfterSelect) {
+							(function () {
+								var selectedData = [],
+								    properId = null,
+								    rowIndex = null,
+								    filteredData = null;
+								var _state = _this6.state;
+								var indexedData = _state.indexedData;
+								var initialData = _state.initialData;
+								var rawData = _state.rawData;
+								var data = _state.data;
+
+								// Get the data (initialData) that match with the selection
+
+								filteredData = initialData.filter(function (element) {
+									return selection.has(element.get(_this6.state.idField));
+								});
+
+								// Then from the filtered data get the raw data that match with the selection
+								selectedData = filteredData.map(function (row) {
+									properId = row.get(_this6.state.idField);
+									rowIndex = _this6.state.initialIndexed[properId]._rawDataIndex;
+
+									return rawData.get(rowIndex);
+								});
+
+								_this6.props.afterSelect.call(_this6, selectedData.toJSON(), selectionArray);
+							})();
+						}
 					})();
 				}
 			}
@@ -1474,7 +1508,6 @@ var ProperCombo =
 						}),
 						_react2['default'].createElement(_searchList2['default'], {
 							data: data,
-							rawData: this.state.rawData,
 							indexedData: this.state.initialIndexed,
 							className: this.props.listClass,
 							idField: this.state.idField,
@@ -7563,7 +7596,9 @@ var ProperCombo =
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
-	      this._detectElementResize.removeResizeListener(this._parentNode, this._onResize);
+	      if (this._detectElementResize) {
+	        this._detectElementResize.removeResizeListener(this._parentNode, this._onResize);
+	      }
 	    }
 	  }, {
 	    key: 'render',
@@ -11714,6 +11749,7 @@ var ProperCombo =
 	      var _props = this.props;
 	      var isRowLoaded = _props.isRowLoaded;
 	      var loadMoreRows = _props.loadMoreRows;
+	      var minimumBatchSize = _props.minimumBatchSize;
 	      var rowsCount = _props.rowsCount;
 	      var threshold = _props.threshold;
 
@@ -11723,6 +11759,8 @@ var ProperCombo =
 
 	      var unloadedRanges = scanForUnloadedRanges({
 	        isRowLoaded: isRowLoaded,
+	        minimumBatchSize: minimumBatchSize,
+	        rowsCount: rowsCount,
 	        startIndex: Math.max(0, startIndex - threshold),
 	        stopIndex: Math.min(rowsCount - 1, stopIndex + threshold)
 	      });
@@ -11789,6 +11827,12 @@ var ProperCombo =
 	  loadMoreRows: _react.PropTypes.func.isRequired,
 
 	  /**
+	   * Minimum number of rows to be loaded at a time.
+	   * This property can be used to batch requests to reduce HTTP requests.
+	   */
+	  minimumBatchSize: _react.PropTypes.number.isRequired,
+
+	  /**
 	   * Number of rows in list; can be arbitrary high number if actual number is unknown.
 	   */
 	  rowsCount: _react.PropTypes.number.isRequired,
@@ -11801,6 +11845,7 @@ var ProperCombo =
 	  threshold: _react.PropTypes.number.isRequired
 	};
 	InfiniteLoader.defaultProps = {
+	  minimumBatchSize: 10,
 	  rowsCount: 0,
 	  threshold: 15
 	};
@@ -11819,10 +11864,13 @@ var ProperCombo =
 	 */
 	function scanForUnloadedRanges(_ref3) {
 	  var isRowLoaded = _ref3.isRowLoaded;
+	  var minimumBatchSize = _ref3.minimumBatchSize;
+	  var rowsCount = _ref3.rowsCount;
 	  var startIndex = _ref3.startIndex;
 	  var stopIndex = _ref3.stopIndex;
 
 	  var unloadedRanges = [];
+
 	  var rangeStartIndex = null;
 	  var rangeStopIndex = null;
 
@@ -11845,6 +11893,17 @@ var ProperCombo =
 	  }
 
 	  if (rangeStopIndex !== null) {
+	    // Attempt to satisfy :minimumBatchSize requirement but don't exceed :rowsCount
+	    var potentialStopIndex = Math.min(Math.max(rangeStopIndex, rangeStartIndex + minimumBatchSize - 1), rowsCount - 1);
+
+	    for (var _i = rangeStopIndex + 1; _i <= potentialStopIndex; _i++) {
+	      if (!isRowLoaded(_i)) {
+	        rangeStopIndex = _i;
+	      } else {
+	        break;
+	      }
+	    }
+
 	    unloadedRanges.push({
 	      startIndex: rangeStartIndex,
 	      stopIndex: rangeStopIndex

@@ -67,7 +67,7 @@
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-immutable-render-mixin": "^0.9.5",
-    "react-propersearch": "^0.1.9",
+    "react-propersearch": "^0.1.15",
     "underscore": "^1.8.3"
   }
 }

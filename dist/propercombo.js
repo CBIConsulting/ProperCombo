@@ -58,7 +58,7 @@ var ProperCombo =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	if (true) {
-		__webpack_require__(114);
+		__webpack_require__(115);
 	}
 
 	exports["default"] = _combofield2["default"];
@@ -106,7 +106,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(60);
+	var Set = __webpack_require__(61);
 
 	function getDefaultProps() {
 		return {
@@ -732,15 +732,15 @@ var ProperCombo =
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
-	var _searchField = __webpack_require__(111);
+	var _searchField = __webpack_require__(112);
 
 	var _searchField2 = _interopRequireDefault(_searchField);
 
-	var _messages2 = __webpack_require__(112);
+	var _messages2 = __webpack_require__(113);
 
 	var _messages3 = _interopRequireDefault(_messages2);
 
-	var _normalize = __webpack_require__(113);
+	var _normalize = __webpack_require__(114);
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
@@ -754,7 +754,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(60);
+	var Set = __webpack_require__(61);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -767,7 +767,8 @@ var ProperCombo =
 			listWidth: null,
 			listHeight: 200,
 			listRowHeight: 26,
-			afterSelect: null,
+			afterSelect: null, // Function Get selection and data
+			afterSelectGetSelection: null, // Function Get just selection (no data)
 			afterSearch: null,
 			onEnter: null, // Optional - To do when key down Enter - SearchField
 			fieldClass: null,
@@ -844,7 +845,7 @@ var ProperCombo =
 		_createClass(Search, [{
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				this.setDefaultSelection(this.props.defaultSelection, true);
+				this.setDefaultSelection(this.props.defaultSelection);
 
 				this.setState({
 					ready: true
@@ -1162,26 +1163,26 @@ var ProperCombo =
 	   * In case that the new selection array be different than the selection array in the components state, then update
 	   * the components state with the new data.
 	   *
-	   * @param {array}	newSelection	 	The selected rows
-	   * @param {boolean}	isFirstSelection  	If that's the first selection (then don't send the selection) or not
+	   * @param {array}	newSelection	The selected rows
+	   * @param {boolean}	sendSelection 	If the selection must be sent or not
 	   */
 
 		}, {
 			key: 'triggerSelection',
 			value: function triggerSelection() {
 				var newSelection = arguments.length <= 0 || arguments[0] === undefined ? new Set() : arguments[0];
-				var isFirstSelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+				var sendSelection = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-				if (isFirstSelection) {
-					this.setState({
-						selection: newSelection,
-						allSelected: this.isAllSelected(this.state.data, newSelection)
-					});
-				} else {
+				if (sendSelection) {
 					this.setState({
 						selection: newSelection,
 						allSelected: this.isAllSelected(this.state.data, newSelection)
 					}, this.sendSelection);
+				} else {
+					this.setState({
+						selection: newSelection,
+						allSelected: this.isAllSelected(this.state.data, newSelection)
+					});
 				}
 			}
 
@@ -1215,14 +1216,11 @@ var ProperCombo =
 	   * Set up the default selection if exist
 	   *
 	   * @param {array || string ... number} defSelection 	Default selection to be applied to the list
-	   * @param {boolean}	isFirstSelection  	If that's the first selection (then don't send the selection) or not
 	   */
 
 		}, {
 			key: 'setDefaultSelection',
 			value: function setDefaultSelection(defSelection) {
-				var isFirstSelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
 				if (defSelection) {
 					var selection = null;
 
@@ -1236,7 +1234,7 @@ var ProperCombo =
 						}
 					}
 
-					this.triggerSelection(selection, isFirstSelection);
+					this.triggerSelection(selection, false);
 				}
 			}
 
@@ -1260,26 +1258,49 @@ var ProperCombo =
 				// The data will be inmutable inside the component
 				var data = newData || _immutable2['default'].fromJS(this.props.data),
 				    index = 0,
-				    field = idField || this.state.idField;
+				    rdataIndex = 0,
+				    idSet = new Set(),
+				    field = idField || this.state.idField,
+				    fieldValue = undefined;
 				var indexed = [],
-				    parsed = [];
+				    parsed = [],
+				    parsedJSON = undefined,
+				    hasNulls = false;
 
 				// Parsing data to add new fields (selected or not, field, rowIndex)
 				parsed = data.map(function (row) {
-					if (!row.get(field, false)) {
-						row = row.set(field, _underscore2['default'].uniqueId());
-					} else {
-						row = row.set(field, row.get(field).toString());
+					fieldValue = row.get(field, false);
+
+					if (!fieldValue) {
+						fieldValue = _underscore2['default'].uniqueId();
 					}
 
-					if (!row.get('_selected', false)) {
-						row = row.set('_selected', false);
+					// No rows with same idField. The idField must be unique
+					if (!idSet.has(fieldValue)) {
+						idSet.add(fieldValue);
+						row = row.set(field, fieldValue.toString());
+
+						if (!row.get('_selected', false)) {
+							row = row.set('_selected', false);
+						}
+
+						row = row.set('_rowIndex', index++); // data row index
+						row = row.set('_rawDataIndex', rdataIndex++); // rawData row index
+
+						return row;
 					}
 
-					row = row.set('_rowIndex', index++);
-
-					return row;
+					rdataIndex++; // add 1 to jump over duplicate values
+					hasNulls = true;
+					return null;
 				});
+
+				// Clear null values if exist
+				if (hasNulls) {
+					parsed = parsed.filter(function (element) {
+						return !_underscore2['default'].isNull(element);
+					});
+				}
 
 				// Prepare indexed data.
 				indexed = _underscore2['default'].indexBy(parsed.toJSON(), field);
@@ -1387,40 +1408,53 @@ var ProperCombo =
 			value: function sendSelection() {
 				var _this6 = this;
 
-				if (typeof this.props.afterSelect == 'function') {
+				var hasAfterSelect = typeof this.props.afterSelect == 'function',
+				    hasGetSelection = typeof this.props.afterSelectGetSelection == 'function';
+
+				if (hasAfterSelect || hasGetSelection) {
 					(function () {
 						var selectionArray = [],
-						    selectedData = [],
-						    properId = null,
-						    rowIndex = null,
-						    filteredData = null;
-						var _state = _this6.state;
-						var indexedData = _state.indexedData;
-						var initialData = _state.initialData;
-						var rawData = _state.rawData;
-						var data = _state.data;
-						var selection = _state.selection;
-
-						// Get the data (initialData) that match with the selection
-
-						filteredData = initialData.filter(function (element) {
-							return selection.has(element.get(_this6.state.idField));
-						});
-
-						// Then from the filtered data get the raw data that match with the selection
-						selectedData = filteredData.map(function (row) {
-							properId = row.get(_this6.state.idField);
-							rowIndex = _this6.state.initialIndexed[properId]._rowIndex;
-
-							return rawData.get(rowIndex);
-						});
+						    selection = _this6.state.selection;
 
 						// Parse the selection to return it as an array instead of a Set obj
 						selection.forEach(function (item) {
 							selectionArray.push(item);
 						});
 
-						_this6.props.afterSelect.call(_this6, selectedData.toJSON(), selectionArray);
+						if (hasGetSelection) {
+							// When you just need the selection but no data
+							_this6.props.afterSelectGetSelection.call(_this6, selectionArray, selection); // selection array / selection Set()
+						}
+
+						if (hasAfterSelect) {
+							(function () {
+								var selectedData = [],
+								    properId = null,
+								    rowIndex = null,
+								    filteredData = null;
+								var _state = _this6.state;
+								var indexedData = _state.indexedData;
+								var initialData = _state.initialData;
+								var rawData = _state.rawData;
+								var data = _state.data;
+
+								// Get the data (initialData) that match with the selection
+
+								filteredData = initialData.filter(function (element) {
+									return selection.has(element.get(_this6.state.idField));
+								});
+
+								// Then from the filtered data get the raw data that match with the selection
+								selectedData = filteredData.map(function (row) {
+									properId = row.get(_this6.state.idField);
+									rowIndex = _this6.state.initialIndexed[properId]._rawDataIndex;
+
+									return rawData.get(rowIndex);
+								});
+
+								_this6.props.afterSelect.call(_this6, selectedData.toJSON(), selectionArray);
+							})();
+						}
 					})();
 				}
 			}
@@ -1474,7 +1508,6 @@ var ProperCombo =
 						}),
 						_react2['default'].createElement(_searchList2['default'], {
 							data: data,
-							rawData: this.state.rawData,
 							indexedData: this.state.initialIndexed,
 							className: this.props.listClass,
 							idField: this.state.idField,
@@ -1532,7 +1565,7 @@ var ProperCombo =
 	(function (global, factory) {
 	   true ? module.exports = factory() :
 	  typeof define === 'function' && define.amd ? define(factory) :
-	  global.Immutable = factory();
+	  (global.Immutable = factory());
 	}(this, function () { 'use strict';var SLICE$0 = Array.prototype.slice;
 
 	  function createClass(ctor, superClass) {
@@ -2427,7 +2460,7 @@ var ProperCombo =
 	      }
 	      return 'Range [ ' +
 	        this._start + '...' + this._end +
-	        (this._step > 1 ? ' by ' + this._step : '') +
+	        (this._step !== 1 ? ' by ' + this._step : '') +
 	      ' ]';
 	    };
 
@@ -2559,6 +2592,9 @@ var ProperCombo =
 	    }
 	    var type = typeof o;
 	    if (type === 'number') {
+	      if (o !== o || o === Infinity) {
+	        return 0;
+	      }
 	      var h = o | 0;
 	      if (h !== o) {
 	        h ^= o * 0xFFFFFFFF;
@@ -2743,6 +2779,17 @@ var ProperCombo =
 	          iter.forEach(function(v, k)  {return map.set(k, v)});
 	        });
 	    }
+
+	    Map.of = function() {var keyValues = SLICE$0.call(arguments, 0);
+	      return emptyMap().withMutations(function(map ) {
+	        for (var i = 0; i < keyValues.length; i += 2) {
+	          if (i + 1 >= keyValues.length) {
+	            throw new Error('Missing value for key: ' + keyValues[i]);
+	          }
+	          map.set(keyValues[i], keyValues[i + 1]);
+	        }
+	      });
+	    };
 
 	    Map.prototype.toString = function() {
 	      return this.__toString('Map {', '}');
@@ -4656,7 +4703,11 @@ var ProperCombo =
 	      begin = begin | 0;
 	    }
 	    if (end !== undefined) {
-	      end = end | 0;
+	      if (end === Infinity) {
+	        end = originalSize;
+	      } else {
+	        end = end | 0;
+	      }
 	    }
 
 	    if (wholeSlice(begin, end, originalSize)) {
@@ -5192,6 +5243,12 @@ var ProperCombo =
 	    Record.prototype.set = function(k, v) {
 	      if (!this.has(k)) {
 	        throw new Error('Cannot set unknown key "' + k + '" on ' + recordName(this));
+	      }
+	      if (this._map && !this._map.has(k)) {
+	        var defaultVal = this._defaultValues[k];
+	        if (v === defaultVal) {
+	          return this;
+	        }
 	      }
 	      var newMap = this._map && this._map.set(k, v);
 	      if (this.__ownerID || newMap === this._map) {
@@ -5876,21 +5933,6 @@ var ProperCombo =
 	      return entry ? entry[1] : notSetValue;
 	    },
 
-	    findEntry: function(predicate, context) {
-	      var found;
-	      this.__iterate(function(v, k, c)  {
-	        if (predicate.call(context, v, k, c)) {
-	          found = [k, v];
-	          return false;
-	        }
-	      });
-	      return found;
-	    },
-
-	    findLastEntry: function(predicate, context) {
-	      return this.toSeq().reverse().findEntry(predicate, context);
-	    },
-
 	    forEach: function(sideEffect, context) {
 	      assertNotInfinite(this.size);
 	      return this.__iterate(context ? sideEffect.bind(context) : sideEffect);
@@ -6001,8 +6043,32 @@ var ProperCombo =
 	      return this.filter(not(predicate), context);
 	    },
 
+	    findEntry: function(predicate, context, notSetValue) {
+	      var found = notSetValue;
+	      this.__iterate(function(v, k, c)  {
+	        if (predicate.call(context, v, k, c)) {
+	          found = [k, v];
+	          return false;
+	        }
+	      });
+	      return found;
+	    },
+
+	    findKey: function(predicate, context) {
+	      var entry = this.findEntry(predicate, context);
+	      return entry && entry[0];
+	    },
+
 	    findLast: function(predicate, context, notSetValue) {
 	      return this.toKeyedSeq().reverse().find(predicate, context, notSetValue);
+	    },
+
+	    findLastEntry: function(predicate, context, notSetValue) {
+	      return this.toKeyedSeq().reverse().findEntry(predicate, context, notSetValue);
+	    },
+
+	    findLastKey: function(predicate, context) {
+	      return this.toKeyedSeq().reverse().findKey(predicate, context);
 	    },
 
 	    first: function() {
@@ -6063,12 +6129,20 @@ var ProperCombo =
 	      return iter.isSubset(this);
 	    },
 
+	    keyOf: function(searchValue) {
+	      return this.findKey(function(value ) {return is(value, searchValue)});
+	    },
+
 	    keySeq: function() {
 	      return this.toSeq().map(keyMapper).toIndexedSeq();
 	    },
 
 	    last: function() {
 	      return this.toSeq().reverse().first();
+	    },
+
+	    lastKeyOf: function(searchValue) {
+	      return this.toKeyedSeq().reverse().keyOf(searchValue);
 	    },
 
 	    max: function(comparator) {
@@ -6161,58 +6235,12 @@ var ProperCombo =
 	  IterablePrototype.chain = IterablePrototype.flatMap;
 	  IterablePrototype.contains = IterablePrototype.includes;
 
-	  // Temporary warning about using length
-	  (function () {
-	    try {
-	      Object.defineProperty(IterablePrototype, 'length', {
-	        get: function () {
-	          if (!Iterable.noLengthWarning) {
-	            var stack;
-	            try {
-	              throw new Error();
-	            } catch (error) {
-	              stack = error.stack;
-	            }
-	            if (stack.indexOf('_wrapObject') === -1) {
-	              console && console.warn && console.warn(
-	                'iterable.length has been deprecated, '+
-	                'use iterable.size or iterable.count(). '+
-	                'This warning will become a silent error in a future version. ' +
-	                stack
-	              );
-	              return this.size;
-	            }
-	          }
-	        }
-	      });
-	    } catch (e) {}
-	  })();
-
-
-
 	  mixin(KeyedIterable, {
 
 	    // ### More sequential methods
 
 	    flip: function() {
 	      return reify(this, flipFactory(this));
-	    },
-
-	    findKey: function(predicate, context) {
-	      var entry = this.findEntry(predicate, context);
-	      return entry && entry[0];
-	    },
-
-	    findLastKey: function(predicate, context) {
-	      return this.toSeq().reverse().findKey(predicate, context);
-	    },
-
-	    keyOf: function(searchValue) {
-	      return this.findKey(function(value ) {return is(value, searchValue)});
-	    },
-
-	    lastKeyOf: function(searchValue) {
-	      return this.findLastKey(function(value ) {return is(value, searchValue)});
 	    },
 
 	    mapEntries: function(mapper, context) {var this$0 = this;
@@ -6263,16 +6291,13 @@ var ProperCombo =
 	    },
 
 	    indexOf: function(searchValue) {
-	      var key = this.toKeyedSeq().keyOf(searchValue);
+	      var key = this.keyOf(searchValue);
 	      return key === undefined ? -1 : key;
 	    },
 
 	    lastIndexOf: function(searchValue) {
-	      var key = this.toKeyedSeq().reverse().keyOf(searchValue);
+	      var key = this.lastKeyOf(searchValue);
 	      return key === undefined ? -1 : key;
-
-	      // var index =
-	      // return this.toSeq().reverse().indexOf(searchValue);
 	    },
 
 	    reverse: function() {
@@ -6306,8 +6331,8 @@ var ProperCombo =
 	    // ### More collection methods
 
 	    findLastIndex: function(predicate, context) {
-	      var key = this.toKeyedSeq().findLastKey(predicate, context);
-	      return key === undefined ? -1 : key;
+	      var entry = this.findLastEntry(predicate, context);
+	      return entry ? entry[0] : -1;
 	    },
 
 	    first: function() {
@@ -6346,6 +6371,10 @@ var ProperCombo =
 	        interleaved.size = zipped.size * iterables.length;
 	      }
 	      return reify(this, interleaved);
+	    },
+
+	    keySeq: function() {
+	      return Range(0, this.size);
 	    },
 
 	    last: function() {
@@ -6396,6 +6425,7 @@ var ProperCombo =
 	  });
 
 	  SetIterable.prototype.has = IterablePrototype.includes;
+	  SetIterable.prototype.contains = SetIterable.prototype.includes;
 
 
 	  // Mixin subclasses
@@ -6432,7 +6462,7 @@ var ProperCombo =
 	  }
 
 	  function quoteString(value) {
-	    return typeof value === 'string' ? JSON.stringify(value) : value;
+	    return typeof value === 'string' ? JSON.stringify(value) : String(value);
 	  }
 
 	  function defaultZipper() {
@@ -6539,7 +6569,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(60);
+	var Set = __webpack_require__(61);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -7563,7 +7593,9 @@ var ProperCombo =
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
-	      this._detectElementResize.removeResizeListener(this._parentNode, this._onResize);
+	      if (this._detectElementResize) {
+	        this._detectElementResize.removeResizeListener(this._parentNode, this._onResize);
+	      }
 	    }
 	  }, {
 	    key: 'render',
@@ -7610,17 +7642,19 @@ var ProperCombo =
 	    value: function _onResize() {
 	      var onResize = this.props.onResize;
 
-	      var _parentNode$getBoundi = this._parentNode.getBoundingClientRect();
+	      // Gaurd against AutoSizer component being removed from the DOM immediately after being added.
+	      // This can result in invalid style values which can result in NaN values if we don't handle them.
+	      // See issue #150 for more context.
 
-	      var height = _parentNode$getBoundi.height;
-	      var width = _parentNode$getBoundi.width;
-
+	      var boundingRect = this._parentNode.getBoundingClientRect();
+	      var height = boundingRect.height || 0;
+	      var width = boundingRect.width || 0;
 
 	      var style = getComputedStyle(this._parentNode);
-	      var paddingLeft = parseInt(style.paddingLeft, 10);
-	      var paddingRight = parseInt(style.paddingRight, 10);
-	      var paddingTop = parseInt(style.paddingTop, 10);
-	      var paddingBottom = parseInt(style.paddingBottom, 10);
+	      var paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+	      var paddingRight = parseInt(style.paddingRight, 10) || 0;
+	      var paddingTop = parseInt(style.paddingTop, 10) || 0;
+	      var paddingBottom = parseInt(style.paddingBottom, 10) || 0;
 
 	      this.setState({
 	        height: height - paddingTop - paddingBottom,
@@ -10669,8 +10703,8 @@ var ProperCombo =
 
 	  var high = cellMetadata.length - 1;
 	  var low = 0;
-	  var middle = void 0;
-	  var currentOffset = void 0;
+	  var middle = undefined;
+	  var currentOffset = undefined;
 
 	  // TODO Add better guards here against NaN offset
 
@@ -11714,6 +11748,7 @@ var ProperCombo =
 	      var _props = this.props;
 	      var isRowLoaded = _props.isRowLoaded;
 	      var loadMoreRows = _props.loadMoreRows;
+	      var minimumBatchSize = _props.minimumBatchSize;
 	      var rowsCount = _props.rowsCount;
 	      var threshold = _props.threshold;
 
@@ -11723,6 +11758,8 @@ var ProperCombo =
 
 	      var unloadedRanges = scanForUnloadedRanges({
 	        isRowLoaded: isRowLoaded,
+	        minimumBatchSize: minimumBatchSize,
+	        rowsCount: rowsCount,
 	        startIndex: Math.max(0, startIndex - threshold),
 	        stopIndex: Math.min(rowsCount - 1, stopIndex + threshold)
 	      });
@@ -11789,6 +11826,12 @@ var ProperCombo =
 	  loadMoreRows: _react.PropTypes.func.isRequired,
 
 	  /**
+	   * Minimum number of rows to be loaded at a time.
+	   * This property can be used to batch requests to reduce HTTP requests.
+	   */
+	  minimumBatchSize: _react.PropTypes.number.isRequired,
+
+	  /**
 	   * Number of rows in list; can be arbitrary high number if actual number is unknown.
 	   */
 	  rowsCount: _react.PropTypes.number.isRequired,
@@ -11801,6 +11844,7 @@ var ProperCombo =
 	  threshold: _react.PropTypes.number.isRequired
 	};
 	InfiniteLoader.defaultProps = {
+	  minimumBatchSize: 10,
 	  rowsCount: 0,
 	  threshold: 15
 	};
@@ -11819,10 +11863,13 @@ var ProperCombo =
 	 */
 	function scanForUnloadedRanges(_ref3) {
 	  var isRowLoaded = _ref3.isRowLoaded;
+	  var minimumBatchSize = _ref3.minimumBatchSize;
+	  var rowsCount = _ref3.rowsCount;
 	  var startIndex = _ref3.startIndex;
 	  var stopIndex = _ref3.stopIndex;
 
 	  var unloadedRanges = [];
+
 	  var rangeStartIndex = null;
 	  var rangeStopIndex = null;
 
@@ -11845,6 +11892,17 @@ var ProperCombo =
 	  }
 
 	  if (rangeStopIndex !== null) {
+	    // Attempt to satisfy :minimumBatchSize requirement but don't exceed :rowsCount
+	    var potentialStopIndex = Math.min(Math.max(rangeStopIndex, rangeStartIndex + minimumBatchSize - 1), rowsCount - 1);
+
+	    for (var i = rangeStopIndex + 1; i <= potentialStopIndex; i++) {
+	      if (!isRowLoaded(i)) {
+	        rangeStopIndex = i;
+	      } else {
+	        break;
+	      }
+	    }
+
 	    unloadedRanges.push({
 	      startIndex: rangeStartIndex,
 	      stopIndex: rangeStopIndex
@@ -12205,23 +12263,20 @@ var ProperCombo =
 
 	'use strict';
 
-	exports.__esModule = true;
-
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	exports['default'] = Dimensions;
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var _react = __webpack_require__(2);
+	var React = __webpack_require__(2);
+	var onElementResize = __webpack_require__(60);
 
-	var _react2 = _interopRequireDefault(_react);
-
-	var style = {
+	var defaultContainerStyle = {
 	  width: '100%',
 	  height: '100%',
 	  padding: 0,
@@ -12247,21 +12302,19 @@ var ProperCombo =
 	 * or as an [ES7 class decorator](https://github.com/wycats/javascript-decorators)
 	 * (see examples)
 	 *
-	 * v1.0.0 is for React v0.14 only. Use ^0.1.0 for React v0.13
-	 *
-	 * @param {object} [options] Options
-	 * @param {function} [options.getHeight] `getHeight(element)` should return element
-	 * height, where element is the wrapper div. Defaults to `element.clientHeight`
-	 * @param {function} [options.getWidth]  `getWidth(element)` should return element
-	 * width, where element is the wrapper div. Defaults to `element.clientWidth`
-	 * @return {function}                   Returns a higher-order component that can be
+	 * @param {object} [options]
+	 * @param {function} [options.getHeight] A function that is passed an element and returns element
+	 * height, where element is the wrapper div. Defaults to `(element) => element.clientHeight`
+	 * @param {function} [options.getWidth]  A function that is passed an element and returns element
+	 * width, where element is the wrapper div. Defaults to `(element) => element.clientWidth`
+	 * @param {object} [options.containerStyle] A style object for the `<div>` that will wrap your component.
+	 * The dimensions of this `div` are what are passed as props to your component. The default style is
+	 * `{ width: '100%', height: '100%', padding: 0, border: 0 }` which will cause the `div` to fill its
+	 * parent in most cases. If you are using a flexbox layout you will want to change this default style.
+	 * @param {boolean} [options.elementResize=false] Set true to watch the wrapper `div` for changes in
+	 * size which are not a result of window resizing - e.g. changes to the flexbox and other layout.
+	 * @return {function}                   A higher-order component that can be
 	 * used to enhance a react component `Dimensions()(MyComponent)`
-	 *
-	 * ### Live Example
-	 *
-	 * Will open a browser window for localhost:9966
-	 *
-	 * `npm i && npm i react react-dom && npm start`
 	 *
 	 * @example
 	 * // ES2015
@@ -12298,90 +12351,194 @@ var ProperCombo =
 	 * module.exports = Dimensions()(MyComponent) // Enhanced component
 	 *
 	 */
-
-	function Dimensions() {
+	module.exports = function Dimensions() {
 	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 	  var _ref$getHeight = _ref.getHeight;
 	  var getHeight = _ref$getHeight === undefined ? defaultGetHeight : _ref$getHeight;
 	  var _ref$getWidth = _ref.getWidth;
 	  var getWidth = _ref$getWidth === undefined ? defaultGetWidth : _ref$getWidth;
+	  var _ref$containerStyle = _ref.containerStyle;
+	  var containerStyle = _ref$containerStyle === undefined ? defaultContainerStyle : _ref$containerStyle;
+	  var _ref$elementResize = _ref.elementResize;
+	  var elementResize = _ref$elementResize === undefined ? false : _ref$elementResize;
 
 	  return function (ComposedComponent) {
-	    return (function (_React$Component) {
+	    return function (_React$Component) {
 	      _inherits(DimensionsHOC, _React$Component);
 
 	      function DimensionsHOC() {
-	        var _this = this;
+	        var _Object$getPrototypeO;
+
+	        var _temp, _this, _ret;
 
 	        _classCallCheck(this, DimensionsHOC);
 
-	        _React$Component.apply(this, arguments);
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
+	        }
 
-	        this.state = {};
-
-	        this.updateDimensions = function () {
+	        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(DimensionsHOC)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.state = {}, _this.updateDimensions = function () {
 	          var container = _this.refs.container;
-	          if (!container) {
-	            throw new Error('Cannot find container div');
-	          }
-	          _this.setState({
-	            containerWidth: getWidth(container),
-	            containerHeight: getHeight(container)
-	          });
-	        };
+	          var containerWidth = getWidth(container);
+	          var containerHeight = getHeight(container);
 
-	        this.onResize = function () {
+	          if (containerWidth !== _this.state.containerWidth || containerHeight !== _this.state.containerHeight) {
+	            _this.setState({ containerWidth: containerWidth, containerHeight: containerHeight });
+	          }
+	        }, _this.onResize = function () {
 	          if (_this.rqf) return;
-	          _this.rqf = window.requestAnimationFrame(function () {
+	          _this.rqf = _this.getWindow().requestAnimationFrame(function () {
 	            _this.rqf = null;
 	            _this.updateDimensions();
 	          });
-	        };
+	        }, _temp), _possibleConstructorReturn(_this, _ret);
 	      }
+	      // ES7 Class properties
+	      // http://babeljs.io/blog/2015/06/07/react-on-es6-plus/#property-initializers
 
-	      DimensionsHOC.prototype.componentDidMount = function componentDidMount() {
-	        this.updateDimensions();
-	        window.addEventListener('resize', this.onResize, false);
-	      };
 
-	      DimensionsHOC.prototype.componentWillUnmount = function componentWillUnmount() {
-	        window.removeEventListener('resize', this.onResize);
-	      };
+	      // Using arrow functions and ES7 Class properties to autobind
+	      // http://babeljs.io/blog/2015/06/07/react-on-es6-plus/#arrow-functions
 
-	      DimensionsHOC.prototype.render = function render() {
-	        return _react2['default'].createElement(
-	          'div',
-	          { style: style, ref: 'container' },
-	          (this.state.containerWidth || this.state.containerHeight) && _react2['default'].createElement(ComposedComponent, _extends({}, this.state, this.props))
-	        );
-	      };
+
+	      _createClass(DimensionsHOC, [{
+	        key: 'getWindow',
+
+
+	        // If the component is mounted in a different window to the javascript
+	        // context, as with https://github.com/JakeGinnivan/react-popout
+	        // then the `window` global will be different from the `window` that
+	        // contains the component.
+	        // Depends on `defaultView` which is not supported <IE9
+	        value: function getWindow() {
+	          return this.refs.container ? this.refs.container.ownerDocument.defaultView || window : window;
+	        }
+	      }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	          if (!this.refs.container) {
+	            throw new Error('Cannot find container div');
+	          }
+	          this.updateDimensions();
+	          if (elementResize) {
+	            // Experimental: `element-resize-event` fires when an element resizes.
+	            // It attaches its own window resize listener and also uses
+	            // requestAnimationFrame, so we can just call `this.updateDimensions`.
+	            onElementResize(this.refs.container, this.updateDimensions);
+	          } else {
+	            this.getWindow().addEventListener('resize', this.onResize, false);
+	          }
+	        }
+	      }, {
+	        key: 'componentWillUnmount',
+	        value: function componentWillUnmount() {
+	          this.getWindow().removeEventListener('resize', this.onResize);
+	        }
+	      }, {
+	        key: 'render',
+	        value: function render() {
+	          return React.createElement(
+	            'div',
+	            { style: containerStyle, ref: 'container' },
+	            (this.state.containerWidth || this.state.containerHeight) && React.createElement(ComposedComponent, _extends({}, this.state, this.props, { updateDimensions: this.updateDimensions }))
+	          );
+	        }
+	      }]);
 
 	      return DimensionsHOC;
-	    })(_react2['default'].Component);
+	    }(React.Component);
 	  };
-	}
-
-	module.exports = exports['default'];
-
-	// ES7 Class properties
-	// http://babeljs.io/blog/2015/06/07/react-on-es6-plus/#property-initializers
-
-	// Using arrow functions and ES7 Class properties to autobind
-	// http://babeljs.io/blog/2015/06/07/react-on-es6-plus/#arrow-functions
+	};
 
 
 /***/ },
 /* 60 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	'use strict';
+	module.exports = function(element, fn) {
+	  var window = this;
+	  var document = window.document;
 
-	module.exports = __webpack_require__(61)() ? Set : __webpack_require__(62);
+	  var attachEvent = document.attachEvent;
+	  if (typeof navigator !== "undefined") {
+	    var isIE = navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/Edge/);
+	  }
+
+	  var requestFrame = (function() {
+	    var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || function(fn) {
+	        return window.setTimeout(fn, 20);
+	      };
+	    return function(fn) {
+	      return raf(fn);
+	    };
+	  })();
+
+	  var cancelFrame = (function() {
+	    var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
+	      window.clearTimeout;
+	    return function(id) {
+	      return cancel(id);
+	    };
+	  })();
+
+	  function resizeListener(e) {
+	    var win = e.target || e.srcElement;
+	    if (win.__resizeRAF__) {
+	      cancelFrame(win.__resizeRAF__);
+	    }
+	    win.__resizeRAF__ = requestFrame(function() {
+	      var trigger = win.__resizeTrigger__;
+	      trigger.__resizeListeners__.forEach(function(fn) {
+	        fn.call(trigger, e);
+	      });
+	    });
+	  }
+
+	  function objectLoad(e) {
+	    this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
+	    this.contentDocument.defaultView.addEventListener('resize', resizeListener);
+	  }
+
+	  if (!element.__resizeListeners__) {
+	    element.__resizeListeners__ = [];
+	    if (attachEvent) {
+	      element.__resizeTrigger__ = element;
+	      element.attachEvent('onresize', resizeListener);
+	    } else {
+	      if (getComputedStyle(element).position == 'static') {
+	        element.style.position = 'relative';
+	      }
+	      var obj = element.__resizeTrigger__ = document.createElement('object');
+	      obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
+	      obj.setAttribute('class', 'resize-sensor');
+	      obj.__resizeElement__ = element;
+	      obj.onload = objectLoad;
+	      obj.type = 'text/html';
+	      if (isIE) {
+	        element.appendChild(obj);
+	      }
+	      obj.data = 'about:blank';
+	      if (!isIE) {
+	        element.appendChild(obj);
+	      }
+	    }
+	  }
+	  element.__resizeListeners__.push(fn);
+	};
 
 
 /***/ },
 /* 61 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = __webpack_require__(62)() ? Set : __webpack_require__(63);
+
+
+/***/ },
+/* 62 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12411,22 +12568,22 @@ var ProperCombo =
 
 
 /***/ },
-/* 62 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear          = __webpack_require__(63)
-	  , eIndexOf       = __webpack_require__(65)
-	  , setPrototypeOf = __webpack_require__(71)
-	  , callable       = __webpack_require__(76)
-	  , d              = __webpack_require__(77)
-	  , ee             = __webpack_require__(89)
-	  , Symbol         = __webpack_require__(90)
-	  , iterator       = __webpack_require__(95)
-	  , forOf          = __webpack_require__(99)
-	  , Iterator       = __webpack_require__(109)
-	  , isNative       = __webpack_require__(110)
+	var clear          = __webpack_require__(64)
+	  , eIndexOf       = __webpack_require__(66)
+	  , setPrototypeOf = __webpack_require__(72)
+	  , callable       = __webpack_require__(77)
+	  , d              = __webpack_require__(78)
+	  , ee             = __webpack_require__(90)
+	  , Symbol         = __webpack_require__(91)
+	  , iterator       = __webpack_require__(96)
+	  , forOf          = __webpack_require__(100)
+	  , Iterator       = __webpack_require__(110)
+	  , isNative       = __webpack_require__(111)
 
 	  , call = Function.prototype.call
 	  , defineProperty = Object.defineProperty, getPrototypeOf = Object.getPrototypeOf
@@ -12497,7 +12654,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 63 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Inspired by Google Closure:
@@ -12506,7 +12663,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var value = __webpack_require__(64);
+	var value = __webpack_require__(65);
 
 	module.exports = function () {
 		value(this).length = 0;
@@ -12515,7 +12672,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 64 */
+/* 65 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12527,13 +12684,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 65 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toPosInt = __webpack_require__(66)
-	  , value    = __webpack_require__(64)
+	var toPosInt = __webpack_require__(67)
+	  , value    = __webpack_require__(65)
 
 	  , indexOf = Array.prototype.indexOf
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -12562,12 +12719,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 66 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toInteger = __webpack_require__(67)
+	var toInteger = __webpack_require__(68)
 
 	  , max = Math.max;
 
@@ -12575,12 +12732,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 67 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var sign = __webpack_require__(68)
+	var sign = __webpack_require__(69)
 
 	  , abs = Math.abs, floor = Math.floor;
 
@@ -12593,18 +12750,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 68 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(69)()
+	module.exports = __webpack_require__(70)()
 		? Math.sign
-		: __webpack_require__(70);
+		: __webpack_require__(71);
 
 
 /***/ },
-/* 69 */
+/* 70 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12617,7 +12774,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 70 */
+/* 71 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12630,18 +12787,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 71 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(72)()
+	module.exports = __webpack_require__(73)()
 		? Object.setPrototypeOf
-		: __webpack_require__(73);
+		: __webpack_require__(74);
 
 
 /***/ },
-/* 72 */
+/* 73 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12658,7 +12815,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 73 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Big thanks to @WebReflection for sorting this out
@@ -12666,8 +12823,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var isObject      = __webpack_require__(74)
-	  , value         = __webpack_require__(64)
+	var isObject      = __webpack_require__(75)
+	  , value         = __webpack_require__(65)
 
 	  , isPrototypeOf = Object.prototype.isPrototypeOf
 	  , defineProperty = Object.defineProperty
@@ -12733,11 +12890,11 @@ var ProperCombo =
 		return false;
 	}())));
 
-	__webpack_require__(75);
+	__webpack_require__(76);
 
 
 /***/ },
-/* 74 */
+/* 75 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12750,7 +12907,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 75 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Workaround for http://code.google.com/p/v8/issues/detail?id=2804
@@ -12759,8 +12916,8 @@ var ProperCombo =
 
 	var create = Object.create, shim;
 
-	if (!__webpack_require__(72)()) {
-		shim = __webpack_require__(73);
+	if (!__webpack_require__(73)()) {
+		shim = __webpack_require__(74);
 	}
 
 	module.exports = (function () {
@@ -12792,7 +12949,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 76 */
+/* 77 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12804,15 +12961,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign        = __webpack_require__(78)
-	  , normalizeOpts = __webpack_require__(84)
-	  , isCallable    = __webpack_require__(85)
-	  , contains      = __webpack_require__(86)
+	var assign        = __webpack_require__(79)
+	  , normalizeOpts = __webpack_require__(85)
+	  , isCallable    = __webpack_require__(86)
+	  , contains      = __webpack_require__(87)
 
 	  , d;
 
@@ -12873,18 +13030,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(79)()
+	module.exports = __webpack_require__(80)()
 		? Object.assign
-		: __webpack_require__(80);
+		: __webpack_require__(81);
 
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12899,13 +13056,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 80 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keys  = __webpack_require__(81)
-	  , value = __webpack_require__(64)
+	var keys  = __webpack_require__(82)
+	  , value = __webpack_require__(65)
 
 	  , max = Math.max;
 
@@ -12927,18 +13084,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 81 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(82)()
+	module.exports = __webpack_require__(83)()
 		? Object.keys
-		: __webpack_require__(83);
+		: __webpack_require__(84);
 
 
 /***/ },
-/* 82 */
+/* 83 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12952,7 +13109,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 83 */
+/* 84 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12965,7 +13122,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 84 */
+/* 85 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12988,7 +13145,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 85 */
+/* 86 */
 /***/ function(module, exports) {
 
 	// Deprecated
@@ -12999,18 +13156,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 86 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(87)()
+	module.exports = __webpack_require__(88)()
 		? String.prototype.contains
-		: __webpack_require__(88);
+		: __webpack_require__(89);
 
 
 /***/ },
-/* 87 */
+/* 88 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13024,7 +13181,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 88 */
+/* 89 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13037,13 +13194,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 89 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var d        = __webpack_require__(77)
-	  , callable = __webpack_require__(76)
+	var d        = __webpack_require__(78)
+	  , callable = __webpack_require__(77)
 
 	  , apply = Function.prototype.apply, call = Function.prototype.call
 	  , create = Object.create, defineProperty = Object.defineProperty
@@ -13175,16 +13332,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 90 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(91)() ? Symbol : __webpack_require__(92);
+	module.exports = __webpack_require__(92)() ? Symbol : __webpack_require__(93);
 
 
 /***/ },
-/* 91 */
+/* 92 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13208,15 +13365,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 92 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// ES2015 Symbol polyfill for environments that do not support it (or partially support it_
 
 	'use strict';
 
-	var d              = __webpack_require__(77)
-	  , validateSymbol = __webpack_require__(93)
+	var d              = __webpack_require__(78)
+	  , validateSymbol = __webpack_require__(94)
 
 	  , create = Object.create, defineProperties = Object.defineProperties
 	  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
@@ -13321,12 +13478,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 93 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isSymbol = __webpack_require__(94);
+	var isSymbol = __webpack_require__(95);
 
 	module.exports = function (value) {
 		if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
@@ -13335,7 +13492,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 94 */
+/* 95 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13346,12 +13503,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 95 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isIterable = __webpack_require__(96);
+	var isIterable = __webpack_require__(97);
 
 	module.exports = function (value) {
 		if (!isIterable(value)) throw new TypeError(value + " is not iterable");
@@ -13360,14 +13517,14 @@ var ProperCombo =
 
 
 /***/ },
-/* 96 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(97)
-	  , isString       = __webpack_require__(98)
-	  , iteratorSymbol = __webpack_require__(90).iterator
+	var isArguments    = __webpack_require__(98)
+	  , isString       = __webpack_require__(99)
+	  , iteratorSymbol = __webpack_require__(91).iterator
 
 	  , isArray = Array.isArray;
 
@@ -13381,7 +13538,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 97 */
+/* 98 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13394,7 +13551,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 98 */
+/* 99 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13410,15 +13567,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 99 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments = __webpack_require__(97)
-	  , callable    = __webpack_require__(76)
-	  , isString    = __webpack_require__(98)
-	  , get         = __webpack_require__(100)
+	var isArguments = __webpack_require__(98)
+	  , callable    = __webpack_require__(77)
+	  , isString    = __webpack_require__(99)
+	  , get         = __webpack_require__(101)
 
 	  , isArray = Array.isArray, call = Function.prototype.call
 	  , some = Array.prototype.some;
@@ -13462,17 +13619,17 @@ var ProperCombo =
 
 
 /***/ },
-/* 100 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(97)
-	  , isString       = __webpack_require__(98)
-	  , ArrayIterator  = __webpack_require__(101)
-	  , StringIterator = __webpack_require__(108)
-	  , iterable       = __webpack_require__(95)
-	  , iteratorSymbol = __webpack_require__(90).iterator;
+	var isArguments    = __webpack_require__(98)
+	  , isString       = __webpack_require__(99)
+	  , ArrayIterator  = __webpack_require__(102)
+	  , StringIterator = __webpack_require__(109)
+	  , iterable       = __webpack_require__(96)
+	  , iteratorSymbol = __webpack_require__(91).iterator;
 
 	module.exports = function (obj) {
 		if (typeof iterable(obj)[iteratorSymbol] === 'function') return obj[iteratorSymbol]();
@@ -13483,15 +13640,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 101 */
+/* 102 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(71)
-	  , contains       = __webpack_require__(86)
-	  , d              = __webpack_require__(77)
-	  , Iterator       = __webpack_require__(102)
+	var setPrototypeOf = __webpack_require__(72)
+	  , contains       = __webpack_require__(87)
+	  , d              = __webpack_require__(78)
+	  , Iterator       = __webpack_require__(103)
 
 	  , defineProperty = Object.defineProperty
 	  , ArrayIterator;
@@ -13519,18 +13676,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 102 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear    = __webpack_require__(63)
-	  , assign   = __webpack_require__(78)
-	  , callable = __webpack_require__(76)
-	  , value    = __webpack_require__(64)
-	  , d        = __webpack_require__(77)
-	  , autoBind = __webpack_require__(103)
-	  , Symbol   = __webpack_require__(90)
+	var clear    = __webpack_require__(64)
+	  , assign   = __webpack_require__(79)
+	  , callable = __webpack_require__(77)
+	  , value    = __webpack_require__(65)
+	  , d        = __webpack_require__(78)
+	  , autoBind = __webpack_require__(104)
+	  , Symbol   = __webpack_require__(91)
 
 	  , defineProperty = Object.defineProperty
 	  , defineProperties = Object.defineProperties
@@ -13615,15 +13772,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 103 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var copy       = __webpack_require__(104)
-	  , map        = __webpack_require__(105)
-	  , callable   = __webpack_require__(76)
-	  , validValue = __webpack_require__(64)
+	var copy       = __webpack_require__(105)
+	  , map        = __webpack_require__(106)
+	  , callable   = __webpack_require__(77)
+	  , validValue = __webpack_require__(65)
 
 	  , bind = Function.prototype.bind, defineProperty = Object.defineProperty
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -13652,13 +13809,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 104 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign = __webpack_require__(78)
-	  , value  = __webpack_require__(64);
+	var assign = __webpack_require__(79)
+	  , value  = __webpack_require__(65);
 
 	module.exports = function (obj) {
 		var copy = Object(value(obj));
@@ -13668,13 +13825,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 105 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var callable = __webpack_require__(76)
-	  , forEach  = __webpack_require__(106)
+	var callable = __webpack_require__(77)
+	  , forEach  = __webpack_require__(107)
 
 	  , call = Function.prototype.call;
 
@@ -13689,16 +13846,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 106 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(107)('forEach');
+	module.exports = __webpack_require__(108)('forEach');
 
 
 /***/ },
-/* 107 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Internal method, used by iteration functions.
@@ -13707,8 +13864,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var callable = __webpack_require__(76)
-	  , value    = __webpack_require__(64)
+	var callable = __webpack_require__(77)
+	  , value    = __webpack_require__(65)
 
 	  , bind = Function.prototype.bind, call = Function.prototype.call, keys = Object.keys
 	  , propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
@@ -13733,7 +13890,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 108 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Thanks @mathiasbynens
@@ -13741,9 +13898,9 @@ var ProperCombo =
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(71)
-	  , d              = __webpack_require__(77)
-	  , Iterator       = __webpack_require__(102)
+	var setPrototypeOf = __webpack_require__(72)
+	  , d              = __webpack_require__(78)
+	  , Iterator       = __webpack_require__(103)
 
 	  , defineProperty = Object.defineProperty
 	  , StringIterator;
@@ -13776,16 +13933,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 109 */
+/* 110 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf    = __webpack_require__(71)
-	  , contains          = __webpack_require__(86)
-	  , d                 = __webpack_require__(77)
-	  , Iterator          = __webpack_require__(102)
-	  , toStringTagSymbol = __webpack_require__(90).toStringTag
+	var setPrototypeOf    = __webpack_require__(72)
+	  , contains          = __webpack_require__(87)
+	  , d                 = __webpack_require__(78)
+	  , Iterator          = __webpack_require__(103)
+	  , toStringTagSymbol = __webpack_require__(91).toStringTag
 
 	  , defineProperty = Object.defineProperty
 	  , SetIterator;
@@ -13812,7 +13969,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 110 */
+/* 111 */
 /***/ function(module, exports) {
 
 	// Exports true if environment provides native `Set` implementation,
@@ -13827,7 +13984,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 111 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14132,7 +14289,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 112 */
+/* 113 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14163,7 +14320,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 113 */
+/* 114 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14205,7 +14362,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 114 */
+/* 115 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

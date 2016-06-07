@@ -12,6 +12,8 @@ function getDefaultProps() {
 		maxSelection: 200,
 		secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 		data: [],
+		rawdata: null, // Case you want to use your own inmutable data. Read prepareData() method for more info. (ProperSearch)
+		indexed: null, // Case you want to use your own inmutable data. Read prepareData() method for more info.
 		messages: Messages,
 		lang: 'ENG',
 		defaultSelection: [],
@@ -37,7 +39,8 @@ function getDefaultProps() {
 		filter: null, // Optional function (to be used when the displayField is an function too)
 		filterField: null, // By default it will be the displayField
 		afterSelect: null, // Function
-		uniqueId: _.uniqueId('comboField_')
+		uniqueId: _.uniqueId('comboField_'),
+		allowsEmptySelection: false, // Put this to true to get a diferent ToolBar that allows select empty
 	}
 }
 
@@ -80,9 +83,11 @@ class ComboField extends React.Component {
 	}
 
 	componentWillMount() {
-		let selection = this.state.selection;
+		let selection = this.state.selection, data;
 		if (!_.isNull(selection) && selection.length > 0)  {
-			this.prepareData(selection, this.props.data, this.props.idField); // Update selectedData in component's state
+			data = !_.isArray(this.props.data) ? this.props.indexed : this.props.data;
+
+			this.prepareData(selection, data, this.props.idField); // Update selectedData in component's state
 		}
 	}
 
@@ -96,13 +101,14 @@ class ComboField extends React.Component {
 			let idFieldChanged = !shallowEqualImmutable(this.props.idField, nextProps.idField);
 			let selectionChanged = !shallowEqualImmutable(this.props.defaultSelection, nextProps.defaultSelection);
 			let secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
+			let isInmutable = !_.isArray(nextProps.data);
 
 			if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
 				if (dataChanged || idFieldChanged || selectionChanged) {
 					let selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
 					let data = dataChanged ? nextProps.data : this.props.data;
 					let idField = idFieldChanged ? nextProps.idField : this.props.idField;
-					let fieldsSet = new Set(_.keys(data[0]));
+					let fieldsSet = !isInmutable ? new Set(_.keys(data[0])) : new Set(_.keys(data.get(0).toJSON()));
 
 					if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
 
@@ -112,13 +118,14 @@ class ComboField extends React.Component {
 							idField: idField
 						});
 					} else {
-						this.prepareData(selection, data, idField);
+						if (isInmutable && this.props.indexed) data = this.props.indexed;
+						this.prepareData(selection, data, idField, isInmutable);
 					}
 				}
 
 				// If the secondary display change then check if that field
 				if (secondaryDisplayChanged) {
-					let fieldsSet = new Set(_.keys(nextProps.data[0]));
+					let fieldsSet = !isInmutable ? new Set(_.keys(nextProps.data[0])) : new Set(_.keys(nextProps.data.get(0).toJSON()));
 					let messages = this.props.messages[this.props.lang];
 
 					// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
@@ -138,10 +145,12 @@ class ComboField extends React.Component {
 		return somethingChanged;
 	}
 
-	prepareData(selection, newData, idField) {
+	prepareData(selection, newData, idField, isInmutable = false) {
 		if (!_.isNull(selection) && !_.isNull(newData)) {
-			let data = _.indexBy(newData, idField), selectedData = [];
-			let dataKeys = new Set(_.keys(data));
+			let data = newData, selectedData = [], dataKeys;
+
+			if (!isInmutable) data = _.indexBy(newData, idField);
+			dataKeys = new Set(_.keys(data));
 
 			if (_.isArray(selection)) {
 				selection.forEach( (element) => {
@@ -275,6 +284,8 @@ class ComboField extends React.Component {
 			key={this.state.uniqueId+'-content-Search'}
 			className={this.props.searchClassName}
 			data={this.props.data}
+			indexed={this.props.indexed}
+			rawdata={this.props.rawdata}
 			messages={this.props.messages}
 			idField={this.state.idField}
 			displayField={this.props.displayField}
@@ -298,6 +309,7 @@ class ComboField extends React.Component {
 			listShowIcon={this.props.listShowIcon}
 			filterField={this.props.filterField}
 			afterSelect={this.afterSelect.bind(this)}
+			allowsEmptySelection={this.props.allowsEmptySelection}
 		/>;
 
 		if (CSSTransition) {
@@ -328,12 +340,13 @@ class ComboField extends React.Component {
  */
 	getList() {
 		let CSSTransition = process.env.NODE_ENV === 'Test' ? null : React.addons.CSSTransitionGroup;
-		let data = this.state.selectedData, list = [], display = null,item, size = 0;
+		let data = this.state.selectedData, list = [], display = null,item, size = 0, dataLength;
 
 		if (data) size = data.length;
+		dataLength = !_.isArray(this.props.data) ? this.props.data.size : this.props.data.length;
 
 		// If all selected then the list will have just one item / element with the size
-		if (this.props.data.length == size) {
+		if (dataLength == size) {
 			let messages = this.props.messages[this.props.lang];
 
 			item = (

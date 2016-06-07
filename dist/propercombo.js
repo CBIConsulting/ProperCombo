@@ -58,7 +58,7 @@ var ProperCombo =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	if (true) {
-		__webpack_require__(115);
+		__webpack_require__(119);
 	}
 
 	exports["default"] = _combofield2["default"];
@@ -106,7 +106,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(61);
+	var Set = __webpack_require__(64);
 
 	function getDefaultProps() {
 		return {
@@ -114,6 +114,8 @@ var ProperCombo =
 			maxSelection: 200,
 			secondaryDisplay: null, // To use when displayField is a function. Can be the name of a field or other function
 			data: [],
+			rawdata: null, // Case you want to use your own inmutable data. Read prepareData() method for more info. (ProperSearch)
+			indexed: null, // Case you want to use your own inmutable data. Read prepareData() method for more info.
 			messages: _messages3['default'],
 			lang: 'ENG',
 			defaultSelection: [],
@@ -139,8 +141,8 @@ var ProperCombo =
 			filter: null, // Optional function (to be used when the displayField is an function too)
 			filterField: null, // By default it will be the displayField
 			afterSelect: null, // Function
-			uniqueId: _underscore2['default'].uniqueId('comboField_')
-		};
+			uniqueId: _underscore2['default'].uniqueId('comboField_'),
+			allowsEmptySelection: false };
 	}
 
 	/**
@@ -165,6 +167,7 @@ var ProperCombo =
 	 *	/>
 	 * ```
 	 */
+	// Put this to true to get a diferent ToolBar that allows select empty
 
 	var ComboField = function (_React$Component) {
 		_inherits(ComboField, _React$Component);
@@ -188,9 +191,12 @@ var ProperCombo =
 		_createClass(ComboField, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
-				var selection = this.state.selection;
+				var selection = this.state.selection,
+				    data = void 0;
 				if (!_underscore2['default'].isNull(selection) && selection.length > 0) {
-					this.prepareData(selection, this.props.data, this.props.idField); // Update selectedData in component's state
+					data = !_underscore2['default'].isArray(this.props.data) ? this.props.indexed : this.props.data;
+
+					this.prepareData(selection, data, this.props.idField); // Update selectedData in component's state
 				}
 			}
 		}, {
@@ -205,13 +211,14 @@ var ProperCombo =
 					var idFieldChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.idField, nextProps.idField);
 					var selectionChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.defaultSelection, nextProps.defaultSelection);
 					var secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
+					var isInmutable = !_underscore2['default'].isArray(nextProps.data);
 
 					if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
 						if (dataChanged || idFieldChanged || selectionChanged) {
 							var selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
 							var data = dataChanged ? nextProps.data : this.props.data;
 							var idField = idFieldChanged ? nextProps.idField : this.props.idField;
-							var fieldsSet = new Set(_underscore2['default'].keys(data[0]));
+							var fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(data[0])) : new Set(_underscore2['default'].keys(data.get(0).toJSON()));
 
 							if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
 
@@ -221,13 +228,14 @@ var ProperCombo =
 									idField: idField
 								});
 							} else {
-								this.prepareData(selection, data, idField);
+								if (isInmutable && this.props.indexed) data = this.props.indexed;
+								this.prepareData(selection, data, idField, isInmutable);
 							}
 						}
 
 						// If the secondary display change then check if that field
 						if (secondaryDisplayChanged) {
-							var _fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
+							var _fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(nextProps.data[0])) : new Set(_underscore2['default'].keys(nextProps.data.get(0).toJSON()));
 							var messages = this.props.messages[this.props.lang];
 
 							// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
@@ -251,11 +259,16 @@ var ProperCombo =
 			value: function prepareData(selection, newData, idField) {
 				var _this2 = this;
 
+				var isInmutable = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+
 				if (!_underscore2['default'].isNull(selection) && !_underscore2['default'].isNull(newData)) {
 					(function () {
-						var data = _underscore2['default'].indexBy(newData, idField),
-						    selectedData = [];
-						var dataKeys = new Set(_underscore2['default'].keys(data));
+						var data = newData,
+						    selectedData = [],
+						    dataKeys = void 0;
+
+						if (!isInmutable) data = _underscore2['default'].indexBy(newData, idField);
+						dataKeys = new Set(_underscore2['default'].keys(data));
 
 						if (_underscore2['default'].isArray(selection)) {
 							selection.forEach(function (element) {
@@ -417,6 +430,8 @@ var ProperCombo =
 					key: this.state.uniqueId + '-content-Search',
 					className: this.props.searchClassName,
 					data: this.props.data,
+					indexed: this.props.indexed,
+					rawdata: this.props.rawdata,
 					messages: this.props.messages,
 					idField: this.state.idField,
 					displayField: this.props.displayField,
@@ -439,7 +454,8 @@ var ProperCombo =
 					placeholder: placeholder,
 					listShowIcon: this.props.listShowIcon,
 					filterField: this.props.filterField,
-					afterSelect: this.afterSelect.bind(this)
+					afterSelect: this.afterSelect.bind(this),
+					allowsEmptySelection: this.props.allowsEmptySelection
 				});
 
 				if (CSSTransition) {
@@ -485,12 +501,14 @@ var ProperCombo =
 				    list = [],
 				    display = null,
 				    item = void 0,
-				    size = 0;
+				    size = 0,
+				    dataLength = void 0;
 
 				if (data) size = data.length;
+				dataLength = !_underscore2['default'].isArray(this.props.data) ? this.props.data.size : this.props.data.length;
 
 				// If all selected then the list will have just one item / element with the size
-				if (this.props.data.length == size) {
+				if (dataLength == size) {
 					var messages = this.props.messages[this.props.lang];
 
 					item = _react2['default'].createElement(
@@ -653,6 +671,8 @@ var ProperCombo =
 		'SPA': {
 			all: 'Seleccionar Todo',
 			none: 'Deseleccionar Todo',
+			empty: 'Seleccionar Vacios',
+			notEmpty: 'Deseleccionar Vacios',
 			loading: 'Cargando...',
 			noData: 'No se encontró ningún elemento',
 			errorIdField: 'No se pudo cambiar el `idField´,',
@@ -666,6 +686,8 @@ var ProperCombo =
 		'ENG': {
 			all: 'Select All',
 			none: 'Unselect All',
+			empty: 'Select Empty',
+			notEmpty: 'Unselect Empty',
 			loading: 'Loading...',
 			noData: 'No data found',
 			errorIdField: "Couldn\'t change the `idField´,",
@@ -732,19 +754,23 @@ var ProperCombo =
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
-	var _searchField = __webpack_require__(112);
+	var _reactPropersearchField = __webpack_require__(115);
 
-	var _searchField2 = _interopRequireDefault(_searchField);
+	var _reactPropersearchField2 = _interopRequireDefault(_reactPropersearchField);
 
-	var _messages2 = __webpack_require__(113);
+	var _messages2 = __webpack_require__(117);
 
 	var _messages3 = _interopRequireDefault(_messages2);
 
-	var _normalize = __webpack_require__(114);
+	var _normalize = __webpack_require__(118);
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
 	var _reactImmutableRenderMixin = __webpack_require__(10);
+
+	var _cache = __webpack_require__(61);
+
+	var _cache2 = _interopRequireDefault(_cache);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -754,14 +780,17 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(61);
+	var Set = __webpack_require__(64);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
 		return {
 			data: [],
+			rawdata: null, // Case you want to use your own inmutable data. Read prepareData() method for more info.
+			indexed: null, // Case you want to use your own inmutable data. Read prepareData() method for more info.
 			messages: _messages3['default'],
 			lang: 'ENG',
+			rowFormater: null, // function to format values in render
 			defaultSelection: null,
 			multiSelect: false,
 			listWidth: null,
@@ -786,8 +815,8 @@ var ProperCombo =
 			displayField: 'label',
 			listShowIcon: true,
 			filter: null, // Optional function (to be used when the displayField is an function too)
-			filterField: null // By default it will be the displayField
-		};
+			filterField: null, // By default it will be the displayField
+			allowsEmptySelection: false };
 	}
 
 	/**
@@ -815,6 +844,7 @@ var ProperCombo =
 	 *	/>
 	 * ```
 	 */
+	// Put this to true to get a diferent ToolBar that allows select empty
 
 	var Search = function (_React$Component) {
 		_inherits(Search, _React$Component);
@@ -824,11 +854,11 @@ var ProperCombo =
 
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Search).call(this, props));
 
-			var preparedData = _this.prepareData(null, _this.props.idField);
+			var preparedData = _this.prepareData(null, _this.props.idField, false, _this.props.displayField);
 
 			_this.state = {
 				data: preparedData.data, // Data to work with (Inmutable)
-				initialData: preparedData.data, // Same data as state.data but this data never changes. (Inmutable)
+				initialData: preparedData.data, // Same data as initial state.data but this data never changes. (Inmutable)
 				rawData: preparedData.rawdata, // Received data without any modfication (Inmutable)
 				indexedData: preparedData.indexed, // Received data indexed (No Inmutable)
 				initialIndexed: preparedData.indexed, // When data get filtered keep the full indexed
@@ -862,17 +892,24 @@ var ProperCombo =
 
 				// Update row indexes when data get filtered
 				if (this.state.data.size != nextState.data.size) {
-					var parsed = null,
-					    indexed = null;
+					var parsed = undefined,
+					    indexed = undefined,
+					    data = undefined;
 
 					if (nextState.ready) {
-						parsed = this.prepareData(nextState.data);
-						indexed = parsed.indexed;
+						if (nextState.data.size === 0) {
+							data = nextState.data;
+							indexed = {};
+						} else {
+							parsed = this.prepareData(nextState.data, this.state.idField, true, this.state.displayField); // Force rebuild indexes etc
+							data = parsed.data;
+							indexed = parsed.indexed;
+						}
 
 						this.setState({
-							data: parsed.data,
-							indexedData: parsed.indexed,
-							allSelected: this.isAllSelected(parsed.data, nextState.selection)
+							data: data,
+							indexedData: indexed,
+							allSelected: this.isAllSelected(data, nextState.selection)
 						});
 					} else {
 						var selection = nextProps.defaultSelection;
@@ -880,6 +917,7 @@ var ProperCombo =
 
 						// props data has been changed in the last call to this method
 						this.setDefaultSelection(selection);
+						if (_underscore2['default'].isNull(selection) || selection.length === 0) this.setState({ ready: true }); // No def selection so then ready
 					}
 
 					return false;
@@ -926,7 +964,8 @@ var ProperCombo =
 							} else {
 								// New idField &&//|| displayField exist in data array fields
 								if (dataChanged) {
-									var preparedData = _this2.prepareData(_immutable2['default'].fromJS(nextProps.data), nextProps.idField);
+									_cache2['default'].flush('search_list');
+									var preparedData = _this2.prepareData(nextProps.data, nextProps.idField, false, nextProps.displayField);
 
 									_this2.setState({
 										data: preparedData.data,
@@ -968,7 +1007,8 @@ var ProperCombo =
 						}
 
 						if (dataChanged) {
-							var _preparedData = _this2.prepareData(_immutable2['default'].fromJS(nextProps.data), nextProps.idField);
+							_cache2['default'].flush('search_list');
+							var _preparedData = _this2.prepareData(nextProps.data, nextProps.idField, false, nextProps.displayField);
 
 							_this2.setState({
 								data: _preparedData.data,
@@ -1229,22 +1269,25 @@ var ProperCombo =
 					} else {
 						if (!_underscore2['default'].isArray(defSelection)) {
 							selection = new Set([defSelection.toString()]);
-						} else if (defSelection !== new Set()) {
+						} else {
 							selection = new Set(defSelection.toString().split(','));
 						}
 					}
+
+					selection['delete'](''); // Remove empty values
 
 					this.triggerSelection(selection, false);
 				}
 			}
 
 			/**
-	   * Prepare the data received by the component for the internal working.
+	   * Prepare the data received by the component for the internal use.
 	   *
 	   * @param (object)	newData 	New data for rebuild. (filtering || props changed)
 	   * @param (string)	idField 	New idField if it has been changed. (props changed)
+	   * @param (boolean) rebuild		Rebuild the data. NOTE: If newData its an Immutable you should put this param to true.
 	   *
-	   * @return (array)	-rawdata: 	The same data as the props.
+	   * @return (array)	-rawdata: 	The same data as the props or the newData in case has been received.
 	   *					-indexed: 	Same as rawdata but indexed by the idField
 	   *					-data: 		Parsed data to add some fields necesary to internal working.
 	   */
@@ -1254,9 +1297,11 @@ var ProperCombo =
 			value: function prepareData() {
 				var newData = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 				var idField = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+				var rebuild = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+				var displayfield = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
 				// The data will be inmutable inside the component
-				var data = newData || _immutable2['default'].fromJS(this.props.data),
+				var data = newData || this.props.data,
 				    index = 0,
 				    rdataIndex = 0,
 				    idSet = new Set(),
@@ -1264,46 +1309,59 @@ var ProperCombo =
 				    fieldValue = undefined;
 				var indexed = [],
 				    parsed = [],
-				    parsedJSON = undefined,
+				    rawdata = undefined,
 				    hasNulls = false;
 
-				// Parsing data to add new fields (selected or not, field, rowIndex)
-				parsed = data.map(function (row) {
-					fieldValue = row.get(field, false);
+				// If not Immutable.
+				// If an Immutable is received in props.data at the components first building the component will work with that data. In that case
+				// the component should get indexed and rawdata in props. It's up to the developer if he / she wants to work with data from outside
+				// but it's important to keep in mind that you need a similar data structure (_selected, _rowIndex, idField...)
+				if (!_immutable2['default'].Iterable.isIterable(data) || rebuild) {
+					data = _immutable2['default'].fromJS(data); // If data it's already Immutable the method .fromJS return the same object
 
-					if (!fieldValue) {
-						fieldValue = _underscore2['default'].uniqueId();
-					}
+					// Parsing data to add new fields (selected or not, field, rowIndex)
+					parsed = data.map(function (row) {
+						fieldValue = row.get(field, false);
 
-					// No rows with same idField. The idField must be unique
-					if (!idSet.has(fieldValue)) {
-						idSet.add(fieldValue);
-						row = row.set(field, fieldValue.toString());
-
-						if (!row.get('_selected', false)) {
-							row = row.set('_selected', false);
+						if (!fieldValue) {
+							fieldValue = _underscore2['default'].uniqueId();
 						}
 
-						row = row.set('_rowIndex', index++); // data row index
-						row = row.set('_rawDataIndex', rdataIndex++); // rawData row index
+						// No rows with same idField. The idField must be unique and also don't render the empty values
+						if (!idSet.has(fieldValue) && fieldValue !== '' && row.get(displayfield, '') !== '') {
+							idSet.add(fieldValue);
+							row = row.set(field, fieldValue.toString());
 
-						return row;
+							if (!row.get('_selected', false)) {
+								row = row.set('_selected', false);
+							}
+
+							row = row.set('_rowIndex', index++); // data row index
+							row = row.set('_rawDataIndex', rdataIndex++); // rawData row index
+
+							return row;
+						}
+
+						rdataIndex++; // add 1 to jump over duplicate values
+						hasNulls = true;
+						return null;
+					});
+
+					// Clear null values if exist
+					if (hasNulls) {
+						parsed = parsed.filter(function (element) {
+							return !_underscore2['default'].isNull(element);
+						});
 					}
 
-					rdataIndex++; // add 1 to jump over duplicate values
-					hasNulls = true;
-					return null;
-				});
-
-				// Clear null values if exist
-				if (hasNulls) {
-					parsed = parsed.filter(function (element) {
-						return !_underscore2['default'].isNull(element);
-					});
+					// Prepare indexed data.
+					indexed = _underscore2['default'].indexBy(parsed.toJSON(), field);
+				} else {
+					// In case received Inmutable data, indexed data and raw data in props.
+					data = this.props.rawdata;
+					parsed = this.props.data;
+					indexed = this.props.indexed;
 				}
-
-				// Prepare indexed data.
-				indexed = _underscore2['default'].indexBy(parsed.toJSON(), field);
 
 				return {
 					rawdata: data,
@@ -1316,13 +1374,20 @@ var ProperCombo =
 	   * Function called each time the selection has changed. Apply an update in the components state selection then render again an update the child
 	   * list.
 	   *
-	   * @param (Set)	selection The selected values using the values of the selected data.
+	   * @param (Set object)	selection 		The selected values using the values of the selected data.
+	   * @param (Boolean) 	emptySelection 	When allowsEmptySelection is true and someone wants the empty selection.
 	   */
 
 		}, {
 			key: 'handleSelectionChange',
 			value: function handleSelectionChange(selection) {
-				this.triggerSelection(selection);
+				var emptySelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+				if (!emptySelection) {
+					this.triggerSelection(selection);
+				} else {
+					this.sendEmptySelection();
+				}
 			}
 
 			/**
@@ -1418,7 +1483,7 @@ var ProperCombo =
 
 						// Parse the selection to return it as an array instead of a Set obj
 						selection.forEach(function (item) {
-							selectionArray.push(item);
+							selectionArray.push(item.toString());
 						});
 
 						if (hasGetSelection) {
@@ -1438,24 +1503,65 @@ var ProperCombo =
 								var rawData = _state.rawData;
 								var data = _state.data;
 
-								// Get the data (initialData) that match with the selection
+								var fields = new Set(_underscore2['default'].keys(rawData.get(0).toJSON())),
+								    hasIdField = fields.has(_this6.state.idField) ? true : false;
 
-								filteredData = initialData.filter(function (element) {
-									return selection.has(element.get(_this6.state.idField));
-								});
+								if (hasIdField) {
+									selectedData = rawData.filter(function (element) {
+										return selection.has(element.get(_this6.state.idField).toString());
+									});
+								} else {
+									// Get the data (initialData) that match with the selection
+									filteredData = initialData.filter(function (element) {
+										return selection.has(element.get(_this6.state.idField));
+									});
 
-								// Then from the filtered data get the raw data that match with the selection
-								selectedData = filteredData.map(function (row) {
-									properId = row.get(_this6.state.idField);
-									rowIndex = _this6.state.initialIndexed[properId]._rawDataIndex;
+									// Then from the filtered data get the raw data that match with the selection
+									selectedData = filteredData.map(function (row) {
+										properId = row.get(_this6.state.idField);
+										rowIndex = _this6.state.initialIndexed[properId]._rawDataIndex;
 
-									return rawData.get(rowIndex);
-								});
+										return rawData.get(rowIndex);
+									});
+								}
 
 								_this6.props.afterSelect.call(_this6, selectedData.toJSON(), selectionArray);
 							})();
 						}
 					})();
+				}
+			}
+		}, {
+			key: 'sendEmptySelection',
+			value: function sendEmptySelection() {
+				var _this7 = this;
+
+				var hasAfterSelect = typeof this.props.afterSelect == 'function',
+				    hasGetSelection = typeof this.props.afterSelectGetSelection == 'function';
+
+				if (hasAfterSelect || hasGetSelection) {
+					if (hasGetSelection) {
+						// When you just need the selection but no data
+						this.props.afterSelectGetSelection.call(this, [''], new Set(''));
+					}
+
+					if (hasAfterSelect) {
+						(function () {
+							var filteredData = null,
+							    rawData = _this7.state.rawData,
+							    id = undefined,
+							    display = undefined;
+
+							// Get the data (rawData) that have idField or displayfield equals to empty string
+							filteredData = rawData.filter(function (element) {
+								id = element.get(_this7.state.idField);
+								display = element.get(_this7.state.displayField);
+								return display === '' || display === null || id === '' || id === null;
+							});
+
+							_this7.props.afterSelect.call(_this7, filteredData.toJSON(), ['']);
+						})();
+					}
 				}
 			}
 
@@ -1494,7 +1600,7 @@ var ProperCombo =
 					content = _react2['default'].createElement(
 						'div',
 						null,
-						_react2['default'].createElement(_searchField2['default'], {
+						_react2['default'].createElement(_reactPropersearchField2['default'], {
 							onSearch: this.handleSearch.bind(this),
 							onEnter: this.props.onEnter,
 							className: this.props.fieldClass,
@@ -1508,6 +1614,7 @@ var ProperCombo =
 						}),
 						_react2['default'].createElement(_searchList2['default'], {
 							data: data,
+							rowFormater: this.props.rowFormater,
 							indexedData: this.state.initialIndexed,
 							className: this.props.listClass,
 							idField: this.state.idField,
@@ -1521,7 +1628,9 @@ var ProperCombo =
 							listWidth: this.props.listWidth,
 							listRowHeight: this.props.listRowHeight,
 							listElementClass: this.props.listElementClass,
-							showIcon: this.props.listShowIcon
+							showIcon: this.props.listShowIcon,
+							cacheManager: this.props.cacheManager,
+							allowsEmptySelection: this.props.allowsEmptySelection
 						})
 					);
 				} else {
@@ -1565,7 +1674,7 @@ var ProperCombo =
 	(function (global, factory) {
 	   true ? module.exports = factory() :
 	  typeof define === 'function' && define.amd ? define(factory) :
-	  (global.Immutable = factory());
+	  global.Immutable = factory();
 	}(this, function () { 'use strict';var SLICE$0 = Array.prototype.slice;
 
 	  function createClass(ctor, superClass) {
@@ -2460,7 +2569,7 @@ var ProperCombo =
 	      }
 	      return 'Range [ ' +
 	        this._start + '...' + this._end +
-	        (this._step !== 1 ? ' by ' + this._step : '') +
+	        (this._step > 1 ? ' by ' + this._step : '') +
 	      ' ]';
 	    };
 
@@ -2592,9 +2701,6 @@ var ProperCombo =
 	    }
 	    var type = typeof o;
 	    if (type === 'number') {
-	      if (o !== o || o === Infinity) {
-	        return 0;
-	      }
 	      var h = o | 0;
 	      if (h !== o) {
 	        h ^= o * 0xFFFFFFFF;
@@ -2779,17 +2885,6 @@ var ProperCombo =
 	          iter.forEach(function(v, k)  {return map.set(k, v)});
 	        });
 	    }
-
-	    Map.of = function() {var keyValues = SLICE$0.call(arguments, 0);
-	      return emptyMap().withMutations(function(map ) {
-	        for (var i = 0; i < keyValues.length; i += 2) {
-	          if (i + 1 >= keyValues.length) {
-	            throw new Error('Missing value for key: ' + keyValues[i]);
-	          }
-	          map.set(keyValues[i], keyValues[i + 1]);
-	        }
-	      });
-	    };
 
 	    Map.prototype.toString = function() {
 	      return this.__toString('Map {', '}');
@@ -4703,11 +4798,7 @@ var ProperCombo =
 	      begin = begin | 0;
 	    }
 	    if (end !== undefined) {
-	      if (end === Infinity) {
-	        end = originalSize;
-	      } else {
-	        end = end | 0;
-	      }
+	      end = end | 0;
 	    }
 
 	    if (wholeSlice(begin, end, originalSize)) {
@@ -5243,12 +5334,6 @@ var ProperCombo =
 	    Record.prototype.set = function(k, v) {
 	      if (!this.has(k)) {
 	        throw new Error('Cannot set unknown key "' + k + '" on ' + recordName(this));
-	      }
-	      if (this._map && !this._map.has(k)) {
-	        var defaultVal = this._defaultValues[k];
-	        if (v === defaultVal) {
-	          return this;
-	        }
 	      }
 	      var newMap = this._map && this._map.set(k, v);
 	      if (this.__ownerID || newMap === this._map) {
@@ -5933,6 +6018,21 @@ var ProperCombo =
 	      return entry ? entry[1] : notSetValue;
 	    },
 
+	    findEntry: function(predicate, context) {
+	      var found;
+	      this.__iterate(function(v, k, c)  {
+	        if (predicate.call(context, v, k, c)) {
+	          found = [k, v];
+	          return false;
+	        }
+	      });
+	      return found;
+	    },
+
+	    findLastEntry: function(predicate, context) {
+	      return this.toSeq().reverse().findEntry(predicate, context);
+	    },
+
 	    forEach: function(sideEffect, context) {
 	      assertNotInfinite(this.size);
 	      return this.__iterate(context ? sideEffect.bind(context) : sideEffect);
@@ -6043,32 +6143,8 @@ var ProperCombo =
 	      return this.filter(not(predicate), context);
 	    },
 
-	    findEntry: function(predicate, context, notSetValue) {
-	      var found = notSetValue;
-	      this.__iterate(function(v, k, c)  {
-	        if (predicate.call(context, v, k, c)) {
-	          found = [k, v];
-	          return false;
-	        }
-	      });
-	      return found;
-	    },
-
-	    findKey: function(predicate, context) {
-	      var entry = this.findEntry(predicate, context);
-	      return entry && entry[0];
-	    },
-
 	    findLast: function(predicate, context, notSetValue) {
 	      return this.toKeyedSeq().reverse().find(predicate, context, notSetValue);
-	    },
-
-	    findLastEntry: function(predicate, context, notSetValue) {
-	      return this.toKeyedSeq().reverse().findEntry(predicate, context, notSetValue);
-	    },
-
-	    findLastKey: function(predicate, context) {
-	      return this.toKeyedSeq().reverse().findKey(predicate, context);
 	    },
 
 	    first: function() {
@@ -6129,20 +6205,12 @@ var ProperCombo =
 	      return iter.isSubset(this);
 	    },
 
-	    keyOf: function(searchValue) {
-	      return this.findKey(function(value ) {return is(value, searchValue)});
-	    },
-
 	    keySeq: function() {
 	      return this.toSeq().map(keyMapper).toIndexedSeq();
 	    },
 
 	    last: function() {
 	      return this.toSeq().reverse().first();
-	    },
-
-	    lastKeyOf: function(searchValue) {
-	      return this.toKeyedSeq().reverse().keyOf(searchValue);
 	    },
 
 	    max: function(comparator) {
@@ -6235,12 +6303,58 @@ var ProperCombo =
 	  IterablePrototype.chain = IterablePrototype.flatMap;
 	  IterablePrototype.contains = IterablePrototype.includes;
 
+	  // Temporary warning about using length
+	  (function () {
+	    try {
+	      Object.defineProperty(IterablePrototype, 'length', {
+	        get: function () {
+	          if (!Iterable.noLengthWarning) {
+	            var stack;
+	            try {
+	              throw new Error();
+	            } catch (error) {
+	              stack = error.stack;
+	            }
+	            if (stack.indexOf('_wrapObject') === -1) {
+	              console && console.warn && console.warn(
+	                'iterable.length has been deprecated, '+
+	                'use iterable.size or iterable.count(). '+
+	                'This warning will become a silent error in a future version. ' +
+	                stack
+	              );
+	              return this.size;
+	            }
+	          }
+	        }
+	      });
+	    } catch (e) {}
+	  })();
+
+
+
 	  mixin(KeyedIterable, {
 
 	    // ### More sequential methods
 
 	    flip: function() {
 	      return reify(this, flipFactory(this));
+	    },
+
+	    findKey: function(predicate, context) {
+	      var entry = this.findEntry(predicate, context);
+	      return entry && entry[0];
+	    },
+
+	    findLastKey: function(predicate, context) {
+	      return this.toSeq().reverse().findKey(predicate, context);
+	    },
+
+	    keyOf: function(searchValue) {
+	      return this.findKey(function(value ) {return is(value, searchValue)});
+	    },
+
+	    lastKeyOf: function(searchValue) {
+	      return this.findLastKey(function(value ) {return is(value, searchValue)});
 	    },
 
 	    mapEntries: function(mapper, context) {var this$0 = this;
@@ -6291,13 +6405,16 @@ var ProperCombo =
 	    },
 
 	    indexOf: function(searchValue) {
-	      var key = this.keyOf(searchValue);
+	      var key = this.toKeyedSeq().keyOf(searchValue);
 	      return key === undefined ? -1 : key;
 	    },
 
 	    lastIndexOf: function(searchValue) {
-	      var key = this.lastKeyOf(searchValue);
+	      var key = this.toKeyedSeq().reverse().keyOf(searchValue);
 	      return key === undefined ? -1 : key;
+
+	      // var index =
+	      // return this.toSeq().reverse().indexOf(searchValue);
 	    },
 
 	    reverse: function() {
@@ -6331,8 +6448,8 @@ var ProperCombo =
 	    // ### More collection methods
 
 	    findLastIndex: function(predicate, context) {
-	      var entry = this.findLastEntry(predicate, context);
-	      return entry ? entry[0] : -1;
+	      var key = this.toKeyedSeq().findLastKey(predicate, context);
+	      return key === undefined ? -1 : key;
 	    },
 
 	    first: function() {
@@ -6371,10 +6488,6 @@ var ProperCombo =
 	        interleaved.size = zipped.size * iterables.length;
 	      }
 	      return reify(this, interleaved);
-	    },
-
-	    keySeq: function() {
-	      return Range(0, this.size);
 	    },
 
 	    last: function() {
@@ -6425,7 +6538,6 @@ var ProperCombo =
 	  });
 
 	  SetIterable.prototype.has = IterablePrototype.includes;
-	  SetIterable.prototype.contains = SetIterable.prototype.includes;
 
 
 	  // Mixin subclasses
@@ -6462,7 +6574,7 @@ var ProperCombo =
 	  }
 
 	  function quoteString(value) {
-	    return typeof value === 'string' ? JSON.stringify(value) : String(value);
+	    return typeof value === 'string' ? JSON.stringify(value) : value;
 	  }
 
 	  function defaultZipper() {
@@ -6561,6 +6673,10 @@ var ProperCombo =
 
 	var _reactDimensions2 = _interopRequireDefault(_reactDimensions);
 
+	var _cache = __webpack_require__(61);
+
+	var _cache2 = _interopRequireDefault(_cache);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -6569,7 +6685,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(61);
+	var Set = __webpack_require__(64);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -6577,6 +6693,7 @@ var ProperCombo =
 			data: null,
 			indexedData: null, // Just when you use a function as a display field. (array) (Full indexed data not filted)
 			onSelectionChange: null,
+			rowFormater: null, // function
 			multiSelect: false,
 			messages: null,
 			selection: new Set(),
@@ -6588,6 +6705,7 @@ var ProperCombo =
 			displayField: 'label',
 			showIcon: true,
 			listElementClass: null,
+			allowsEmptySelection: false,
 			uniqueID: _underscore2['default'].uniqueId('search_list_')
 		};
 	}
@@ -6744,7 +6862,6 @@ var ProperCombo =
 
 			/**
 	   * Function called each time the buttons in the bar of the list has been clicked. Delete or add all the data elements into the selection, just if it has changed.
-	   * Prevent multiple clicks in the same button.
 	   *
 	   * @param (Boolean)	selectAll 	If its a select all action or an unselect all.
 	   * @param (Array)	e 			Element which call the function
@@ -6784,6 +6901,20 @@ var ProperCombo =
 			}
 
 			/**
+	   * Function called each time the buttons (select empty) in the bar of the list has been clicked (In case empty selection allowed).
+	   *
+	   * @param (Array)	e 			Element which call the function
+	   */
+
+		}, {
+			key: 'handleSelectEmpty',
+			value: function handleSelectEmpty(e) {
+				if (typeof this.props.onSelectionChange == 'function') {
+					this.props.onSelectionChange.call(this, null, true);
+				}
+			}
+
+			/**
 	   * Return the tool bar for the top of the list. It will be displayed only when the selection can be multiple.
 	   *
 	   * @return (html) 	The toolbar code
@@ -6792,6 +6923,8 @@ var ProperCombo =
 		}, {
 			key: 'getToolbar',
 			value: function getToolbar() {
+				var maxWidth = this.props.containerWidth ? this.props.containerWidth / 2 - 1 : 100;
+
 				return _react2['default'].createElement(
 					'div',
 					{ className: 'proper-search-list-bar' },
@@ -6800,17 +6933,27 @@ var ProperCombo =
 						{ className: 'btn-group form-inline' },
 						_react2['default'].createElement(
 							'a',
-							{ id: 'proper-search-list-bar-check', ref: this.props.uniqueID + '_all', className: 'btn list-bar-check', role: 'button', onClick: this.handleSelectAll.bind(this, true) },
+							{
+								id: 'proper-search-list-bar-check',
+								ref: this.props.uniqueID + '_all',
+								className: 'btn-select list-bar-check', role: 'button',
+								onClick: this.handleSelectAll.bind(this, true),
+								style: { maxWidth: maxWidth, boxSizing: 'border-box' } },
 							_react2['default'].createElement(
 								'label',
 								null,
 								this.props.messages.all
 							)
 						),
-						' ',
 						_react2['default'].createElement(
 							'a',
-							{ id: 'proper-search-list-bar-unCheck', ref: this.props.uniqueID + '_none', className: 'btn list-bar-unCheck', role: 'button', onClick: this.handleSelectAll.bind(this, false) },
+							{
+								id: 'proper-search-list-bar-unCheck',
+								ref: this.props.uniqueID + '_none',
+								className: 'btn-select list-bar-unCheck',
+								role: 'button',
+								onClick: this.handleSelectAll.bind(this, false),
+								style: { maxWidth: maxWidth, boxSizing: 'border-box' } },
 							_react2['default'].createElement(
 								'label',
 								null,
@@ -6822,69 +6965,125 @@ var ProperCombo =
 			}
 
 			/**
+	   * Return the tool bar for the top of the list in case Empty Selection allowed
+	   *
+	   * @return (html) 	The toolbar code
+	   */
+
+		}, {
+			key: 'getToolbarForEmpty',
+			value: function getToolbarForEmpty() {
+				var allSelected = this.state.allSelected,
+				    selectMessage = undefined,
+				    maxWidth = this.props.containerWidth / 2 - 1;
+				selectMessage = allSelected ? this.props.messages.none : this.props.messages.all;
+
+				return _react2['default'].createElement(
+					'div',
+					{ className: 'proper-search-list-bar' },
+					_react2['default'].createElement(
+						'div',
+						{ className: 'btn-group form-inline' },
+						_react2['default'].createElement(
+							'a',
+							{
+								id: 'proper-search-list-bar-select',
+								ref: this.props.uniqueID + '_all',
+								className: 'btn-select list-bar-select',
+								role: 'button',
+								onClick: this.handleSelectAll.bind(this, !allSelected),
+								style: { maxWidth: maxWidth, boxSizing: 'border-box' } },
+							_react2['default'].createElement(
+								'label',
+								null,
+								selectMessage
+							)
+						),
+						_react2['default'].createElement(
+							'a',
+							{
+								id: 'proper-search-list-bar-empty',
+								ref: this.props.uniqueID + '_none',
+								className: 'btn-select list-bar-empty',
+								role: 'button',
+								onClick: this.handleSelectEmpty.bind(this),
+								style: { maxWidth: maxWidth, boxSizing: 'border-box' } },
+							_react2['default'].createElement(
+								'label',
+								null,
+								this.props.messages.empty
+							)
+						)
+					)
+				);
+			}
+
+			/**
 	   * Build and return the content of the list.
+	   *
+	   * @param {integer} index 		Index of the data to be rendered
+	   * @return {html}	list-row	A row of the list
 	   */
 
 		}, {
 			key: 'getContent',
-			value: function getContent() {
-				var _this4 = this;
-
+			value: function getContent(index) {
 				var icon = null,
-				    result = [],
 				    selectedClass = null,
 				    className = null,
 				    element = null,
-				    content = null;
+				    listElementClass = this.props.listElementClass;
 				var data = this.props.data,
-				    selection = this.props.selection,
-				    field = this.props.idField;
-				var displayField = this.props.displayField,
+				    rowdata = undefined,
+				    field = this.props.idField,
+				    displayField = this.props.displayField,
 				    showIcon = this.props.showIcon;
-				var listElementClass = this.props.listElementClass;
 
-				data.forEach(function (item, index) {
-					element = item.get(displayField);
-					className = "proper-search-list-element";
+				rowdata = data.get(index);
+				element = rowdata.get(displayField);
+				className = "proper-search-list-element";
 
-					if (_this4.props.multiSelect) {
-						if (showIcon) {
-							if (item.get('_selected', false)) {
-								icon = _react2['default'].createElement('i', { className: 'fa fa-check-square-o' });
-								selectedClass = ' proper-search-selected';
-							} else {
-								icon = _react2['default'].createElement('i', { className: 'fa fa-square-o' });
-								selectedClass = null;
-							}
+				if (this.props.multiSelect) {
+					if (showIcon) {
+						if (rowdata.get('_selected', false)) {
+							icon = _react2['default'].createElement('i', { className: 'fa fa-check-square-o' });
+							selectedClass = ' proper-search-selected';
+						} else {
+							icon = _react2['default'].createElement('i', { className: 'fa fa-square-o' });
+							selectedClass = null;
 						}
-					} else {
-						if (item.get('_selected')) selectedClass = ' proper-search-single-selected';else selectedClass = null;
 					}
+				} else {
+					if (rowdata.get('_selected')) selectedClass = ' proper-search-single-selected';else selectedClass = null;
+				}
 
-					if (listElementClass) {
-						className += ' ' + listElementClass;
+				if (listElementClass) {
+					className += ' ' + listElementClass;
+				}
+
+				if (selectedClass) {
+					className += ' ' + selectedClass;
+				}
+
+				if (typeof element == 'function') {
+					var id = rowdata.get(field);
+					element = element(this.props.indexedData[id]);
+				} else if (this.props.rowFormater) {
+					var ckey = ['search_list', 'list_' + this.props.uniqueID, 'row__' + rowdata.get(this.props.idField), displayField];
+					element = _cache2['default'].read(ckey);
+
+					if (element === undefined) {
+						element = this.props.rowFormater(rowdata.get(displayField));
+						_cache2['default'].write(ckey, element);
 					}
+				}
 
-					if (selectedClass) {
-						className += ' ' + selectedClass;
-					}
-
-					if (typeof element == 'function') {
-						var id = item.get(field);
-						element = element(_this4.props.indexedData[id]);
-					}
-
-					content = _react2['default'].createElement(
-						'div',
-						{ key: 'element-' + index, ref: _this4.props.uniqueID + '_' + index, className: className, onClick: _this4.handleElementClick.bind(_this4, item.get(field)) },
-						icon,
-						element
-					);
-
-					result.push(content);
-				});
-
-				return result;
+				return _react2['default'].createElement(
+					'div',
+					{ key: 'element-' + index, ref: this.props.uniqueID + '_' + index, className: className, onClick: this.handleElementClick.bind(this, rowdata.get(field)) },
+					icon,
+					element
+				);
 			}
 			/**
 	   * To be rendered when the data has no data (Ex. filtered data)
@@ -6912,18 +7111,20 @@ var ProperCombo =
 
 		}, {
 			key: 'rowRenderer',
-			value: function rowRenderer(list, index) {
-				return list[index];
+			value: function rowRenderer(index) {
+				return this.getContent(index);
 			}
 		}, {
 			key: 'render',
 			value: function render() {
 				var toolbar = null,
 				    rowsCount = 0,
-				    list = this.getContent(),
 				    className = "proper-search-list";
 
-				if (this.props.multiSelect) toolbar = this.getToolbar();
+				if (this.props.multiSelect) {
+					toolbar = this.props.allowsEmptySelection ? this.getToolbarForEmpty() : this.getToolbar();
+				}
+
 				rowsCount = this.props.data.size;
 
 				if (this.props.className) {
@@ -6939,7 +7140,7 @@ var ProperCombo =
 						className: "proper-search-list-virtual",
 						width: this.props.listWidth || this.props.containerWidth,
 						height: this.props.listHeight,
-						rowRenderer: this.rowRenderer.bind(this, list),
+						rowRenderer: this.rowRenderer.bind(this),
 						rowHeight: this.props.listRowHeight,
 						noRowsRenderer: this.noRowsRenderer.bind(this),
 						rowsCount: rowsCount,
@@ -8281,6 +8482,12 @@ var ProperCombo =
 
 	      this._scrollbarSize = (0, _scrollbarSize2.default)();
 
+	      if (scrollToCell >= 0) {
+	        this._updateScrollPositionForScrollToCell();
+	      } else if (scrollLeft >= 0 || scrollTop >= 0) {
+	        this._setScrollPosition({ scrollLeft: scrollLeft, scrollTop: scrollTop });
+	      }
+
 	      // Update onSectionRendered callback.
 	      this._invokeOnSectionRenderedHelper();
 
@@ -8289,12 +8496,8 @@ var ProperCombo =
 	      var totalHeight = _cellLayoutManager$ge.height;
 	      var totalWidth = _cellLayoutManager$ge.width;
 
-
-	      if (scrollToCell >= 0) {
-	        this._updateScrollPositionForScrollToCell();
-	      }
-
 	      // Initialize onScroll callback.
+
 	      this._invokeOnScrollMemoizer({
 	        scrollLeft: scrollLeft || 0,
 	        scrollTop: scrollTop || 0,
@@ -8340,17 +8543,10 @@ var ProperCombo =
 	  }, {
 	    key: 'componentWillMount',
 	    value: function componentWillMount() {
-	      var _props3 = this.props;
-	      var cellLayoutManager = _props3.cellLayoutManager;
-	      var scrollLeft = _props3.scrollLeft;
-	      var scrollTop = _props3.scrollTop;
+	      var cellLayoutManager = this.props.cellLayoutManager;
 
 
 	      cellLayoutManager.calculateSizeAndPositionData();
-
-	      if (scrollLeft >= 0 || scrollTop >= 0) {
-	        this._setScrollPosition({ scrollLeft: scrollLeft, scrollTop: scrollTop });
-	      }
 	    }
 	  }, {
 	    key: 'componentWillUnmount',
@@ -8400,12 +8596,12 @@ var ProperCombo =
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _props4 = this.props;
-	      var cellLayoutManager = _props4.cellLayoutManager;
-	      var className = _props4.className;
-	      var height = _props4.height;
-	      var noContentRenderer = _props4.noContentRenderer;
-	      var width = _props4.width;
+	      var _props3 = this.props;
+	      var cellLayoutManager = _props3.cellLayoutManager;
+	      var className = _props3.className;
+	      var height = _props3.height;
+	      var noContentRenderer = _props3.noContentRenderer;
+	      var width = _props3.width;
 	      var _state2 = this.state;
 	      var isScrolling = _state2.isScrolling;
 	      var scrollLeft = _state2.scrollLeft;
@@ -8502,9 +8698,9 @@ var ProperCombo =
 	  }, {
 	    key: '_invokeOnSectionRenderedHelper',
 	    value: function _invokeOnSectionRenderedHelper() {
-	      var _props5 = this.props;
-	      var cellLayoutManager = _props5.cellLayoutManager;
-	      var onSectionRendered = _props5.onSectionRendered;
+	      var _props4 = this.props;
+	      var cellLayoutManager = _props4.cellLayoutManager;
+	      var onSectionRendered = _props4.onSectionRendered;
 
 
 	      this._onSectionRenderedMemoizer({
@@ -8526,10 +8722,10 @@ var ProperCombo =
 	        callback: function callback(_ref2) {
 	          var scrollLeft = _ref2.scrollLeft;
 	          var scrollTop = _ref2.scrollTop;
-	          var _props6 = _this3.props;
-	          var height = _props6.height;
-	          var onScroll = _props6.onScroll;
-	          var width = _props6.width;
+	          var _props5 = _this3.props;
+	          var height = _props5.height;
+	          var onScroll = _props5.onScroll;
+	          var width = _props5.width;
 
 
 	          onScroll({
@@ -8593,11 +8789,11 @@ var ProperCombo =
 	  }, {
 	    key: '_updateScrollPositionForScrollToCell',
 	    value: function _updateScrollPositionForScrollToCell() {
-	      var _props7 = this.props;
-	      var cellLayoutManager = _props7.cellLayoutManager;
-	      var height = _props7.height;
-	      var scrollToCell = _props7.scrollToCell;
-	      var width = _props7.width;
+	      var _props6 = this.props;
+	      var cellLayoutManager = _props6.cellLayoutManager;
+	      var height = _props6.height;
+	      var scrollToCell = _props6.scrollToCell;
+	      var width = _props6.width;
 	      var _state3 = this.state;
 	      var scrollLeft = _state3.scrollLeft;
 	      var scrollTop = _state3.scrollTop;
@@ -8634,10 +8830,10 @@ var ProperCombo =
 	      // Gradually converging on a scrollTop that is within the bounds of the new, smaller height.
 	      // This causes a series of rapid renders that is slow for long lists.
 	      // We can avoid that by doing some simple bounds checking to ensure that scrollTop never exceeds the total height.
-	      var _props8 = this.props;
-	      var cellLayoutManager = _props8.cellLayoutManager;
-	      var height = _props8.height;
-	      var width = _props8.width;
+	      var _props7 = this.props;
+	      var cellLayoutManager = _props7.cellLayoutManager;
+	      var height = _props7.height;
+	      var width = _props7.width;
 
 	      var scrollbarSize = this._scrollbarSize;
 
@@ -9022,6 +9218,9 @@ var ProperCombo =
 	var queueIndex = -1;
 
 	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
 	    draining = false;
 	    if (currentQueue.length) {
 	        queue = currentQueue.concat(queue);
@@ -12435,13 +12634,30 @@ var ProperCombo =
 	        value: function componentWillUnmount() {
 	          this.getWindow().removeEventListener('resize', this.onResize);
 	        }
+
+	        /**
+	         * Returns the underlying wrapped component instance.
+	         * Useful if you need to access a method or property of the component
+	         * passed to react-dimensions.
+	         *
+	         * @return {object} The rendered React component
+	         **/
+
+	      }, {
+	        key: 'getWrappedInstance',
+	        value: function getWrappedInstance() {
+	          this.refs.wrappedInstance;
+	        }
 	      }, {
 	        key: 'render',
 	        value: function render() {
 	          return React.createElement(
 	            'div',
 	            { style: containerStyle, ref: 'container' },
-	            (this.state.containerWidth || this.state.containerHeight) && React.createElement(ComposedComponent, _extends({}, this.state, this.props, { updateDimensions: this.updateDimensions }))
+	            (this.state.containerWidth || this.state.containerHeight) && React.createElement(ComposedComponent, _extends({}, this.state, this.props, {
+	              updateDimensions: this.updateDimensions,
+	              ref: 'wrappedInstance'
+	            }))
 	          );
 	        }
 	      }]);
@@ -12456,76 +12672,85 @@ var ProperCombo =
 /* 60 */
 /***/ function(module, exports) {
 
-	module.exports = function(element, fn) {
-	  var window = this;
-	  var document = window.document;
+	var exports = function exports(element, fn) {
+	  var window = this
+	  var document = window.document
+	  var isIE
+	  var requestFrame
 
-	  var attachEvent = document.attachEvent;
-	  if (typeof navigator !== "undefined") {
-	    var isIE = navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/Edge/);
+	  var attachEvent = document.attachEvent
+	  if (typeof navigator !== 'undefined') {
+	    isIE = navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/Edge/)
 	  }
 
-	  var requestFrame = (function() {
-	    var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || function(fn) {
-	        return window.setTimeout(fn, 20);
-	      };
-	    return function(fn) {
-	      return raf(fn);
-	    };
-	  })();
+	  requestFrame = (function () {
+	    var raf = window.requestAnimationFrame ||
+	      window.mozRequestAnimationFrame ||
+	        window.webkitRequestAnimationFrame ||
+	          function fallbackRAF(func) {
+	            return window.setTimeout(func, 20)
+	          }
+	    return function requestFrameFunction(func) {
+	      return raf(func)
+	    }
+	  })()
 
-	  var cancelFrame = (function() {
-	    var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
-	      window.clearTimeout;
-	    return function(id) {
-	      return cancel(id);
-	    };
-	  })();
+	  var cancelFrame = (function () {
+	    var cancel = window.cancelAnimationFrame ||
+	      window.mozCancelAnimationFrame ||
+	        window.webkitCancelAnimationFrame ||
+	          window.clearTimeout
+	    return function cancelFrameFunction(id) {
+	      return cancel(id)
+	    }
+	  })()
 
 	  function resizeListener(e) {
-	    var win = e.target || e.srcElement;
+	    var win = e.target || e.srcElement
 	    if (win.__resizeRAF__) {
-	      cancelFrame(win.__resizeRAF__);
+	      cancelFrame(win.__resizeRAF__)
 	    }
-	    win.__resizeRAF__ = requestFrame(function() {
-	      var trigger = win.__resizeTrigger__;
-	      trigger.__resizeListeners__.forEach(function(fn) {
-	        fn.call(trigger, e);
-	      });
-	    });
+	    win.__resizeRAF__ = requestFrame(function () {
+	      var trigger = win.__resizeTrigger__
+	      trigger.__resizeListeners__.forEach(function (fn) {
+	        fn.call(trigger, e)
+	      })
+	    })
 	  }
 
-	  function objectLoad(e) {
-	    this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
-	    this.contentDocument.defaultView.addEventListener('resize', resizeListener);
+	  function objectLoad() {
+	    this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__
+	    this.contentDocument.defaultView.addEventListener('resize', resizeListener)
 	  }
 
 	  if (!element.__resizeListeners__) {
-	    element.__resizeListeners__ = [];
+	    element.__resizeListeners__ = []
 	    if (attachEvent) {
-	      element.__resizeTrigger__ = element;
-	      element.attachEvent('onresize', resizeListener);
+	      element.__resizeTrigger__ = element
+	      element.attachEvent('onresize', resizeListener)
 	    } else {
-	      if (getComputedStyle(element).position == 'static') {
-	        element.style.position = 'relative';
+	      if (getComputedStyle(element).position === 'static') {
+	        element.style.position = 'relative'
 	      }
-	      var obj = element.__resizeTrigger__ = document.createElement('object');
-	      obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
-	      obj.setAttribute('class', 'resize-sensor');
-	      obj.__resizeElement__ = element;
-	      obj.onload = objectLoad;
-	      obj.type = 'text/html';
+	      var obj = element.__resizeTrigger__ = document.createElement('object')
+	      obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;')
+	      obj.setAttribute('class', 'resize-sensor')
+	      obj.__resizeElement__ = element
+	      obj.onload = objectLoad
+	      obj.type = 'text/html'
 	      if (isIE) {
-	        element.appendChild(obj);
+	        element.appendChild(obj)
 	      }
-	      obj.data = 'about:blank';
+	      obj.data = 'about:blank'
 	      if (!isIE) {
-	        element.appendChild(obj);
+	        element.appendChild(obj)
 	      }
 	    }
 	  }
-	  element.__resizeListeners__.push(fn);
-	};
+	  element.__resizeListeners__.push(fn)
+	}
+
+	module.exports = (typeof window === 'undefined') ? exports : exports.bind(window)
 
 
 /***/ },
@@ -12534,11 +12759,653 @@ var ProperCombo =
 
 	'use strict';
 
-	module.exports = __webpack_require__(62)() ? Set : __webpack_require__(63);
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _dotObject = __webpack_require__(62);
+
+	var _dotObject2 = _interopRequireDefault(_dotObject);
+
+	var _underscore = __webpack_require__(4);
+
+	var _deepmerge = __webpack_require__(63);
+
+	var _deepmerge2 = _interopRequireDefault(_deepmerge);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var cache = {};
+
+	function parseKey(key) {
+		return (0, _underscore.map)(key, function (k) {
+			return k.toString().replace('.', '_');
+		}).join('.');
+	}
+
+	var RowCache = function () {
+		function RowCache() {
+			var base = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, RowCache);
+
+			this.init(base);
+		}
+
+		_createClass(RowCache, [{
+			key: 'init',
+			value: function init() {
+				var base = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+
+				cache = base;
+
+				return this;
+			}
+		}, {
+			key: 'read',
+			value: function read(key) {
+				var k = parseKey(key);
+				return _dotObject2['default'].pick(k, cache);
+			}
+		}, {
+			key: 'write',
+			value: function write(key, value) {
+				var k = parseKey(key);
+				var writable = {};
+
+				writable[k] = value;
+				writable = _dotObject2['default'].object(writable);
+
+				cache = (0, _deepmerge2['default'])(cache, writable);
+
+				return this;
+			}
+		}, {
+			key: 'flush',
+			value: function flush() {
+				var key = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+
+				if (key) {
+					var k = parseKey(key);
+					_dotObject2['default'].remove(k, cache);
+				} else {
+					this.init();
+				}
+
+				return this;
+			}
+		}]);
+
+		return RowCache;
+	}();
+
+	var rowcache = new RowCache();
+
+	exports['default'] = rowcache;
+	module.exports = exports['default'];
 
 /***/ },
 /* 62 */
+/***/ function(module, exports) {
+
+	'use strict'
+
+	function _process (v, mod) {
+	  var i
+	  var r
+
+	  if (typeof mod === 'function') {
+	    r = mod(v)
+	    if (r !== undefined) {
+	      v = r
+	    }
+	  } else if (Array.isArray(mod)) {
+	    for (i = 0; i < mod.length; i++) {
+	      r = mod[i](v)
+	      if (r !== undefined) {
+	        v = r
+	      }
+	    }
+	  }
+
+	  return v
+	}
+
+	function parseKey (key, val) {
+	  // detect negative index notation
+	  if (key[0] === '-' && Array.isArray(val) && /^-\d+$/.test(key)) {
+	    return val.length + parseInt(key, 10)
+	  }
+	  return key
+	}
+
+	function isIndex (k) {
+	  return /^\d+/.test(k)
+	}
+
+	function parsePath (path, sep) {
+	  if (path.indexOf('[') >= 0) {
+	    path = path.replace(/\[/g, '.').replace(/]/g, '')
+	  }
+	  return path.split(sep)
+	}
+
+	function DotObject (seperator, override, useArray) {
+	  if (!(this instanceof DotObject)) {
+	    return new DotObject(seperator, override, useArray)
+	  }
+
+	  if (typeof seperator === 'undefined') seperator = '.'
+	  if (typeof override === 'undefined') override = false
+	  if (typeof useArray === 'undefined') useArray = true
+	  this.seperator = seperator
+	  this.override = override
+	  this.useArray = useArray
+
+	  // contains touched arrays
+	  this.cleanup = []
+	}
+
+	var dotDefault = new DotObject('.', false, true)
+	function wrap (method) {
+	  return function () {
+	    return dotDefault[method].apply(dotDefault, arguments)
+	  }
+	}
+
+	DotObject.prototype._fill = function (a, obj, v, mod) {
+	  var k = a.shift()
+
+	  if (a.length > 0) {
+	    obj[k] = obj[k] ||
+	      (this.useArray && isIndex(a[0]) ? [] : {})
+
+	    if (obj[k] !== Object(obj[k])) {
+	      if (this.override) {
+	        obj[k] = {}
+	      } else {
+	        throw new Error(
+	          'Trying to redefine `' + k + '` which is a ' + typeof obj[k]
+	        )
+	      }
+	    }
+
+	    this._fill(a, obj[k], v, mod)
+	  } else {
+	    if (!this.override &&
+	      obj[k] === Object(obj[k]) && Object.keys(obj[k]).length) {
+	      throw new Error("Trying to redefine non-empty obj['" + k + "']")
+	    }
+
+	    obj[k] = _process(v, mod)
+	  }
+	}
+
+	/**
+	 *
+	 * Converts an object with dotted-key/value pairs to it's expanded version
+	 *
+	 * Optionally transformed by a set of modifiers.
+	 *
+	 * Usage:
+	 *
+	 *   var row = {
+	 *     'nr': 200,
+	 *     'doc.name': '  My Document  '
+	 *   }
+	 *
+	 *   var mods = {
+	 *     'doc.name': [_s.trim, _s.underscored]
+	 *   }
+	 *
+	 *   dot.object(row, mods)
+	 *
+	 * @param {Object} obj
+	 * @param {Object} mods
+	 */
+	DotObject.prototype.object = function (obj, mods) {
+	  var self = this
+
+	  Object.keys(obj).forEach(function (k) {
+	    var mod = mods === undefined ? null : mods[k]
+	    // normalize array notation.
+	    var ok = parsePath(k, self.seperator).join(self.seperator)
+
+	    if (ok.indexOf(self.seperator) !== -1) {
+	      self._fill(ok.split(self.seperator), obj, obj[k], mod)
+	      delete obj[k]
+	    } else if (self.override) {
+	      obj[k] = _process(obj[k], mod)
+	    }
+	  })
+
+	  return obj
+	}
+
+	/**
+	 * @param {String} path dotted path
+	 * @param {String} v value to be set
+	 * @param {Object} obj object to be modified
+	 * @param {Function|Array} mod optional modifier
+	 */
+	DotObject.prototype.str = function (path, v, obj, mod) {
+	  if (path.indexOf(this.seperator) !== -1) {
+	    this._fill(path.split(this.seperator), obj, v, mod)
+	  } else if (this.override) {
+	    obj[path] = _process(v, mod)
+	  }
+
+	  return obj
+	}
+
+	/**
+	 *
+	 * Pick a value from an object using dot notation.
+	 *
+	 * Optionally remove the value
+	 *
+	 * @param {String} path
+	 * @param {Object} obj
+	 * @param {Boolean} remove
+	 */
+	DotObject.prototype.pick = function (path, obj, remove) {
+	  var i
+	  var keys
+	  var val
+	  var key
+	  var cp
+
+	  keys = parsePath(path, this.seperator)
+	  for (i = 0; i < keys.length; i++) {
+	    key = parseKey(keys[i], obj)
+	    if (obj && typeof obj === 'object' && key in obj) {
+	      if (i === (keys.length - 1)) {
+	        if (remove) {
+	          val = obj[key]
+	          delete obj[key]
+	          if (Array.isArray(obj)) {
+	            cp = keys.slice(0, -1).join('.')
+	            if (this.cleanup.indexOf(cp) === -1) {
+	              this.cleanup.push(cp)
+	            }
+	          }
+	          return val
+	        } else {
+	          return obj[key]
+	        }
+	      } else {
+	        obj = obj[key]
+	      }
+	    } else {
+	      return undefined
+	    }
+	  }
+	  if (remove && Array.isArray(obj)) {
+	    obj = obj.filter(function (n) { return n !== undefined })
+	  }
+	  return obj
+	}
+
+	/**
+	 *
+	 * Remove value from an object using dot notation.
+	 *
+	 * @param {String} path
+	 * @param {Object} obj
+	 * @return {Mixed} The removed value
+	 */
+	DotObject.prototype.remove = function (path, obj) {
+	  var i
+
+	  this.cleanup = []
+	  if (Array.isArray(path)) {
+	    for (i = 0; i < path.length; i++) {
+	      this.pick(path[i], obj, true)
+	    }
+	    this._cleanup(obj)
+	    return obj
+	  } else {
+	    return this.pick(path, obj, true)
+	  }
+	}
+
+	DotObject.prototype._cleanup = function (obj) {
+	  var ret
+	  var i
+	  var keys
+	  var root
+	  if (this.cleanup.length) {
+	    for (i = 0; i < this.cleanup.length; i++) {
+	      keys = this.cleanup[i].split('.')
+	      root = keys.splice(0, -1).join('.')
+	      ret = root ? this.pick(root, obj) : obj
+	      ret = ret[keys[0]].filter(function (v) { return v !== undefined })
+	      this.set(this.cleanup[i], ret, obj)
+	    }
+	    this.cleanup = []
+	  }
+	}
+
+	// alias method
+	DotObject.prototype.del = DotObject.prototype.remove
+
+	/**
+	 *
+	 * Move a property from one place to the other.
+	 *
+	 * If the source path does not exist (undefined)
+	 * the target property will not be set.
+	 *
+	 * @param {String} source
+	 * @param {String} target
+	 * @param {Object} obj
+	 * @param {Function|Array} mods
+	 * @param {Boolean} merge
+	 */
+	DotObject.prototype.move = function (source, target, obj, mods, merge) {
+	  if (typeof mods === 'function' || Array.isArray(mods)) {
+	    this.set(target, _process(this.pick(source, obj, true), mods), obj, merge)
+	  } else {
+	    merge = mods
+	    this.set(target, this.pick(source, obj, true), obj, merge)
+	  }
+
+	  return obj
+	}
+
+	/**
+	 *
+	 * Transfer a property from one object to another object.
+	 *
+	 * If the source path does not exist (undefined)
+	 * the property on the other object will not be set.
+	 *
+	 * @param {String} source
+	 * @param {String} target
+	 * @param {Object} obj1
+	 * @param {Object} obj2
+	 * @param {Function|Array} mods
+	 * @param {Boolean} merge
+	 */
+	DotObject.prototype.transfer = function (source, target, obj1, obj2, mods, merge) {
+	  if (typeof mods === 'function' || Array.isArray(mods)) {
+	    this.set(target,
+	      _process(
+	        this.pick(source, obj1, true),
+	        mods
+	      ), obj2, merge)
+	  } else {
+	    merge = mods
+	    this.set(target, this.pick(source, obj1, true), obj2, merge)
+	  }
+
+	  return obj2
+	}
+
+	/**
+	 *
+	 * Copy a property from one object to another object.
+	 *
+	 * If the source path does not exist (undefined)
+	 * the property on the other object will not be set.
+	 *
+	 * @param {String} source
+	 * @param {String} target
+	 * @param {Object} obj1
+	 * @param {Object} obj2
+	 * @param {Function|Array} mods
+	 * @param {Boolean} merge
+	 */
+	DotObject.prototype.copy = function (source, target, obj1, obj2, mods, merge) {
+	  if (typeof mods === 'function' || Array.isArray(mods)) {
+	    this.set(target,
+	      _process(
+	        // clone what is picked
+	        JSON.parse(
+	          JSON.stringify(
+	            this.pick(source, obj1, false)
+	          )
+	        ),
+	        mods
+	      ), obj2, merge)
+	  } else {
+	    merge = mods
+	    this.set(target, this.pick(source, obj1, false), obj2, merge)
+	  }
+
+	  return obj2
+	}
+
+	function isObject (val) {
+	  return Object.prototype.toString.call(val) === '[object Object]'
+	}
+
+	/**
+	 *
+	 * Set a property on an object using dot notation.
+	 *
+	 * @param {String} path
+	 * @param {Mixed} val
+	 * @param {Object} obj
+	 * @param {Boolean} merge
+	 */
+	DotObject.prototype.set = function (path, val, obj, merge) {
+	  var i
+	  var k
+	  var keys
+	  var key
+
+	  // Do not operate if the value is undefined.
+	  if (typeof val === 'undefined') {
+	    return obj
+	  }
+	  keys = parsePath(path, this.seperator)
+
+	  for (i = 0; i < keys.length; i++) {
+	    key = keys[i]
+	    if (i === (keys.length - 1)) {
+	      if (merge && isObject(val) && isObject(obj[key])) {
+	        for (k in val) {
+	          if (val.hasOwnProperty(k)) {
+	            obj[key][k] = val[k]
+	          }
+	        }
+	      } else if (merge && Array.isArray(obj[key]) && Array.isArray(val)) {
+	        for (var j = 0; j < val.length; j++) {
+	          obj[keys[i]].push(val[j])
+	        }
+	      } else {
+	        obj[key] = val
+	      }
+	    } else if (
+	      // force the value to be an object
+	      !obj.hasOwnProperty(key) ||
+	      (!isObject(obj[key]) && !Array.isArray(obj[key]))
+	    ) {
+	      // initialize as array if next key is numeric
+	      if (/^\d+$/.test(keys[i + 1])) {
+	        obj[key] = []
+	      } else {
+	        obj[key] = {}
+	      }
+	    }
+	    obj = obj[key]
+	  }
+	  return obj
+	}
+
+	/**
+	 *
+	 * Transform an object
+	 *
+	 * Usage:
+	 *
+	 *   var obj = {
+	 *     "id": 1,
+	  *    "some": {
+	  *      "thing": "else"
+	  *    }
+	 *   }
+	 *
+	 *   var transform = {
+	 *     "id": "nr",
+	  *    "some.thing": "name"
+	 *   }
+	 *
+	 *   var tgt = dot.transform(transform, obj)
+	 *
+	 * @param {Object} recipe Transform recipe
+	 * @param {Object} obj Object to be transformed
+	 * @param {Array} mods modifiers for the target
+	 */
+	DotObject.prototype.transform = function (recipe, obj, tgt) {
+	  obj = obj || {}
+	  tgt = tgt || {}
+	  Object.keys(recipe).forEach(function (key) {
+	    this.set(recipe[key], this.pick(key, obj), tgt)
+	  }.bind(this))
+	  return tgt
+	}
+
+	/**
+	 *
+	 * Convert object to dotted-key/value pair
+	 *
+	 * Usage:
+	 *
+	 *   var tgt = dot.dot(obj)
+	 *
+	 *   or
+	 *
+	 *   var tgt = {}
+	 *   dot.dot(obj, tgt)
+	 *
+	 * @param {Object} obj source object
+	 * @param {Object} tgt target object
+	 * @param {Array} path path array (internal)
+	 */
+	DotObject.prototype.dot = function (obj, tgt, path) {
+	  tgt = tgt || {}
+	  path = path || []
+	  Object.keys(obj).forEach(function (key) {
+	    if (Object(obj[key]) === obj[key]) {
+	      return this.dot(obj[key], tgt, path.concat(key))
+	    } else {
+	      tgt[path.concat(key).join(this.seperator)] = obj[key]
+	    }
+	  }.bind(this))
+	  return tgt
+	}
+
+	DotObject.pick = wrap('pick')
+	DotObject.move = wrap('move')
+	DotObject.transfer = wrap('transfer')
+	DotObject.transform = wrap('transform')
+	DotObject.copy = wrap('copy')
+	DotObject.object = wrap('object')
+	DotObject.str = wrap('str')
+	DotObject.set = wrap('set')
+	DotObject.del = DotObject.remove = wrap('remove')
+	DotObject.dot = wrap('dot')
+
+	;['override', 'overwrite'].forEach(function (prop) {
+	  Object.defineProperty(DotObject, prop, {
+	    get: function () {
+	      return dotDefault.override
+	    },
+	    set: function (val) {
+	      dotDefault.override = !!val
+	    }
+	  })
+	})
+
+	Object.defineProperty(DotObject, 'useArray', {
+	  get: function () {
+	    return dotDefault.useArray
+	  },
+	  set: function (val) {
+	    dotDefault.useArray = val
+	  }
+	})
+
+	DotObject._process = _process
+
+	module.exports = DotObject;
+
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports === 'object') {
+	        module.exports = factory();
+	    } else {
+	        root.deepmerge = factory();
+	    }
+	}(this, function () {
+
+	return function deepmerge(target, src) {
+	    var array = Array.isArray(src);
+	    var dst = array && [] || {};
+
+	    if (array) {
+	        target = target || [];
+	        dst = dst.concat(target);
+	        src.forEach(function(e, i) {
+	            if (typeof dst[i] === 'undefined') {
+	                dst[i] = e;
+	            } else if (typeof e === 'object') {
+	                dst[i] = deepmerge(target[i], e);
+	            } else {
+	                if (target.indexOf(e) === -1) {
+	                    dst.push(e);
+	                }
+	            }
+	        });
+	    } else {
+	        if (target && typeof target === 'object') {
+	            Object.keys(target).forEach(function (key) {
+	                dst[key] = target[key];
+	            })
+	        }
+	        Object.keys(src).forEach(function (key) {
+	            if (typeof src[key] !== 'object' || !src[key]) {
+	                dst[key] = src[key];
+	            }
+	            else {
+	                if (!target[key]) {
+	                    dst[key] = src[key];
+	                } else {
+	                    dst[key] = deepmerge(target[key], src[key]);
+	                }
+	            }
+	        });
+	    }
+
+	    return dst;
+	}
+
+	}));
+
+
+/***/ },
+/* 64 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = __webpack_require__(65)() ? Set : __webpack_require__(66);
+
+
+/***/ },
+/* 65 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12568,22 +13435,22 @@ var ProperCombo =
 
 
 /***/ },
-/* 63 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear          = __webpack_require__(64)
-	  , eIndexOf       = __webpack_require__(66)
-	  , setPrototypeOf = __webpack_require__(72)
-	  , callable       = __webpack_require__(77)
-	  , d              = __webpack_require__(78)
-	  , ee             = __webpack_require__(90)
-	  , Symbol         = __webpack_require__(91)
-	  , iterator       = __webpack_require__(96)
-	  , forOf          = __webpack_require__(100)
-	  , Iterator       = __webpack_require__(110)
-	  , isNative       = __webpack_require__(111)
+	var clear          = __webpack_require__(67)
+	  , eIndexOf       = __webpack_require__(69)
+	  , setPrototypeOf = __webpack_require__(75)
+	  , callable       = __webpack_require__(80)
+	  , d              = __webpack_require__(81)
+	  , ee             = __webpack_require__(93)
+	  , Symbol         = __webpack_require__(94)
+	  , iterator       = __webpack_require__(99)
+	  , forOf          = __webpack_require__(103)
+	  , Iterator       = __webpack_require__(113)
+	  , isNative       = __webpack_require__(114)
 
 	  , call = Function.prototype.call
 	  , defineProperty = Object.defineProperty, getPrototypeOf = Object.getPrototypeOf
@@ -12654,7 +13521,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 64 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Inspired by Google Closure:
@@ -12663,7 +13530,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var value = __webpack_require__(65);
+	var value = __webpack_require__(68);
 
 	module.exports = function () {
 		value(this).length = 0;
@@ -12672,7 +13539,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 65 */
+/* 68 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12684,13 +13551,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 66 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toPosInt = __webpack_require__(67)
-	  , value    = __webpack_require__(65)
+	var toPosInt = __webpack_require__(70)
+	  , value    = __webpack_require__(68)
 
 	  , indexOf = Array.prototype.indexOf
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -12719,12 +13586,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 67 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toInteger = __webpack_require__(68)
+	var toInteger = __webpack_require__(71)
 
 	  , max = Math.max;
 
@@ -12732,12 +13599,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 68 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var sign = __webpack_require__(69)
+	var sign = __webpack_require__(72)
 
 	  , abs = Math.abs, floor = Math.floor;
 
@@ -12750,18 +13617,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 69 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(70)()
+	module.exports = __webpack_require__(73)()
 		? Math.sign
-		: __webpack_require__(71);
+		: __webpack_require__(74);
 
 
 /***/ },
-/* 70 */
+/* 73 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12774,7 +13641,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 71 */
+/* 74 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12787,18 +13654,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 72 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(73)()
+	module.exports = __webpack_require__(76)()
 		? Object.setPrototypeOf
-		: __webpack_require__(74);
+		: __webpack_require__(77);
 
 
 /***/ },
-/* 73 */
+/* 76 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12815,7 +13682,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 74 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Big thanks to @WebReflection for sorting this out
@@ -12823,8 +13690,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var isObject      = __webpack_require__(75)
-	  , value         = __webpack_require__(65)
+	var isObject      = __webpack_require__(78)
+	  , value         = __webpack_require__(68)
 
 	  , isPrototypeOf = Object.prototype.isPrototypeOf
 	  , defineProperty = Object.defineProperty
@@ -12890,11 +13757,11 @@ var ProperCombo =
 		return false;
 	}())));
 
-	__webpack_require__(76);
+	__webpack_require__(79);
 
 
 /***/ },
-/* 75 */
+/* 78 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12907,7 +13774,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 76 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Workaround for http://code.google.com/p/v8/issues/detail?id=2804
@@ -12916,8 +13783,8 @@ var ProperCombo =
 
 	var create = Object.create, shim;
 
-	if (!__webpack_require__(73)()) {
-		shim = __webpack_require__(74);
+	if (!__webpack_require__(76)()) {
+		shim = __webpack_require__(77);
 	}
 
 	module.exports = (function () {
@@ -12949,7 +13816,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 77 */
+/* 80 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12961,15 +13828,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 78 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign        = __webpack_require__(79)
-	  , normalizeOpts = __webpack_require__(85)
-	  , isCallable    = __webpack_require__(86)
-	  , contains      = __webpack_require__(87)
+	var assign        = __webpack_require__(82)
+	  , normalizeOpts = __webpack_require__(88)
+	  , isCallable    = __webpack_require__(89)
+	  , contains      = __webpack_require__(90)
 
 	  , d;
 
@@ -13030,18 +13897,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 79 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(80)()
+	module.exports = __webpack_require__(83)()
 		? Object.assign
-		: __webpack_require__(81);
+		: __webpack_require__(84);
 
 
 /***/ },
-/* 80 */
+/* 83 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13056,13 +13923,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 81 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keys  = __webpack_require__(82)
-	  , value = __webpack_require__(65)
+	var keys  = __webpack_require__(85)
+	  , value = __webpack_require__(68)
 
 	  , max = Math.max;
 
@@ -13084,18 +13951,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 82 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(83)()
+	module.exports = __webpack_require__(86)()
 		? Object.keys
-		: __webpack_require__(84);
+		: __webpack_require__(87);
 
 
 /***/ },
-/* 83 */
+/* 86 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13109,7 +13976,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 84 */
+/* 87 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13122,7 +13989,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 85 */
+/* 88 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13145,7 +14012,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 86 */
+/* 89 */
 /***/ function(module, exports) {
 
 	// Deprecated
@@ -13156,18 +14023,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 87 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(88)()
+	module.exports = __webpack_require__(91)()
 		? String.prototype.contains
-		: __webpack_require__(89);
+		: __webpack_require__(92);
 
 
 /***/ },
-/* 88 */
+/* 91 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13181,7 +14048,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 89 */
+/* 92 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13194,13 +14061,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 90 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var d        = __webpack_require__(78)
-	  , callable = __webpack_require__(77)
+	var d        = __webpack_require__(81)
+	  , callable = __webpack_require__(80)
 
 	  , apply = Function.prototype.apply, call = Function.prototype.call
 	  , create = Object.create, defineProperty = Object.defineProperty
@@ -13332,16 +14199,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 91 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(92)() ? Symbol : __webpack_require__(93);
+	module.exports = __webpack_require__(95)() ? Symbol : __webpack_require__(96);
 
 
 /***/ },
-/* 92 */
+/* 95 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13365,15 +14232,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 93 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// ES2015 Symbol polyfill for environments that do not support it (or partially support it_
 
 	'use strict';
 
-	var d              = __webpack_require__(78)
-	  , validateSymbol = __webpack_require__(94)
+	var d              = __webpack_require__(81)
+	  , validateSymbol = __webpack_require__(97)
 
 	  , create = Object.create, defineProperties = Object.defineProperties
 	  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
@@ -13478,12 +14345,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 94 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isSymbol = __webpack_require__(95);
+	var isSymbol = __webpack_require__(98);
 
 	module.exports = function (value) {
 		if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
@@ -13492,7 +14359,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 95 */
+/* 98 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13503,12 +14370,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 96 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isIterable = __webpack_require__(97);
+	var isIterable = __webpack_require__(100);
 
 	module.exports = function (value) {
 		if (!isIterable(value)) throw new TypeError(value + " is not iterable");
@@ -13517,14 +14384,14 @@ var ProperCombo =
 
 
 /***/ },
-/* 97 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(98)
-	  , isString       = __webpack_require__(99)
-	  , iteratorSymbol = __webpack_require__(91).iterator
+	var isArguments    = __webpack_require__(101)
+	  , isString       = __webpack_require__(102)
+	  , iteratorSymbol = __webpack_require__(94).iterator
 
 	  , isArray = Array.isArray;
 
@@ -13538,7 +14405,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 98 */
+/* 101 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13551,7 +14418,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 99 */
+/* 102 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13567,15 +14434,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 100 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments = __webpack_require__(98)
-	  , callable    = __webpack_require__(77)
-	  , isString    = __webpack_require__(99)
-	  , get         = __webpack_require__(101)
+	var isArguments = __webpack_require__(101)
+	  , callable    = __webpack_require__(80)
+	  , isString    = __webpack_require__(102)
+	  , get         = __webpack_require__(104)
 
 	  , isArray = Array.isArray, call = Function.prototype.call
 	  , some = Array.prototype.some;
@@ -13619,17 +14486,17 @@ var ProperCombo =
 
 
 /***/ },
-/* 101 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(98)
-	  , isString       = __webpack_require__(99)
-	  , ArrayIterator  = __webpack_require__(102)
-	  , StringIterator = __webpack_require__(109)
-	  , iterable       = __webpack_require__(96)
-	  , iteratorSymbol = __webpack_require__(91).iterator;
+	var isArguments    = __webpack_require__(101)
+	  , isString       = __webpack_require__(102)
+	  , ArrayIterator  = __webpack_require__(105)
+	  , StringIterator = __webpack_require__(112)
+	  , iterable       = __webpack_require__(99)
+	  , iteratorSymbol = __webpack_require__(94).iterator;
 
 	module.exports = function (obj) {
 		if (typeof iterable(obj)[iteratorSymbol] === 'function') return obj[iteratorSymbol]();
@@ -13640,15 +14507,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 102 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(72)
-	  , contains       = __webpack_require__(87)
-	  , d              = __webpack_require__(78)
-	  , Iterator       = __webpack_require__(103)
+	var setPrototypeOf = __webpack_require__(75)
+	  , contains       = __webpack_require__(90)
+	  , d              = __webpack_require__(81)
+	  , Iterator       = __webpack_require__(106)
 
 	  , defineProperty = Object.defineProperty
 	  , ArrayIterator;
@@ -13676,18 +14543,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 103 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear    = __webpack_require__(64)
-	  , assign   = __webpack_require__(79)
-	  , callable = __webpack_require__(77)
-	  , value    = __webpack_require__(65)
-	  , d        = __webpack_require__(78)
-	  , autoBind = __webpack_require__(104)
-	  , Symbol   = __webpack_require__(91)
+	var clear    = __webpack_require__(67)
+	  , assign   = __webpack_require__(82)
+	  , callable = __webpack_require__(80)
+	  , value    = __webpack_require__(68)
+	  , d        = __webpack_require__(81)
+	  , autoBind = __webpack_require__(107)
+	  , Symbol   = __webpack_require__(94)
 
 	  , defineProperty = Object.defineProperty
 	  , defineProperties = Object.defineProperties
@@ -13772,15 +14639,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 104 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var copy       = __webpack_require__(105)
-	  , map        = __webpack_require__(106)
-	  , callable   = __webpack_require__(77)
-	  , validValue = __webpack_require__(65)
+	var copy       = __webpack_require__(108)
+	  , map        = __webpack_require__(109)
+	  , callable   = __webpack_require__(80)
+	  , validValue = __webpack_require__(68)
 
 	  , bind = Function.prototype.bind, defineProperty = Object.defineProperty
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -13809,13 +14676,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 105 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign = __webpack_require__(79)
-	  , value  = __webpack_require__(65);
+	var assign = __webpack_require__(82)
+	  , value  = __webpack_require__(68);
 
 	module.exports = function (obj) {
 		var copy = Object(value(obj));
@@ -13825,13 +14692,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 106 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var callable = __webpack_require__(77)
-	  , forEach  = __webpack_require__(107)
+	var callable = __webpack_require__(80)
+	  , forEach  = __webpack_require__(110)
 
 	  , call = Function.prototype.call;
 
@@ -13846,16 +14713,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 107 */
+/* 110 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(108)('forEach');
+	module.exports = __webpack_require__(111)('forEach');
 
 
 /***/ },
-/* 108 */
+/* 111 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Internal method, used by iteration functions.
@@ -13864,8 +14731,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var callable = __webpack_require__(77)
-	  , value    = __webpack_require__(65)
+	var callable = __webpack_require__(80)
+	  , value    = __webpack_require__(68)
 
 	  , bind = Function.prototype.bind, call = Function.prototype.call, keys = Object.keys
 	  , propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
@@ -13890,7 +14757,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 109 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Thanks @mathiasbynens
@@ -13898,9 +14765,9 @@ var ProperCombo =
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(72)
-	  , d              = __webpack_require__(78)
-	  , Iterator       = __webpack_require__(103)
+	var setPrototypeOf = __webpack_require__(75)
+	  , d              = __webpack_require__(81)
+	  , Iterator       = __webpack_require__(106)
 
 	  , defineProperty = Object.defineProperty
 	  , StringIterator;
@@ -13933,16 +14800,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 110 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf    = __webpack_require__(72)
-	  , contains          = __webpack_require__(87)
-	  , d                 = __webpack_require__(78)
-	  , Iterator          = __webpack_require__(103)
-	  , toStringTagSymbol = __webpack_require__(91).toStringTag
+	var setPrototypeOf    = __webpack_require__(75)
+	  , contains          = __webpack_require__(90)
+	  , d                 = __webpack_require__(81)
+	  , Iterator          = __webpack_require__(106)
+	  , toStringTagSymbol = __webpack_require__(94).toStringTag
 
 	  , defineProperty = Object.defineProperty
 	  , SetIterator;
@@ -13969,7 +14836,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 111 */
+/* 114 */
 /***/ function(module, exports) {
 
 	// Exports true if environment provides native `Set` implementation,
@@ -13984,7 +14851,30 @@ var ProperCombo =
 
 
 /***/ },
-/* 112 */
+/* 115 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _searchField = __webpack_require__(116);
+
+	var _searchField2 = _interopRequireDefault(_searchField);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	if (false) {
+		require("../css/style.scss");
+	}
+
+	exports["default"] = _searchField2["default"];
+	module.exports = exports['default'];
+
+/***/ },
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14002,6 +14892,10 @@ var ProperCombo =
 	var _underscore = __webpack_require__(4);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
+
+	var _reactDimensions = __webpack_require__(59);
+
+	var _reactDimensions2 = _interopRequireDefault(_reactDimensions);
 
 	var _reactImmutableRenderMixin = __webpack_require__(10);
 
@@ -14270,7 +15164,8 @@ var ProperCombo =
 							autoComplete: this.props.autoComplete,
 							placeholder: this.props.placeholder,
 							defaultValue: this.props.defaultValue,
-							onKeyUp: this.onChange
+							onKeyUp: this.onChange,
+							style: { maxWidth: this.props.containerWidth - 5, boxSizing: 'border-box' }
 						}),
 						clearBtn
 					)
@@ -14285,11 +15180,12 @@ var ProperCombo =
 
 	SearchField.defaultProps = getDefaultProps();
 
-	exports['default'] = SearchField;
+	var toExport =  false ? SearchField : (0, _reactDimensions2['default'])()(SearchField);
+	exports['default'] = toExport;
 	module.exports = exports['default'];
 
 /***/ },
-/* 113 */
+/* 117 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14301,6 +15197,8 @@ var ProperCombo =
 		'SPA': {
 			all: 'Seleccionar Todo',
 			none: 'Deseleccionar Todo',
+			empty: 'Seleccionar Vacios',
+			notEmpty: 'Deseleccionar Vacios',
 			loading: 'Cargando...',
 			noData: 'No se encontró ningún elemento',
 			errorIdField: 'No se pudo cambiar el `idField´, el campo',
@@ -14310,6 +15208,8 @@ var ProperCombo =
 		'ENG': {
 			all: 'Select All',
 			none: 'Unselect All',
+			empty: 'Select Empty',
+			notEmpty: 'Unselect Empty',
 			loading: 'Loading...',
 			noData: 'No data found',
 			errorIdField: "Couldn\'t change the `idField´, the field",
@@ -14320,7 +15220,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 114 */
+/* 118 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14362,7 +15262,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 115 */
+/* 119 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

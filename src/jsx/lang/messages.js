@@ -2,6 +2,8 @@ export default {
 	'SPA': {
 		all: 'Seleccionar Todo',
 		none: 'Deseleccionar Todo',
+		empty: 'Seleccionar Vacios',
+		notEmpty: 'Deseleccionar Vacios',
 		loading: 'Cargando...',
 		noData: 'No se encontró ningún elemento',
 		errorIdField: 'No se pudo cambiar el `idField´,',
@@ -15,6 +17,8 @@ export default {
 	'ENG': {
 		all: 'Select All',
 		none: 'Unselect All',
+		empty: 'Select Empty',
+		notEmpty: 'Unselect Empty',
 		loading: 'Loading...',
 		noData:'No data found',
 		errorIdField: "Couldn\'t change the `idField´,",

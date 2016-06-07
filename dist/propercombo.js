@@ -58,7 +58,7 @@ var ProperCombo =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	if (true) {
-		__webpack_require__(118);
+		__webpack_require__(119);
 	}
 
 	exports["default"] = _combofield2["default"];
@@ -754,15 +754,15 @@ var ProperCombo =
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
-	var _searchField = __webpack_require__(115);
+	var _reactPropersearchField = __webpack_require__(115);
 
-	var _searchField2 = _interopRequireDefault(_searchField);
+	var _reactPropersearchField2 = _interopRequireDefault(_reactPropersearchField);
 
-	var _messages2 = __webpack_require__(116);
+	var _messages2 = __webpack_require__(117);
 
 	var _messages3 = _interopRequireDefault(_messages2);
 
-	var _normalize = __webpack_require__(117);
+	var _normalize = __webpack_require__(118);
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
@@ -1600,7 +1600,7 @@ var ProperCombo =
 					content = _react2['default'].createElement(
 						'div',
 						null,
-						_react2['default'].createElement(_searchField2['default'], {
+						_react2['default'].createElement(_reactPropersearchField2['default'], {
 							onSearch: this.handleSearch.bind(this),
 							onEnter: this.props.onEnter,
 							className: this.props.fieldClass,
@@ -9218,6 +9218,9 @@ var ProperCombo =
 	var queueIndex = -1;
 
 	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
 	    draining = false;
 	    if (currentQueue.length) {
 	        queue = currentQueue.concat(queue);
@@ -14851,6 +14854,29 @@ var ProperCombo =
 /* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _searchField = __webpack_require__(116);
+
+	var _searchField2 = _interopRequireDefault(_searchField);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	if (false) {
+		require("../css/style.scss");
+	}
+
+	exports["default"] = _searchField2["default"];
+	module.exports = exports['default'];
+
+/***/ },
+/* 116 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -15159,7 +15185,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 116 */
+/* 117 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15194,7 +15220,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 117 */
+/* 118 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15236,7 +15262,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 118 */
+/* 119 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

@@ -272,7 +272,7 @@ var ProperCombo =
 
 						if (_underscore2['default'].isArray(selection)) {
 							selection.forEach(function (element) {
-								if (dataKeys.has(element)) {
+								if (dataKeys.has(element.toString())) {
 									selectedData.push(data[element]);
 								}
 							});

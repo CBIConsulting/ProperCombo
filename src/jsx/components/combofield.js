@@ -154,7 +154,7 @@ class ComboField extends React.Component {
 
 			if (_.isArray(selection)) {
 				selection.forEach( (element) => {
-					if (dataKeys.has(element)) {
+					if (dataKeys.has(element.toString())) {
 						selectedData.push(data[element]);
 					}
 				});

@@ -167,7 +167,6 @@ var ProperCombo =
 	 *	/>
 	 * ```
 	 */
-	// Put this to true to get a diferent ToolBar that allows select empty
 
 	var ComboField = function (_React$Component) {
 		_inherits(ComboField, _React$Component);

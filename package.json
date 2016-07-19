@@ -1,14 +1,15 @@
 {
   "name": "react-propercombo",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A virtual field that show/hide a ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and display the selected items in boxes inside the field",
   "main": "index.js",
   "scripts": {
     "test": "webpack && karma start --single-run --no-auto-watch karma.conf.js",
+    "clean": "rm -Rvf css && rm -Rvf dist && rm -Rvf lib && mkdir dist && mkdir css && mkdir lib",
     "watch": "karma start --auto-watch --no-single-run karma.conf.js",
     "start": "webpack-dev-server --hot --inline --config webpack.config.example.js",
-    "build": "babel src/jsx --out-dir lib && webpack && cp -rvf src/css/* css/",
-    "release": "webpack --config webpack.config.min.js",
+    "build": "npm run clean && babel src/jsx --out-dir lib && webpack && cp -rvf src/css/* css/",
+    "release":"npm run build && webpack --config webpack.config.min.js",
     "build-example": "webpack --config webpack.config.example.dist.js"
   },
   "repository": {
@@ -16,6 +17,8 @@
     "url": "git+https://github.com/CBIConsulting/ProperCombo.git"
   },
   "keywords": [
+    "react",
+    "combo",
     "react-component",
     "search",
     "ui"
@@ -54,7 +57,7 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
-    "node-sass": "~3.4.2",
+    "node-sass": "^3.4.2",
     "phantomjs-prebuilt": "^2.1.7",
     "react-addons-test-utils": "^0.14.7",
     "sass-loader": "^3.2.0",
@@ -67,7 +70,7 @@
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-immutable-render-mixin": "^0.9.5",
-    "react-propersearch": "^0.2.3",
+    "react-propersearch": "^0.2.4",
     "underscore": "^1.8.3"
   }
 }

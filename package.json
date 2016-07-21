@@ -9,7 +9,7 @@
     "watch": "karma start --auto-watch --no-single-run karma.conf.js",
     "start": "webpack-dev-server --hot --inline --config webpack.config.example.js",
     "build": "npm run clean && babel src/jsx --out-dir lib && webpack && cp -rvf src/css/* css/",
-    "release":"npm run build && webpack --config webpack.config.min.js",
+    "release": "npm run build && webpack --config webpack.config.min.js",
     "build-example": "webpack --config webpack.config.example.dist.js"
   },
   "repository": {
@@ -70,7 +70,7 @@
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-immutable-render-mixin": "^0.9.5",
-    "react-propersearch": "^0.2.4",
+    "react-propersearch": "^0.2.5",
     "underscore": "^1.8.3"
   }
 }

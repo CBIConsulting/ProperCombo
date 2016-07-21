@@ -17,6 +17,7 @@ function getDefaultProps() {
 		messages: Messages,
 		lang: 'ENG',
 		defaultSelection: [],
+		hiddenSelection: [],
 		multiSelect: false,
 		listWidth: null,
 		listHeight: 200,
@@ -310,6 +311,7 @@ class ComboField extends React.Component {
 			filterField={this.props.filterField}
 			afterSelect={this.afterSelect.bind(this)}
 			allowsEmptySelection={this.props.allowsEmptySelection}
+			hiddenSelection={this.props.hiddenSelection}
 		/>;
 
 		if (CSSTransition) {

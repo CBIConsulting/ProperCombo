@@ -1,6 +1,6 @@
 {
   "name": "react-propercombo",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A virtual field that show/hide a ProperSearch component (https://github.com/CBIConsulting/ProperSearch) and display the selected items in boxes inside the field",
   "main": "index.js",
   "scripts": {

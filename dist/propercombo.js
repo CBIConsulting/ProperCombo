@@ -509,7 +509,7 @@ var ProperCombo =
 				dataLength = !_underscore2['default'].isArray(this.props.data) ? this.props.data.size : this.props.data.length;
 
 				// If all selected then the list will have just one item / element with the size
-				if (dataLength == size) {
+				if (dataLength == size && size > 20) {
 					var messages = this.props.messages[this.props.lang];
 
 					item = _react2['default'].createElement(

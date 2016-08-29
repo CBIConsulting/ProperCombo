@@ -348,7 +348,7 @@ class ComboField extends React.Component {
 		dataLength = !_.isArray(this.props.data) ? this.props.data.size : this.props.data.length;
 
 		// If all selected then the list will have just one item / element with the size
-		if (dataLength == size) {
+		if (dataLength == size && size > 20) {
 			let messages = this.props.messages[this.props.lang];
 
 			item = (

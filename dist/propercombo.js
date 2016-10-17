@@ -58,7 +58,7 @@ var ProperCombo =
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	if (true) {
-		__webpack_require__(125);
+		__webpack_require__(128);
 	}
 
 	exports["default"] = _combofield2["default"];
@@ -106,7 +106,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(70);
+	var Set = __webpack_require__(73);
 
 	function getDefaultProps() {
 		return {
@@ -142,7 +142,7 @@ var ProperCombo =
 			filter: null, // Optional function (to be used when the displayField is an function too)
 			filterField: null, // By default it will be the displayField
 			afterSelect: null, // Function
-			uniqueId: _underscore2['default'].uniqueId('comboField_'),
+			uniqueId: null,
 			allowsEmptySelection: false };
 	}
 
@@ -175,14 +175,13 @@ var ProperCombo =
 		function ComboField(props) {
 			_classCallCheck(this, ComboField);
 
-			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ComboField).call(this, props));
+			var _this = _possibleConstructorReturn(this, (ComboField.__proto__ || Object.getPrototypeOf(ComboField)).call(this, props));
 
 			_this.state = {
 				selectedData: null,
-				selection: _this.props.defaultSelection,
-				uniqueId: _this.props.uniqueId,
-				secondaryDisplay: _this.props.secondaryDisplay,
-				idField: _this.props.idField,
+				selection: props.defaultSelection,
+				secondaryDisplay: props.secondaryDisplay,
+				idField: props.idField,
 				show: false
 			};
 			return _this;
@@ -191,6 +190,7 @@ var ProperCombo =
 		_createClass(ComboField, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
+				this.uniqueId = this.props.uniqueId ? this.props.uniqueId : _underscore2['default'].uniqueId('comboField_');
 				var selection = this.state.selection,
 				    data = void 0;
 				if (!_underscore2['default'].isNull(selection) && selection.length > 0) {
@@ -259,7 +259,7 @@ var ProperCombo =
 			value: function prepareData(selection, newData, idField) {
 				var _this2 = this;
 
-				var isInmutable = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+				var isInmutable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
 				if (!_underscore2['default'].isNull(selection) && !_underscore2['default'].isNull(newData)) {
 					(function () {
@@ -308,7 +308,7 @@ var ProperCombo =
 					this.setState({
 						selectedData: data,
 						selection: selection
-					}, this.sendSelection(data, selection));
+					}, this.sendSelection.bind(this, data, selection));
 				}
 			}
 
@@ -376,7 +376,7 @@ var ProperCombo =
 			value: function onRemoveElement() {
 				var _this3 = this;
 
-				var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+				var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 				var e = arguments[1];
 
 				e.preventDefault();
@@ -427,7 +427,7 @@ var ProperCombo =
 				}
 
 				search = _react2['default'].createElement(_reactPropersearch2['default'], {
-					key: this.state.uniqueId + '-content-Search',
+					key: this.uniqueId + '-content-Search',
 					className: this.props.searchClassName,
 					data: this.props.data,
 					indexed: this.props.indexed,
@@ -463,7 +463,7 @@ var ProperCombo =
 					return _react2['default'].createElement(
 						CSSTransition,
 						{
-							key: this.state.uniqueId + '-content',
+							key: this.uniqueId + '-content',
 							className: contentClass,
 							transitionName: 'content',
 							component: 'div',
@@ -477,7 +477,7 @@ var ProperCombo =
 					// Test - No Animations
 					return _react2['default'].createElement(
 						'div',
-						{ key: this.state.uniqueId + '-content', className: contentClass },
+						{ key: this.uniqueId + '-content', className: contentClass },
 						' ',
 						search,
 						' '
@@ -574,7 +574,7 @@ var ProperCombo =
 					return _react2['default'].createElement(
 						CSSTransition,
 						{
-							key: this.state.uniqueId + '-fieldllist-elements',
+							key: this.uniqueId + '-fieldllist-elements',
 							className: 'proper-combo-virtualField-list',
 							transitionName: 'list',
 							component: 'ul',
@@ -585,7 +585,7 @@ var ProperCombo =
 				} else {
 					return _react2['default'].createElement(
 						'ul',
-						{ key: this.state.uniqueId + '-fieldllist-elements', className: 'proper-combo-virtualField-list' },
+						{ key: this.uniqueId + '-fieldllist-elements', className: 'proper-combo-virtualField-list' },
 						' ',
 						list,
 						' '
@@ -613,13 +613,13 @@ var ProperCombo =
 				// CSSTransitionGroups for animations Content and List
 				return _react2['default'].createElement(
 					'div',
-					{ key: this.state.uniqueId, className: className },
+					{ key: this.uniqueId, className: className },
 					_react2['default'].createElement(
 						'div',
-						{ key: this.state.uniqueId + '-field', className: 'proper-combo-virtual' },
+						{ key: this.uniqueId + '-field', className: 'proper-combo-virtual' },
 						_react2['default'].createElement(
 							'div',
-							{ key: this.state.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.state.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
+							{ key: this.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
 							elementsList
 						),
 						_react2['default'].createElement(
@@ -755,21 +755,21 @@ var ProperCombo =
 
 	var _searchList2 = _interopRequireDefault(_searchList);
 
-	var _reactPropersearchField = __webpack_require__(121);
+	var _reactPropersearchField = __webpack_require__(124);
 
 	var _reactPropersearchField2 = _interopRequireDefault(_reactPropersearchField);
 
-	var _messages2 = __webpack_require__(123);
+	var _messages2 = __webpack_require__(126);
 
 	var _messages3 = _interopRequireDefault(_messages2);
 
-	var _normalize = __webpack_require__(124);
+	var _normalize = __webpack_require__(127);
 
 	var _normalize2 = _interopRequireDefault(_normalize);
 
 	var _reactImmutableRenderMixin = __webpack_require__(10);
 
-	var _cache = __webpack_require__(67);
+	var _cache = __webpack_require__(70);
 
 	var _cache2 = _interopRequireDefault(_cache);
 
@@ -781,7 +781,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(70);
+	var Set = __webpack_require__(73);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -854,9 +854,9 @@ var ProperCombo =
 		function Search(props) {
 			_classCallCheck(this, Search);
 
-			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Search).call(this, props));
+			var _this = _possibleConstructorReturn(this, (Search.__proto__ || Object.getPrototypeOf(Search)).call(this, props));
 
-			var preparedData = _this.prepareData(null, _this.props.idField, false, _this.props.displayField);
+			var preparedData = _this.prepareData(null, props.idField, false, props.displayField);
 
 			_this.state = {
 				data: preparedData.data, // Data to work with (Inmutable)
@@ -864,8 +864,8 @@ var ProperCombo =
 				rawData: preparedData.rawdata, // Received data without any modfication (Inmutable)
 				indexedData: preparedData.indexed, // Received data indexed (No Inmutable)
 				initialIndexed: preparedData.indexed, // When data get filtered keep the full indexed
-				idField: _this.props.idField, // To don't update the idField if that field doesn't exist in the fields of data array
-				displayField: _this.props.displayField, // same
+				idField: props.idField, // To don't update the idField if that field doesn't exist in the fields of data array
+				displayField: props.displayField, // same
 				selection: new Set(),
 				allSelected: false,
 				selectionApplied: false, // If the selection has been aplied to the data (mostly for some cases of updating props data)
@@ -1097,7 +1097,7 @@ var ProperCombo =
 			value: function updateSelectionData(newSelection) {
 				var _this3 = this;
 
-				var newAllSelected = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+				var newAllSelected = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
 				var newIndexed = _underscore2['default'].clone(this.state.indexedData);
 				var oldSelection = this.state.selection;
@@ -1212,8 +1212,8 @@ var ProperCombo =
 		}, {
 			key: 'triggerSelection',
 			value: function triggerSelection() {
-				var newSelection = arguments.length <= 0 || arguments[0] === undefined ? new Set() : arguments[0];
-				var sendSelection = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+				var newSelection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Set();
+				var sendSelection = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
 				if (sendSelection) {
 					this.setState({
@@ -1297,10 +1297,10 @@ var ProperCombo =
 		}, {
 			key: 'prepareData',
 			value: function prepareData() {
-				var newData = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-				var idField = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-				var rebuild = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
-				var displayfield = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+				var newData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+				var idField = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+				var rebuild = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+				var displayfield = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
 				// The data will be inmutable inside the component
 				var data = newData || this.props.data,
@@ -1383,7 +1383,7 @@ var ProperCombo =
 		}, {
 			key: 'handleSelectionChange',
 			value: function handleSelectionChange(selection) {
-				var emptySelection = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+				var emptySelection = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
 				if (!emptySelection) {
 					this.triggerSelection(selection);
@@ -6669,11 +6669,11 @@ var ProperCombo =
 
 	var _reactVirtualized = __webpack_require__(15);
 
-	var _reactDimensions = __webpack_require__(66);
+	var _reactDimensions = __webpack_require__(69);
 
 	var _reactDimensions2 = _interopRequireDefault(_reactDimensions);
 
-	var _cache = __webpack_require__(67);
+	var _cache = __webpack_require__(70);
 
 	var _cache2 = _interopRequireDefault(_cache);
 
@@ -6685,7 +6685,7 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Set = __webpack_require__(70);
+	var Set = __webpack_require__(73);
 
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
@@ -6707,7 +6707,7 @@ var ProperCombo =
 			listElementClass: null,
 			allowsEmptySelection: false,
 			hiddenSelection: null,
-			uniqueID: _underscore2['default'].uniqueId('search_list_')
+			uniqueID: null
 		};
 	}
 
@@ -6734,11 +6734,11 @@ var ProperCombo =
 		function SearchList(props) {
 			_classCallCheck(this, SearchList);
 
-			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SearchList).call(this, props));
+			var _this = _possibleConstructorReturn(this, (SearchList.__proto__ || Object.getPrototypeOf(SearchList)).call(this, props));
 
 			_this.state = {
-				allSelected: _this.props.allSelected,
-				nothingSelected: _this.props.selection.size == 0,
+				allSelected: props.allSelected,
+				nothingSelected: props.selection.size == 0,
 				hiddenSelection: new Set()
 			};
 			return _this;
@@ -6747,6 +6747,7 @@ var ProperCombo =
 		_createClass(SearchList, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
+				this.uniqueId = this.props.uniqueID ? this.props.uniqueID : _underscore2['default'].uniqueId('search_list_');
 				if (this.props.hiddenSelection) {
 					this.setState({
 						hiddenSelection: this.parseHiddenSelection(this.props)
@@ -6951,7 +6952,7 @@ var ProperCombo =
 		}, {
 			key: 'parseHiddenSelection',
 			value: function parseHiddenSelection() {
-				var props = arguments.length <= 0 || arguments[0] === undefined ? this.props : arguments[0];
+				var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props;
 
 				var hidden = [],
 				    isArray = _underscore2['default'].isArray(props.hiddenSelection),
@@ -7124,7 +7125,7 @@ var ProperCombo =
 				if (typeof element == 'function') {
 					element = element(this.props.indexedData[id]);
 				} else if (this.props.rowFormater) {
-					var ckey = ['search_list', 'list_' + this.props.uniqueID, 'row__' + rowdata.get(this.props.idField), displayField];
+					var ckey = ['search_list', 'list_' + this.uniqueId, 'row__' + rowdata.get(this.props.idField), displayField];
 					element = _cache2['default'].read(ckey);
 
 					if (element === undefined) {
@@ -7454,8 +7455,20 @@ var ProperCombo =
 	    return _CellMeasurer.CellMeasurer;
 	  }
 	});
+	Object.defineProperty(exports, 'defaultCellMeasurerCellSizeCache', {
+	  enumerable: true,
+	  get: function get() {
+	    return _CellMeasurer.defaultCellSizeCache;
+	  }
+	});
+	Object.defineProperty(exports, 'uniformSizeCellMeasurerCellSizeCache', {
+	  enumerable: true,
+	  get: function get() {
+	    return _CellMeasurer.defaultCellSizeCache;
+	  }
+	});
 
-	var _Collection = __webpack_require__(26);
+	var _Collection = __webpack_require__(27);
 
 	Object.defineProperty(exports, 'Collection', {
 	  enumerable: true,
@@ -7464,7 +7477,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _ColumnSizer = __webpack_require__(40);
+	var _ColumnSizer = __webpack_require__(41);
 
 	Object.defineProperty(exports, 'ColumnSizer', {
 	  enumerable: true,
@@ -7473,8 +7486,32 @@ var ProperCombo =
 	  }
 	});
 
-	var _FlexTable = __webpack_require__(50);
+	var _FlexTable = __webpack_require__(51);
 
+	Object.defineProperty(exports, 'defaultFlexTableCellDataGetter', {
+	  enumerable: true,
+	  get: function get() {
+	    return _FlexTable.defaultCellDataGetter;
+	  }
+	});
+	Object.defineProperty(exports, 'defaultFlexTableCellRenderer', {
+	  enumerable: true,
+	  get: function get() {
+	    return _FlexTable.defaultCellRenderer;
+	  }
+	});
+	Object.defineProperty(exports, 'defaultFlexTableHeaderRenderer', {
+	  enumerable: true,
+	  get: function get() {
+	    return _FlexTable.defaultHeaderRenderer;
+	  }
+	});
+	Object.defineProperty(exports, 'defaultFlexTableRowRenderer', {
+	  enumerable: true,
+	  get: function get() {
+	    return _FlexTable.defaultRowRenderer;
+	  }
+	});
 	Object.defineProperty(exports, 'FlexTable', {
 	  enumerable: true,
 	  get: function get() {
@@ -7500,7 +7537,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _Grid = __webpack_require__(42);
+	var _Grid = __webpack_require__(43);
 
 	Object.defineProperty(exports, 'defaultCellRangeRenderer', {
 	  enumerable: true,
@@ -7515,7 +7552,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _InfiniteLoader = __webpack_require__(58);
+	var _InfiniteLoader = __webpack_require__(60);
 
 	Object.defineProperty(exports, 'InfiniteLoader', {
 	  enumerable: true,
@@ -7524,7 +7561,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _ScrollSync = __webpack_require__(60);
+	var _ScrollSync = __webpack_require__(62);
 
 	Object.defineProperty(exports, 'ScrollSync', {
 	  enumerable: true,
@@ -7533,7 +7570,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _VirtualScroll = __webpack_require__(62);
+	var _VirtualScroll = __webpack_require__(64);
 
 	Object.defineProperty(exports, 'VirtualScroll', {
 	  enumerable: true,
@@ -7542,7 +7579,7 @@ var ProperCombo =
 	  }
 	});
 
-	var _WindowScroller = __webpack_require__(64);
+	var _WindowScroller = __webpack_require__(66);
 
 	Object.defineProperty(exports, 'WindowScroller', {
 	  enumerable: true,
@@ -7602,14 +7639,13 @@ var ProperCombo =
 	/**
 	 * This HOC decorates a virtualized component and responds to arrow-key events by scrolling one row or column at a time.
 	 */
-
 	var ArrowKeyStepper = function (_Component) {
 	  _inherits(ArrowKeyStepper, _Component);
 
 	  function ArrowKeyStepper(props, context) {
 	    _classCallCheck(this, ArrowKeyStepper);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrowKeyStepper).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (ArrowKeyStepper.__proto__ || Object.getPrototypeOf(ArrowKeyStepper)).call(this, props, context));
 
 	    _this.state = {
 	      scrollToColumn: 0,
@@ -7861,14 +7897,13 @@ var ProperCombo =
 	 * Child component should not be declared as a child but should rather be specified by a `ChildComponent` property.
 	 * All other properties will be passed through to the child component.
 	 */
-
 	var AutoSizer = function (_Component) {
 	  _inherits(AutoSizer, _Component);
 
 	  function AutoSizer(props) {
 	    _classCallCheck(this, AutoSizer);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AutoSizer).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (AutoSizer.__proto__ || Object.getPrototypeOf(AutoSizer)).call(this, props));
 
 	    _this.state = {
 	      height: 0,
@@ -7884,6 +7919,11 @@ var ProperCombo =
 	  _createClass(AutoSizer, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
+	      // Delay access of parentNode until mount.
+	      // This handles edge-cases where the component has already been unmounted before its ref has been set,
+	      // As well as libraries like react-lite which have a slightly different lifecycle.
+	      this._parentNode = this._autoSizer.parentNode;
+
 	      // Defer requiring resize handler in order to support server-side rendering.
 	      // See issue #41
 	      this._detectElementResize = __webpack_require__(23);
@@ -7973,8 +8013,7 @@ var ProperCombo =
 	  }, {
 	    key: '_setRef',
 	    value: function _setRef(autoSizer) {
-	      // In case the component has been unmounted
-	      this._parentNode = autoSizer && autoSizer.parentNode;
+	      this._autoSizer = autoSizer;
 	    }
 	  }]);
 
@@ -8179,16 +8218,21 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.CellMeasurer = exports.default = undefined;
+	exports.defaultCellSizeCache = exports.CellMeasurer = exports.default = undefined;
 
 	var _CellMeasurer2 = __webpack_require__(25);
 
 	var _CellMeasurer3 = _interopRequireDefault(_CellMeasurer2);
 
+	var _defaultCellSizeCache2 = __webpack_require__(26);
+
+	var _defaultCellSizeCache3 = _interopRequireDefault(_defaultCellSizeCache2);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = _CellMeasurer3.default;
 	exports.CellMeasurer = _CellMeasurer3.default;
+	exports.defaultCellSizeCache = _defaultCellSizeCache3.default;
 
 /***/ },
 /* 25 */
@@ -8206,9 +8250,17 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _reactAddonsShallowCompare = __webpack_require__(18);
+
+	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
+
 	var _reactDom = __webpack_require__(3);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _defaultCellSizeCache = __webpack_require__(26);
+
+	var _defaultCellSizeCache2 = _interopRequireDefault(_defaultCellSizeCache);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -8222,21 +8274,21 @@ var ProperCombo =
 	 * Measures a Grid cell's contents by rendering them in a way that is not visible to the user.
 	 * Either a fixed width or height may be provided if it is desirable to measure only in one direction.
 	 */
-
 	var CellMeasurer = function (_Component) {
 	  _inherits(CellMeasurer, _Component);
 
 	  function CellMeasurer(props, state) {
 	    _classCallCheck(this, CellMeasurer);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CellMeasurer).call(this, props, state));
+	    var _this = _possibleConstructorReturn(this, (CellMeasurer.__proto__ || Object.getPrototypeOf(CellMeasurer)).call(this, props, state));
 
-	    _this._cachedColumnWidths = {};
-	    _this._cachedRowHeights = {};
+	    _this._cellSizeCache = props.cellSizeCache || new _defaultCellSizeCache2.default();
 
 	    _this.getColumnWidth = _this.getColumnWidth.bind(_this);
 	    _this.getRowHeight = _this.getRowHeight.bind(_this);
 	    _this.resetMeasurements = _this.resetMeasurements.bind(_this);
+	    _this.resetMeasurementForColumn = _this.resetMeasurementForColumn.bind(_this);
+	    _this.resetMeasurementForRow = _this.resetMeasurementForRow.bind(_this);
 	    return _this;
 	  }
 
@@ -8245,8 +8297,8 @@ var ProperCombo =
 	    value: function getColumnWidth(_ref) {
 	      var index = _ref.index;
 
-	      if (this._cachedColumnWidths[index]) {
-	        return this._cachedColumnWidths[index];
+	      if (this._cellSizeCache.hasColumnWidth(index)) {
+	        return this._cellSizeCache.getColumnWidth(index);
 	      }
 
 	      var rowCount = this.props.rowCount;
@@ -8267,7 +8319,7 @@ var ProperCombo =
 	        maxWidth = Math.max(maxWidth, width);
 	      }
 
-	      this._cachedColumnWidths[index] = maxWidth;
+	      this._cellSizeCache.setColumnWidth(index, maxWidth);
 
 	      return maxWidth;
 	    }
@@ -8276,8 +8328,8 @@ var ProperCombo =
 	    value: function getRowHeight(_ref2) {
 	      var index = _ref2.index;
 
-	      if (this._cachedRowHeights[index]) {
-	        return this._cachedRowHeights[index];
+	      if (this._cellSizeCache.hasRowHeight(index)) {
+	        return this._cellSizeCache.getRowHeight(index);
 	      }
 
 	      var columnCount = this.props.columnCount;
@@ -8298,15 +8350,25 @@ var ProperCombo =
 	        maxHeight = Math.max(maxHeight, height);
 	      }
 
-	      this._cachedRowHeights[index] = maxHeight;
+	      this._cellSizeCache.setRowHeight(index, maxHeight);
 
 	      return maxHeight;
 	    }
 	  }, {
+	    key: 'resetMeasurementForColumn',
+	    value: function resetMeasurementForColumn(columnIndex) {
+	      this._cellSizeCache.clearColumnWidth(columnIndex);
+	    }
+	  }, {
+	    key: 'resetMeasurementForRow',
+	    value: function resetMeasurementForRow(rowIndex) {
+	      this._cellSizeCache.clearRowHeight(rowIndex);
+	    }
+	  }, {
 	    key: 'resetMeasurements',
 	    value: function resetMeasurements() {
-	      this._cachedColumnWidths = {};
-	      this._cachedRowHeights = {};
+	      this._cellSizeCache.clearAllColumnWidths();
+	      this._cellSizeCache.clearAllRowHeights();
 	    }
 	  }, {
 	    key: 'componentDidMount',
@@ -8316,6 +8378,13 @@ var ProperCombo =
 	  }, {
 	    key: 'componentWillReceiveProps',
 	    value: function componentWillReceiveProps(nextProps) {
+	      var cellSizeCache = this.props.cellSizeCache;
+
+
+	      if (cellSizeCache !== nextProps.cellSizeCache) {
+	        this._cellSizeCache = nextProps.cellSizeCache;
+	      }
+
 	      this._updateDivDimensions(nextProps);
 	    }
 	  }, {
@@ -8332,8 +8401,15 @@ var ProperCombo =
 	      return children({
 	        getColumnWidth: this.getColumnWidth,
 	        getRowHeight: this.getRowHeight,
-	        resetMeasurements: this.resetMeasurements
+	        resetMeasurements: this.resetMeasurements,
+	        resetMeasurementForColumn: this.resetMeasurementForColumn,
+	        resetMeasurementForRow: this.resetMeasurementForRow
 	      });
+	    }
+	  }, {
+	    key: 'shouldComponentUpdate',
+	    value: function shouldComponentUpdate(nextProps, nextState) {
+	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_getContainerNode',
@@ -8437,6 +8513,11 @@ var ProperCombo =
 	  cellRenderer: _react.PropTypes.func.isRequired,
 
 	  /**
+	   * Optional, custom caching strategy for cell sizes.
+	   */
+	  cellSizeCache: _react.PropTypes.object,
+
+	  /**
 	   * Function respondible for rendering a virtualized component.
 	   * This function should implement the following signature:
 	   * ({ getColumnWidth, getRowHeight, resetMeasurements }) => PropTypes.element
@@ -8473,6 +8554,108 @@ var ProperCombo =
 
 /***/ },
 /* 26 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/**
+	 * Default CellMeasurer `cellSizeCache` implementation.
+	 * Permanently caches all cell sizes (identified by column and row index) unless explicitly cleared.
+	 * Can be configured to handle uniform cell widths and/or heights as a way of optimizing certain use cases.
+	 */
+	var CellSizeCache = function () {
+	  function CellSizeCache() {
+	    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    var _ref$uniformRowHeight = _ref.uniformRowHeight;
+	    var uniformRowHeight = _ref$uniformRowHeight === undefined ? false : _ref$uniformRowHeight;
+	    var _ref$uniformColumnWid = _ref.uniformColumnWidth;
+	    var uniformColumnWidth = _ref$uniformColumnWid === undefined ? false : _ref$uniformColumnWid;
+
+	    _classCallCheck(this, CellSizeCache);
+
+	    this._uniformRowHeight = uniformRowHeight;
+	    this._uniformColumnWidth = uniformColumnWidth;
+
+	    this._cachedColumnWidths = {};
+	    this._cachedRowHeights = {};
+	  }
+
+	  _createClass(CellSizeCache, [{
+	    key: "clearAllColumnWidths",
+	    value: function clearAllColumnWidths() {
+	      this._cachedColumnWidth = undefined;
+	      this._cachedColumnWidths = {};
+	    }
+	  }, {
+	    key: "clearAllRowHeights",
+	    value: function clearAllRowHeights() {
+	      this._cachedRowHeight = undefined;
+	      this._cachedRowHeights = {};
+	    }
+	  }, {
+	    key: "clearColumnWidth",
+	    value: function clearColumnWidth(index) {
+	      this._cachedColumnWidth = undefined;
+
+	      delete this._cachedColumnWidths[index];
+	    }
+	  }, {
+	    key: "clearRowHeight",
+	    value: function clearRowHeight(index) {
+	      this._cachedRowHeight = undefined;
+
+	      delete this._cachedRowHeights[index];
+	    }
+	  }, {
+	    key: "getColumnWidth",
+	    value: function getColumnWidth(index) {
+	      return this._uniformColumnWidth ? this._cachedColumnWidth : this._cachedColumnWidths[index];
+	    }
+	  }, {
+	    key: "getRowHeight",
+	    value: function getRowHeight(index) {
+	      return this._uniformRowHeight ? this._cachedRowHeight : this._cachedRowHeights[index];
+	    }
+	  }, {
+	    key: "hasColumnWidth",
+	    value: function hasColumnWidth(index) {
+	      return this._uniformColumnWidth ? !!this._cachedColumnWidth : !!this._cachedColumnWidths[index];
+	    }
+	  }, {
+	    key: "hasRowHeight",
+	    value: function hasRowHeight(index) {
+	      return this._uniformRowHeight ? !!this._cachedRowHeight : !!this._cachedRowHeights[index];
+	    }
+	  }, {
+	    key: "setColumnWidth",
+	    value: function setColumnWidth(index, width) {
+	      this._cachedColumnWidth = width;
+	      this._cachedColumnWidths[index] = width;
+	    }
+	  }, {
+	    key: "setRowHeight",
+	    value: function setRowHeight(index, height) {
+	      this._cachedRowHeight = height;
+	      this._cachedRowHeights[index] = height;
+	    }
+	  }]);
+
+	  return CellSizeCache;
+	}();
+
+	exports.default = CellSizeCache;
+
+/***/ },
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8482,7 +8665,7 @@ var ProperCombo =
 	});
 	exports.Collection = exports.default = undefined;
 
-	var _Collection2 = __webpack_require__(27);
+	var _Collection2 = __webpack_require__(28);
 
 	var _Collection3 = _interopRequireDefault(_Collection2);
 
@@ -8492,7 +8675,7 @@ var ProperCombo =
 	exports.Collection = _Collection3.default;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8509,15 +8692,15 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _CollectionView = __webpack_require__(28);
+	var _CollectionView = __webpack_require__(29);
 
 	var _CollectionView2 = _interopRequireDefault(_CollectionView);
 
-	var _calculateSizeAndPositionData2 = __webpack_require__(36);
+	var _calculateSizeAndPositionData2 = __webpack_require__(37);
 
 	var _calculateSizeAndPositionData3 = _interopRequireDefault(_calculateSizeAndPositionData2);
 
-	var _getUpdatedOffsetForIndex = __webpack_require__(39);
+	var _getUpdatedOffsetForIndex = __webpack_require__(40);
 
 	var _getUpdatedOffsetForIndex2 = _interopRequireDefault(_getUpdatedOffsetForIndex);
 
@@ -8539,17 +8722,21 @@ var ProperCombo =
 	 * Renders scattered or non-linear data.
 	 * Unlike Grid, which renders checkerboard data, Collection can render arbitrarily positioned- even overlapping- data.
 	 */
-
 	var Collection = function (_Component) {
 	  _inherits(Collection, _Component);
 
 	  function Collection(props, context) {
 	    _classCallCheck(this, Collection);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (Collection.__proto__ || Object.getPrototypeOf(Collection)).call(this, props, context));
 
 	    _this._cellMetadata = [];
 	    _this._lastRenderedCellIndices = [];
+
+	    // Cell cache during scroll (for perforamnce)
+	    _this._cellCache = [];
+
+	    _this._isScrollingChange = _this._isScrollingChange.bind(_this);
 	    return _this;
 	  }
 
@@ -8559,6 +8746,7 @@ var ProperCombo =
 	  _createClass(Collection, [{
 	    key: 'recomputeCellSizesAndPositions',
 	    value: function recomputeCellSizesAndPositions() {
+	      this._cellCache = [];
 	      this._collectionView.recomputeCellSizesAndPositions();
 	    }
 
@@ -8573,6 +8761,7 @@ var ProperCombo =
 
 	      return _react2.default.createElement(_CollectionView2.default, _extends({
 	        cellLayoutManager: this,
+	        isScrollingChange: this._isScrollingChange,
 	        ref: function ref(_ref) {
 	          _this2._collectionView = _ref;
 	        }
@@ -8692,6 +8881,7 @@ var ProperCombo =
 	      });
 
 	      return cellGroupRenderer({
+	        cellCache: this._cellCache,
 	        cellRenderer: cellRenderer,
 	        cellSizeAndPositionGetter: function cellSizeAndPositionGetter(_ref4) {
 	          var index = _ref4.index;
@@ -8700,6 +8890,13 @@ var ProperCombo =
 	        indices: this._lastRenderedCellIndices,
 	        isScrolling: isScrolling
 	      });
+	    }
+	  }, {
+	    key: '_isScrollingChange',
+	    value: function _isScrollingChange(isScrolling) {
+	      if (!isScrolling) {
+	        this._cellCache = [];
+	      }
 	    }
 	  }]);
 
@@ -8749,6 +8946,7 @@ var ProperCombo =
 
 
 	function defaultCellGroupRenderer(_ref5) {
+	  var cellCache = _ref5.cellCache;
 	  var cellRenderer = _ref5.cellRenderer;
 	  var cellSizeAndPositionGetter = _ref5.cellSizeAndPositionGetter;
 	  var indices = _ref5.indices;
@@ -8756,10 +8954,28 @@ var ProperCombo =
 
 	  return indices.map(function (index) {
 	    var cellMetadata = cellSizeAndPositionGetter({ index: index });
-	    var renderedCell = cellRenderer({
-	      index: index,
-	      isScrolling: isScrolling
-	    });
+
+	    // Avoid re-creating cells while scrolling.
+	    // This can lead to the same cell being created many times and can cause performance issues for "heavy" cells.
+	    // If a scroll is in progress- cache and reuse cells.
+	    // This cache will be thrown away once scrolling complets.
+	    var renderedCell = void 0;
+
+	    if (isScrolling) {
+	      if (!(index in cellCache)) {
+	        cellCache[index] = cellRenderer({
+	          index: index,
+	          isScrolling: isScrolling
+	        });
+	      }
+
+	      renderedCell = cellCache[index];
+	    } else {
+	      renderedCell = cellRenderer({
+	        index: index,
+	        isScrolling: isScrolling
+	      });
+	    }
 
 	    if (renderedCell == null || renderedCell === false) {
 	      return null;
@@ -8785,7 +9001,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8802,19 +9018,19 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _createCallbackMemoizer = __webpack_require__(30);
+	var _createCallbackMemoizer = __webpack_require__(31);
 
 	var _createCallbackMemoizer2 = _interopRequireDefault(_createCallbackMemoizer);
 
-	var _scrollbarSize = __webpack_require__(31);
+	var _scrollbarSize = __webpack_require__(32);
 
 	var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
 
-	var _raf = __webpack_require__(33);
+	var _raf = __webpack_require__(34);
 
 	var _raf2 = _interopRequireDefault(_raf);
 
@@ -8858,7 +9074,7 @@ var ProperCombo =
 	  function CollectionView(props, context) {
 	    _classCallCheck(this, CollectionView);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CollectionView).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (CollectionView.__proto__ || Object.getPrototypeOf(CollectionView)).call(this, props, context));
 
 	    _this.state = {
 	      calculateSizeAndPositionDataOnNextUpdate: false,
@@ -9041,34 +9257,43 @@ var ProperCombo =
 	      var _this2 = this;
 
 	      var _props3 = this.props;
+	      var autoHeight = _props3.autoHeight;
+	      var cellCount = _props3.cellCount;
 	      var cellLayoutManager = _props3.cellLayoutManager;
 	      var className = _props3.className;
 	      var height = _props3.height;
+	      var horizontalOverscanSize = _props3.horizontalOverscanSize;
 	      var noContentRenderer = _props3.noContentRenderer;
 	      var style = _props3.style;
+	      var verticalOverscanSize = _props3.verticalOverscanSize;
 	      var width = _props3.width;
 	      var _state2 = this.state;
 	      var isScrolling = _state2.isScrolling;
 	      var scrollLeft = _state2.scrollLeft;
 	      var scrollTop = _state2.scrollTop;
 
-
-	      var childrenToDisplay = height > 0 && width > 0 ? cellLayoutManager.cellRenderers({
-	        height: height,
-	        isScrolling: isScrolling,
-	        width: width,
-	        x: scrollLeft,
-	        y: scrollTop
-	      }) : [];
-
 	      var _cellLayoutManager$ge2 = cellLayoutManager.getTotalSize();
 
 	      var totalHeight = _cellLayoutManager$ge2.height;
 	      var totalWidth = _cellLayoutManager$ge2.width;
 
+	      // Safely expand the rendered area by the specified overscan amount
+
+	      var left = Math.max(0, scrollLeft - horizontalOverscanSize);
+	      var top = Math.max(0, scrollTop - verticalOverscanSize);
+	      var right = Math.min(totalWidth, scrollLeft + width + horizontalOverscanSize);
+	      var bottom = Math.min(totalHeight, scrollTop + height + verticalOverscanSize);
+
+	      var childrenToDisplay = height > 0 && width > 0 ? cellLayoutManager.cellRenderers({
+	        height: bottom - top,
+	        isScrolling: isScrolling,
+	        width: right - left,
+	        x: left,
+	        y: top
+	      }) : [];
 
 	      var collectionStyle = {
-	        height: height,
+	        height: autoHeight ? 'auto' : height,
 	        width: width
 	      };
 
@@ -9097,7 +9322,7 @@ var ProperCombo =
 	          style: _extends({}, collectionStyle, style),
 	          tabIndex: 0
 	        },
-	        childrenToDisplay.length > 0 && _react2.default.createElement(
+	        cellCount > 0 && _react2.default.createElement(
 	          'div',
 	          {
 	            className: 'Collection__innerScrollContainer',
@@ -9105,13 +9330,13 @@ var ProperCombo =
 	              height: totalHeight,
 	              maxHeight: totalHeight,
 	              maxWidth: totalWidth,
-	              pointerEvents: isScrolling ? 'none' : 'auto',
+	              pointerEvents: isScrolling ? 'none' : '',
 	              width: totalWidth
 	            }
 	          },
 	          childrenToDisplay
 	        ),
-	        childrenToDisplay.length === 0 && noContentRenderer()
+	        cellCount === 0 && noContentRenderer()
 	      );
 	    }
 	  }, {
@@ -9138,6 +9363,11 @@ var ProperCombo =
 	      }
 
 	      this._disablePointerEventsTimeoutId = setTimeout(function () {
+	        var isScrollingChange = _this3.props.isScrollingChange;
+
+
+	        isScrollingChange(false);
+
 	        _this3._disablePointerEventsTimeoutId = null;
 	        _this3.setState({
 	          isScrolling: false
@@ -9286,6 +9516,7 @@ var ProperCombo =
 	      var _props7 = this.props;
 	      var cellLayoutManager = _props7.cellLayoutManager;
 	      var height = _props7.height;
+	      var isScrollingChange = _props7.isScrollingChange;
 	      var width = _props7.width;
 
 	      var scrollbarSize = this._scrollbarSize;
@@ -9311,6 +9542,8 @@ var ProperCombo =
 
 	        // Synchronously set :isScrolling the first time (since _setNextState will reschedule its animation frame each time it's called)
 	        if (!this.state.isScrolling) {
+	          isScrollingChange(true);
+
 	          this.setState({
 	            isScrolling: true
 	          });
@@ -9340,6 +9573,12 @@ var ProperCombo =
 	  'aria-label': _react.PropTypes.string,
 
 	  /**
+	   * Removes fixed height from the scrollingContainer so that the total height
+	   * of rows can stretch the window. Intended for use with WindowScroller
+	   */
+	  autoHeight: _react.PropTypes.bool,
+
+	  /**
 	   * Number of cells in collection.
 	   */
 	  cellCount: _react.PropTypes.number.isRequired,
@@ -9358,6 +9597,14 @@ var ProperCombo =
 	   * Height of Collection; this property determines the number of visible (vs virtualized) rows.
 	   */
 	  height: _react.PropTypes.number.isRequired,
+
+	  /**
+	   * Enables the `Collection` to horiontally "overscan" its content similar to how `Grid` does.
+	   * This can reduce flicker around the edges when a user scrolls quickly.
+	   */
+	  horizontalOverscanSize: _react.PropTypes.number.isRequired,
+
+	  isScrollingChange: _react.PropTypes.func,
 
 	  /**
 	   * Optional renderer to be used in place of rows when either :rowCount or :cellCount is 0.
@@ -9405,12 +9652,19 @@ var ProperCombo =
 	  style: _react.PropTypes.object,
 
 	  /**
+	   * Enables the `Collection` to vertically "overscan" its content similar to how `Grid` does.
+	   * This can reduce flicker around the edges when a user scrolls quickly.
+	   */
+	  verticalOverscanSize: _react.PropTypes.number.isRequired,
+
+	  /**
 	   * Width of Collection; this property determines the number of visible (vs virtualized) columns.
 	   */
 	  width: _react.PropTypes.number.isRequired
 	};
 	CollectionView.defaultProps = {
 	  'aria-label': 'grid',
+	  horizontalOverscanSize: 0,
 	  noContentRenderer: function noContentRenderer() {
 	    return null;
 	  },
@@ -9421,12 +9675,13 @@ var ProperCombo =
 	    return null;
 	  },
 	  scrollToAlignment: 'auto',
-	  style: {}
+	  style: {},
+	  verticalOverscanSize: 0
 	};
 	exports.default = CollectionView;
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -9480,7 +9735,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9522,12 +9777,12 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var canUseDOM = __webpack_require__(32);
+	var canUseDOM = __webpack_require__(33);
 
 	var size;
 
@@ -9552,17 +9807,17 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';
 	module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(34)
+	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(35)
 	  , root = typeof window === 'undefined' ? global : window
 	  , vendors = ['moz', 'webkit']
 	  , suffix = 'AnimationFrame'
@@ -9638,7 +9893,7 @@ var ProperCombo =
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Generated by CoffeeScript 1.7.1
@@ -9674,15 +9929,101 @@ var ProperCombo =
 
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(35)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)))
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
-
 	var process = module.exports = {};
+
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
+	(function () {
+	    try {
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
+	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
+	    }
+	    try {
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
+	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
+	    }
+	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+
+
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+
+
+
+	}
 	var queue = [];
 	var draining = false;
 	var currentQueue;
@@ -9707,7 +10048,7 @@ var ProperCombo =
 	    if (draining) {
 	        return;
 	    }
-	    var timeout = setTimeout(cleanUpNextTick);
+	    var timeout = runTimeout(cleanUpNextTick);
 	    draining = true;
 
 	    var len = queue.length;
@@ -9724,7 +10065,7 @@ var ProperCombo =
 	    }
 	    currentQueue = null;
 	    draining = false;
-	    clearTimeout(timeout);
+	    runClearTimeout(timeout);
 	}
 
 	process.nextTick = function (fun) {
@@ -9736,7 +10077,7 @@ var ProperCombo =
 	    }
 	    queue.push(new Item(fun, args));
 	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
+	        runTimeout(drainQueue);
 	    }
 	};
 
@@ -9777,7 +10118,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9787,7 +10128,7 @@ var ProperCombo =
 	});
 	exports.default = calculateSizeAndPositionData;
 
-	var _SectionManager = __webpack_require__(37);
+	var _SectionManager = __webpack_require__(38);
 
 	var _SectionManager2 = _interopRequireDefault(_SectionManager);
 
@@ -9829,7 +10170,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9845,7 +10186,7 @@ var ProperCombo =
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 
-	var _Section = __webpack_require__(38);
+	var _Section = __webpack_require__(39);
 
 	var _Section2 = _interopRequireDefault(_Section);
 
@@ -9860,7 +10201,6 @@ var ProperCombo =
 	 * Grows (and adds Sections) dynamically as cells are registered.
 	 * Automatically adds cells to the appropriate Section(s).
 	 */
-
 	var SectionManager = function () {
 	  function SectionManager() {
 	    var sectionSize = arguments.length <= 0 || arguments[0] === undefined ? SECTION_SIZE : arguments[0];
@@ -9990,7 +10330,7 @@ var ProperCombo =
 	exports.default = SectionManager;
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10009,7 +10349,6 @@ var ProperCombo =
 	 * This enables us to more quickly determine which cells to display in a given region of the Window.
 	 * Sections have a fixed size and contain 0 to many cells (tracked by their indices).
 	 */
-
 	var Section = function () {
 	  function Section(_ref) {
 	    var height = _ref.height;
@@ -10066,7 +10405,7 @@ var ProperCombo =
 	exports.default = Section;
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10111,7 +10450,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10121,7 +10460,7 @@ var ProperCombo =
 	});
 	exports.ColumnSizer = exports.default = undefined;
 
-	var _ColumnSizer2 = __webpack_require__(41);
+	var _ColumnSizer2 = __webpack_require__(42);
 
 	var _ColumnSizer3 = _interopRequireDefault(_ColumnSizer2);
 
@@ -10131,7 +10470,7 @@ var ProperCombo =
 	exports.ColumnSizer = _ColumnSizer3.default;
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10148,7 +10487,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(42);
+	var _Grid = __webpack_require__(43);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -10163,14 +10502,13 @@ var ProperCombo =
 	/**
 	 * High-order component that auto-calculates column-widths for `Grid` cells.
 	 */
-
 	var ColumnSizer = function (_Component) {
 	  _inherits(ColumnSizer, _Component);
 
 	  function ColumnSizer(props, context) {
 	    _classCallCheck(this, ColumnSizer);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ColumnSizer).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (ColumnSizer.__proto__ || Object.getPrototypeOf(ColumnSizer)).call(this, props, context));
 
 	    _this._registerChild = _this._registerChild.bind(_this);
 	    return _this;
@@ -10272,7 +10610,7 @@ var ProperCombo =
 	exports.default = ColumnSizer;
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10282,11 +10620,11 @@ var ProperCombo =
 	});
 	exports.defaultCellRangeRenderer = exports.Grid = exports.default = undefined;
 
-	var _Grid2 = __webpack_require__(43);
+	var _Grid2 = __webpack_require__(44);
 
 	var _Grid3 = _interopRequireDefault(_Grid2);
 
-	var _defaultCellRangeRenderer2 = __webpack_require__(49);
+	var _defaultCellRangeRenderer2 = __webpack_require__(50);
 
 	var _defaultCellRangeRenderer3 = _interopRequireDefault(_defaultCellRangeRenderer2);
 
@@ -10297,7 +10635,7 @@ var ProperCombo =
 	exports.defaultCellRangeRenderer = _defaultCellRangeRenderer3.default;
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10305,6 +10643,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.DEFAULT_SCROLLING_RESET_TIME_INTERVAL = undefined;
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -10314,31 +10653,31 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _calculateSizeAndPositionDataAndUpdateScrollOffset = __webpack_require__(44);
+	var _calculateSizeAndPositionDataAndUpdateScrollOffset = __webpack_require__(45);
 
 	var _calculateSizeAndPositionDataAndUpdateScrollOffset2 = _interopRequireDefault(_calculateSizeAndPositionDataAndUpdateScrollOffset);
 
-	var _ScalingCellSizeAndPositionManager = __webpack_require__(45);
+	var _ScalingCellSizeAndPositionManager = __webpack_require__(46);
 
 	var _ScalingCellSizeAndPositionManager2 = _interopRequireDefault(_ScalingCellSizeAndPositionManager);
 
-	var _createCallbackMemoizer = __webpack_require__(30);
+	var _createCallbackMemoizer = __webpack_require__(31);
 
 	var _createCallbackMemoizer2 = _interopRequireDefault(_createCallbackMemoizer);
 
-	var _getOverscanIndices = __webpack_require__(47);
+	var _getOverscanIndices = __webpack_require__(48);
 
 	var _getOverscanIndices2 = _interopRequireDefault(_getOverscanIndices);
 
-	var _scrollbarSize = __webpack_require__(31);
+	var _scrollbarSize = __webpack_require__(32);
 
 	var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
 
-	var _raf = __webpack_require__(33);
+	var _raf = __webpack_require__(34);
 
 	var _raf2 = _interopRequireDefault(_raf);
 
@@ -10346,11 +10685,11 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _updateScrollIndexHelper = __webpack_require__(48);
+	var _updateScrollIndexHelper = __webpack_require__(49);
 
 	var _updateScrollIndexHelper2 = _interopRequireDefault(_updateScrollIndexHelper);
 
-	var _defaultCellRangeRenderer = __webpack_require__(49);
+	var _defaultCellRangeRenderer = __webpack_require__(50);
 
 	var _defaultCellRangeRenderer2 = _interopRequireDefault(_defaultCellRangeRenderer);
 
@@ -10366,7 +10705,7 @@ var ProperCombo =
 	 * Specifies the number of miliseconds during which to disable pointer events while a scroll is in progress.
 	 * This improves performance and makes scrolling smoother.
 	 */
-	var IS_SCROLLING_TIMEOUT = 150;
+	var DEFAULT_SCROLLING_RESET_TIME_INTERVAL = exports.DEFAULT_SCROLLING_RESET_TIME_INTERVAL = 150;
 
 	/**
 	 * Controls whether the Grid updates the DOM element's scrollLeft/scrollTop based on the current state or just observes it.
@@ -10388,10 +10727,12 @@ var ProperCombo =
 	  function Grid(props, context) {
 	    _classCallCheck(this, Grid);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Grid).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (Grid.__proto__ || Object.getPrototypeOf(Grid)).call(this, props, context));
 
 	    _this.state = {
 	      isScrolling: false,
+	      scrollDirectionHorizontal: _getOverscanIndices.SCROLL_DIRECTION_FIXED,
+	      scrollDirectionVertical: _getOverscanIndices.SCROLL_DIRECTION_FIXED,
 	      scrollLeft: 0,
 	      scrollTop: 0
 	    };
@@ -10468,6 +10809,11 @@ var ProperCombo =
 
 	      this._columnSizeAndPositionManager.resetCell(columnIndex);
 	      this._rowSizeAndPositionManager.resetCell(rowIndex);
+
+	      // Clear cell cache in case we are scrolling;
+	      // Invalid row heights likely mean invalid cached content as well.
+	      this._cellCache = {};
+
 	      this.forceUpdate();
 	    }
 	  }, {
@@ -10522,7 +10868,9 @@ var ProperCombo =
 
 	      var _props3 = this.props;
 	      var autoHeight = _props3.autoHeight;
+	      var columnCount = _props3.columnCount;
 	      var height = _props3.height;
+	      var rowCount = _props3.rowCount;
 	      var scrollToAlignment = _props3.scrollToAlignment;
 	      var scrollToColumn = _props3.scrollToColumn;
 	      var scrollToRow = _props3.scrollToRow;
@@ -10532,20 +10880,25 @@ var ProperCombo =
 	      var scrollPositionChangeReason = _state.scrollPositionChangeReason;
 	      var scrollTop = _state.scrollTop;
 
+	      // Handle edge case where column or row count has only just increased over 0.
+	      // In this case we may have to restore a previously-specified scroll offset.
+	      // For more info see bvaughn/react-virtualized/issues/218
+
+	      var columnOrRowCountJustIncreasedFromZero = columnCount > 0 && prevProps.columnCount === 0 || rowCount > 0 && prevProps.rowCount === 0;
+
 	      // Make sure requested changes to :scrollLeft or :scrollTop get applied.
 	      // Assigning to scrollLeft/scrollTop tells the browser to interrupt any running scroll animations,
 	      // And to discard any pending async changes to the scroll position that may have happened in the meantime (e.g. on a separate scrolling thread).
 	      // So we only set these when we require an adjustment of the scroll position.
 	      // See issue #2 for more information.
-
 	      if (scrollPositionChangeReason === SCROLL_POSITION_CHANGE_REASONS.REQUESTED) {
-	        if (scrollLeft >= 0 && scrollLeft !== prevState.scrollLeft && scrollLeft !== this._scrollingContainer.scrollLeft) {
+	        if (scrollLeft >= 0 && (scrollLeft !== prevState.scrollLeft && scrollLeft !== this._scrollingContainer.scrollLeft || columnOrRowCountJustIncreasedFromZero)) {
 	          this._scrollingContainer.scrollLeft = scrollLeft;
 	        }
 
 	        // @TRICKY :autoHeight property instructs Grid to leave :scrollTop management to an external HOC (eg WindowScroller).
 	        // In this case we should avoid checking scrollingContainer.scrollTop since it forces layout/flow.
-	        if (!autoHeight && scrollTop >= 0 && scrollTop !== prevState.scrollTop && scrollTop !== this._scrollingContainer.scrollTop) {
+	        if (!autoHeight && scrollTop >= 0 && (scrollTop !== prevState.scrollTop && scrollTop !== this._scrollingContainer.scrollTop || columnOrRowCountJustIncreasedFromZero)) {
 	          this._scrollingContainer.scrollTop = scrollTop;
 	        }
 	      }
@@ -10690,9 +11043,9 @@ var ProperCombo =
 	      var _this4 = this;
 
 	      var _props4 = this.props;
+	      var autoContainerWidth = _props4.autoContainerWidth;
 	      var autoHeight = _props4.autoHeight;
 	      var className = _props4.className;
-	      var columnCount = _props4.columnCount;
 	      var height = _props4.height;
 	      var noContentRenderer = _props4.noContentRenderer;
 	      var style = _props4.style;
@@ -10745,11 +11098,11 @@ var ProperCombo =
 	          {
 	            className: 'Grid__innerScrollContainer',
 	            style: {
-	              width: columnCount === 1 ? 'auto' : totalColumnsWidth,
+	              width: autoContainerWidth ? 'auto' : totalColumnsWidth,
 	              height: totalRowsHeight,
 	              maxWidth: totalColumnsWidth,
 	              maxHeight: totalRowsHeight,
-	              pointerEvents: isScrolling ? 'none' : 'auto'
+	              pointerEvents: isScrolling ? 'none' : ''
 	            }
 	          },
 	          childrenToDisplay
@@ -10781,6 +11134,8 @@ var ProperCombo =
 	      var rowCount = props.rowCount;
 	      var width = props.width;
 	      var isScrolling = state.isScrolling;
+	      var scrollDirectionHorizontal = state.scrollDirectionHorizontal;
+	      var scrollDirectionVertical = state.scrollDirectionVertical;
 	      var scrollLeft = state.scrollLeft;
 	      var scrollTop = state.scrollTop;
 
@@ -10816,6 +11171,7 @@ var ProperCombo =
 	        var overscanColumnIndices = (0, _getOverscanIndices2.default)({
 	          cellCount: columnCount,
 	          overscanCellsCount: overscanColumnCount,
+	          scrollDirection: scrollDirectionHorizontal,
 	          startIndex: this._renderedColumnStartIndex,
 	          stopIndex: this._renderedColumnStopIndex
 	        });
@@ -10823,6 +11179,7 @@ var ProperCombo =
 	        var overscanRowIndices = (0, _getOverscanIndices2.default)({
 	          cellCount: rowCount,
 	          overscanCellsCount: overscanRowCount,
+	          scrollDirection: scrollDirectionVertical,
 	          startIndex: this._renderedRowStartIndex,
 	          stopIndex: this._renderedRowStopIndex
 	        });
@@ -10862,11 +11219,14 @@ var ProperCombo =
 	  }, {
 	    key: '_enablePointerEventsAfterDelay',
 	    value: function _enablePointerEventsAfterDelay() {
+	      var scrollingResetTimeInterval = this.props.scrollingResetTimeInterval;
+
+
 	      if (this._disablePointerEventsTimeoutId) {
 	        clearTimeout(this._disablePointerEventsTimeoutId);
 	      }
 
-	      this._disablePointerEventsTimeoutId = setTimeout(this._enablePointerEventsAfterDelayCallback, IS_SCROLLING_TIMEOUT);
+	      this._disablePointerEventsTimeoutId = setTimeout(this._enablePointerEventsAfterDelayCallback, scrollingResetTimeInterval);
 	    }
 	  }, {
 	    key: '_enablePointerEventsAfterDelayCallback',
@@ -10877,7 +11237,9 @@ var ProperCombo =
 	      this._cellCache = {};
 
 	      this.setState({
-	        isScrolling: false
+	        isScrolling: false,
+	        scrollDirectionHorizontal: _getOverscanIndices.SCROLL_DIRECTION_FIXED,
+	        scrollDirectionVertical: _getOverscanIndices.SCROLL_DIRECTION_FIXED
 	      });
 	    }
 	  }, {
@@ -11111,6 +11473,10 @@ var ProperCombo =
 	        // For more information see https://github.com/bvaughn/react-virtualized/pull/124
 	        var scrollPositionChangeReason = event.cancelable ? SCROLL_POSITION_CHANGE_REASONS.OBSERVED : SCROLL_POSITION_CHANGE_REASONS.REQUESTED;
 
+	        // Track scrolling direction so we can more efficiently overscan rows to reduce empty space around the edges while scrolling.
+	        var scrollDirectionVertical = scrollTop > this.state.scrollTop ? _getOverscanIndices.SCROLL_DIRECTION_FORWARD : _getOverscanIndices.SCROLL_DIRECTION_BACKWARD;
+	        var scrollDirectionHorizontal = scrollLeft > this.state.scrollLeft ? _getOverscanIndices.SCROLL_DIRECTION_FORWARD : _getOverscanIndices.SCROLL_DIRECTION_BACKWARD;
+
 	        if (!this.state.isScrolling) {
 	          this.setState({
 	            isScrolling: true
@@ -11119,6 +11485,8 @@ var ProperCombo =
 
 	        this._setNextState({
 	          isScrolling: true,
+	          scrollDirectionHorizontal: scrollDirectionHorizontal,
+	          scrollDirectionVertical: scrollDirectionVertical,
 	          scrollLeft: scrollLeft,
 	          scrollPositionChangeReason: scrollPositionChangeReason,
 	          scrollTop: scrollTop
@@ -11134,6 +11502,12 @@ var ProperCombo =
 
 	Grid.propTypes = {
 	  'aria-label': _react.PropTypes.string,
+
+	  /**
+	   * Set the width of the inner scrollable container to 'auto'.
+	   * This is useful for single-column Grids to ensure that the column doesn't extend below a vertical scrollbar.
+	   */
+	  autoContainerWidth: _react.PropTypes.bool,
 
 	  /**
 	   * Removes fixed height from the scrollingContainer so that the total height
@@ -11245,6 +11619,9 @@ var ProperCombo =
 	   */
 	  rowCount: _react.PropTypes.number.isRequired,
 
+	  /** Wait this amount of time after the last scroll event before resetting Grid `pointer-events`. */
+	  scrollingResetTimeInterval: _react.PropTypes.number,
+
 	  /** Horizontal offset. */
 	  scrollLeft: _react.PropTypes.number,
 
@@ -11296,6 +11673,7 @@ var ProperCombo =
 	  },
 	  overscanColumnCount: 0,
 	  overscanRowCount: 10,
+	  scrollingResetTimeInterval: DEFAULT_SCROLLING_RESET_TIME_INTERVAL,
 	  scrollToAlignment: 'auto',
 	  style: {},
 	  tabIndex: 0
@@ -11303,7 +11681,7 @@ var ProperCombo =
 	exports.default = Grid;
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11350,7 +11728,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11362,7 +11740,7 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _CellSizeAndPositionManager = __webpack_require__(46);
+	var _CellSizeAndPositionManager = __webpack_require__(47);
 
 	var _CellSizeAndPositionManager2 = _interopRequireDefault(_CellSizeAndPositionManager);
 
@@ -11373,11 +11751,11 @@ var ProperCombo =
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	/**
-	 * Browsers have scroll offset limitations (eg Chrome stops scrolling at ~33.5M pixels).
+	 * Browsers have scroll offset limitations (eg Chrome stops scrolling at ~33.5M pixels where as Edge tops out at ~1.5M pixels).
 	 * After a certain position, the browser won't allow the user to scroll further (even via JavaScript scroll offset adjustments).
 	 * This util picks a lower ceiling for max size and artificially adjusts positions within to make it transparent for users.
 	 */
-	var DEFAULT_MAX_SCROLL_SIZE = exports.DEFAULT_MAX_SCROLL_SIZE = 10000000;
+	var DEFAULT_MAX_SCROLL_SIZE = exports.DEFAULT_MAX_SCROLL_SIZE = 1500000;
 
 	/**
 	 * Extends CellSizeAndPositionManager and adds scaling behavior for lists that are too large to fit within a browser's native limits.
@@ -11427,8 +11805,7 @@ var ProperCombo =
 	    key: 'getOffsetAdjustment',
 	    value: function getOffsetAdjustment(_ref2) {
 	      var containerSize = _ref2.containerSize;
-	      var offset // safe
-	      = _ref2.offset;
+	      var offset = _ref2.offset;
 
 	      var totalSize = this._cellSizeAndPositionManager.getTotalSize();
 	      var safeTotalSize = this.getTotalSize();
@@ -11468,8 +11845,7 @@ var ProperCombo =
 	      var align = _ref3$align === undefined ? 'auto' : _ref3$align;
 	      var containerSize = _ref3.containerSize;
 	      var currentOffset = _ref3.currentOffset;
-	      var // safe
-	      targetIndex = _ref3.targetIndex;
+	      var targetIndex = _ref3.targetIndex;
 	      var totalSize = _ref3.totalSize;
 
 	      currentOffset = this._safeOffsetToOffset({
@@ -11497,8 +11873,7 @@ var ProperCombo =
 	    key: 'getVisibleCellRange',
 	    value: function getVisibleCellRange(_ref4) {
 	      var containerSize = _ref4.containerSize;
-	      var offset // safe
-	      = _ref4.offset;
+	      var offset = _ref4.offset;
 
 	      offset = this._safeOffsetToOffset({
 	        containerSize: containerSize,
@@ -11520,8 +11895,7 @@ var ProperCombo =
 	    value: function _getOffsetPercentage(_ref5) {
 	      var containerSize = _ref5.containerSize;
 	      var offset = _ref5.offset;
-	      var // safe
-	      totalSize = _ref5.totalSize;
+	      var totalSize = _ref5.totalSize;
 
 	      return totalSize <= containerSize ? 0 : offset / (totalSize - containerSize);
 	    }
@@ -11529,8 +11903,7 @@ var ProperCombo =
 	    key: '_offsetToSafeOffset',
 	    value: function _offsetToSafeOffset(_ref6) {
 	      var containerSize = _ref6.containerSize;
-	      var offset // unsafe
-	      = _ref6.offset;
+	      var offset = _ref6.offset;
 
 	      var totalSize = this._cellSizeAndPositionManager.getTotalSize();
 	      var safeTotalSize = this.getTotalSize();
@@ -11551,8 +11924,7 @@ var ProperCombo =
 	    key: '_safeOffsetToOffset',
 	    value: function _safeOffsetToOffset(_ref7) {
 	      var containerSize = _ref7.containerSize;
-	      var offset // safe
-	      = _ref7.offset;
+	      var offset = _ref7.offset;
 
 	      var totalSize = this._cellSizeAndPositionManager.getTotalSize();
 	      var safeTotalSize = this.getTotalSize();
@@ -11577,7 +11949,7 @@ var ProperCombo =
 	exports.default = ScalingCellSizeAndPositionManager;
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11593,7 +11965,6 @@ var ProperCombo =
 	/**
 	 * Just-in-time calculates and caches size and position information for a collection of cells.
 	 */
-
 	var CellSizeAndPositionManager = function () {
 	  function CellSizeAndPositionManager(_ref) {
 	    var cellCount = _ref.cellCount;
@@ -11880,7 +12251,7 @@ var ProperCombo =
 	exports.default = CellSizeAndPositionManager;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11889,11 +12260,16 @@ var ProperCombo =
 	  value: true
 	});
 	exports.default = getOverscanIndices;
+	var SCROLL_DIRECTION_BACKWARD = exports.SCROLL_DIRECTION_BACKWARD = -1;
+	var SCROLL_DIRECTION_FIXED = exports.SCROLL_DIRECTION_FIXED = 0;
+	var SCROLL_DIRECTION_FORWARD = exports.SCROLL_DIRECTION_FORWARD = 1;
+
 	/**
 	 * Calculates the number of cells to overscan before and after a specified range.
 	 * This function ensures that overscanning doesn't exceed the available cells.
 	 *
 	 * @param cellCount Number of rows or columns in the current axis
+	 * @param scrollDirection One of SCROLL_DIRECTION_BACKWARD
 	 * @param overscanCellsCount Maximum number of cells to over-render in either direction
 	 * @param startIndex Begin of range of visible cells
 	 * @param stopIndex End of range of visible cells
@@ -11901,17 +12277,32 @@ var ProperCombo =
 	function getOverscanIndices(_ref) {
 	  var cellCount = _ref.cellCount;
 	  var overscanCellsCount = _ref.overscanCellsCount;
+	  var scrollDirection = _ref.scrollDirection;
 	  var startIndex = _ref.startIndex;
 	  var stopIndex = _ref.stopIndex;
 
+	  var overscanStartIndex = void 0;
+	  var overscanStopIndex = void 0;
+
+	  if (scrollDirection === SCROLL_DIRECTION_FORWARD) {
+	    overscanStartIndex = startIndex;
+	    overscanStopIndex = stopIndex + overscanCellsCount * 2;
+	  } else if (scrollDirection === SCROLL_DIRECTION_BACKWARD) {
+	    overscanStartIndex = startIndex - overscanCellsCount * 2;
+	    overscanStopIndex = stopIndex;
+	  } else {
+	    overscanStartIndex = startIndex - overscanCellsCount;
+	    overscanStopIndex = stopIndex + overscanCellsCount;
+	  }
+
 	  return {
-	    overscanStartIndex: Math.max(0, startIndex - overscanCellsCount),
-	    overscanStopIndex: Math.min(cellCount - 1, stopIndex + overscanCellsCount)
+	    overscanStartIndex: Math.max(0, overscanStartIndex),
+	    overscanStopIndex: Math.min(cellCount - 1, overscanStopIndex)
 	  };
 	}
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11961,23 +12352,18 @@ var ProperCombo =
 	    // If we don't have a selected item but list size or number of children have decreased,
 	    // Make sure we aren't scrolled too far past the current content.
 	  } else if (!hasScrollToIndex && cellCount > 0 && (size < previousSize || cellCount < previousCellsCount)) {
-	      scrollToIndex = cellCount - 1;
-
-	      var calculatedScrollOffset = cellSizeAndPositionManager.getUpdatedOffsetForIndex({
-	        containerSize: size,
-	        currentOffset: scrollOffset,
-	        targetIndex: scrollToIndex
-	      });
-
-	      // Only adjust the scroll position if we've scrolled below the last set of rows.
-	      if (calculatedScrollOffset < scrollOffset) {
-	        updateScrollIndexCallback(cellCount - 1);
-	      }
+	    // We need to ensure that the current scroll offset is still within the collection's range.
+	    // To do this, we don't need to measure everything; CellMeasurer would perform poorly.
+	    // Just check to make sure we're still okay.
+	    // Only adjust the scroll position if we've scrolled below the last set of rows.
+	    if (scrollOffset > cellSizeAndPositionManager.getTotalSize() - size) {
+	      updateScrollIndexCallback(cellCount - 1);
 	    }
+	  }
 	}
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11994,7 +12380,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
@@ -12048,12 +12434,12 @@ var ProperCombo =
 	        // If the user is no longer scrolling, don't cache cells.
 	        // This makes dynamic cell content difficult for users and would also lead to a heavier memory footprint.
 	      } else {
-	          renderedCell = cellRenderer({
-	            columnIndex: columnIndex,
-	            isScrolling: isScrolling,
-	            rowIndex: rowIndex
-	          });
-	        }
+	        renderedCell = cellRenderer({
+	          columnIndex: columnIndex,
+	          isScrolling: isScrolling,
+	          rowIndex: rowIndex
+	        });
+	      }
 
 	      if (renderedCell == null || renderedCell === false) {
 	        continue;
@@ -12084,7 +12470,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12092,34 +12478,54 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.default = undefined;
+	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.defaultRowRenderer = exports.defaultHeaderRenderer = exports.defaultCellRenderer = exports.defaultCellDataGetter = exports.default = undefined;
 
-	var _FlexTable2 = __webpack_require__(51);
+	var _FlexTable2 = __webpack_require__(52);
 
 	var _FlexTable3 = _interopRequireDefault(_FlexTable2);
 
-	var _FlexColumn2 = __webpack_require__(52);
+	var _defaultCellDataGetter2 = __webpack_require__(58);
+
+	var _defaultCellDataGetter3 = _interopRequireDefault(_defaultCellDataGetter2);
+
+	var _defaultCellRenderer2 = __webpack_require__(57);
+
+	var _defaultCellRenderer3 = _interopRequireDefault(_defaultCellRenderer2);
+
+	var _defaultHeaderRenderer2 = __webpack_require__(54);
+
+	var _defaultHeaderRenderer3 = _interopRequireDefault(_defaultHeaderRenderer2);
+
+	var _defaultRowRenderer2 = __webpack_require__(59);
+
+	var _defaultRowRenderer3 = _interopRequireDefault(_defaultRowRenderer2);
+
+	var _FlexColumn2 = __webpack_require__(53);
 
 	var _FlexColumn3 = _interopRequireDefault(_FlexColumn2);
 
-	var _SortDirection2 = __webpack_require__(55);
+	var _SortDirection2 = __webpack_require__(56);
 
 	var _SortDirection3 = _interopRequireDefault(_SortDirection2);
 
-	var _SortIndicator2 = __webpack_require__(54);
+	var _SortIndicator2 = __webpack_require__(55);
 
 	var _SortIndicator3 = _interopRequireDefault(_SortIndicator2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = _FlexTable3.default;
+	exports.defaultCellDataGetter = _defaultCellDataGetter3.default;
+	exports.defaultCellRenderer = _defaultCellRenderer3.default;
+	exports.defaultHeaderRenderer = _defaultHeaderRenderer3.default;
+	exports.defaultRowRenderer = _defaultRowRenderer3.default;
 	exports.FlexTable = _FlexTable3.default;
 	exports.FlexColumn = _FlexColumn3.default;
 	exports.SortDirection = _SortDirection3.default;
 	exports.SortIndicator = _SortIndicator3.default;
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12132,11 +12538,11 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _FlexColumn = __webpack_require__(52);
+	var _FlexColumn = __webpack_require__(53);
 
 	var _FlexColumn2 = _interopRequireDefault(_FlexColumn);
 
@@ -12150,11 +12556,15 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _Grid = __webpack_require__(42);
+	var _Grid = __webpack_require__(43);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
-	var _SortDirection = __webpack_require__(55);
+	var _defaultRowRenderer = __webpack_require__(59);
+
+	var _defaultRowRenderer2 = _interopRequireDefault(_defaultRowRenderer);
+
+	var _SortDirection = __webpack_require__(56);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -12170,14 +12580,13 @@ var ProperCombo =
 	 * Table component with fixed headers and virtualized rows for improved performance with large data sets.
 	 * This component expects explicit width, height, and padding parameters.
 	 */
-
 	var FlexTable = function (_Component) {
 	  _inherits(FlexTable, _Component);
 
 	  function FlexTable(props) {
 	    _classCallCheck(this, FlexTable);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(FlexTable).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (FlexTable.__proto__ || Object.getPrototypeOf(FlexTable)).call(this, props));
 
 	    _this.state = {
 	      scrollbarWidth: 0
@@ -12185,6 +12594,7 @@ var ProperCombo =
 
 	    _this._cellClassName = _this._cellClassName.bind(_this);
 	    _this._cellStyle = _this._cellStyle.bind(_this);
+	    _this._createColumn = _this._createColumn.bind(_this);
 	    _this._createRow = _this._createRow.bind(_this);
 	    _this._onScroll = _this._onScroll.bind(_this);
 	    _this._onSectionRendered = _this._onSectionRendered.bind(_this);
@@ -12194,7 +12604,7 @@ var ProperCombo =
 	  _createClass(FlexTable, [{
 	    key: 'forceUpdateGrid',
 	    value: function forceUpdateGrid() {
-	      this._grid.forceUpdate();
+	      this.Grid.forceUpdate();
 	    }
 
 	    /** See Grid#measureAllCells */
@@ -12202,7 +12612,7 @@ var ProperCombo =
 	  }, {
 	    key: 'measureAllRows',
 	    value: function measureAllRows() {
-	      this._grid.measureAllCells();
+	      this.Grid.measureAllCells();
 	    }
 
 	    /** See Grid#recomputeGridSize */
@@ -12212,7 +12622,7 @@ var ProperCombo =
 	    value: function recomputeRowHeights() {
 	      var index = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
-	      this._grid.recomputeGridSize({
+	      this.Grid.recomputeGridSize({
 	        rowIndex: index
 	      });
 	      this.forceUpdateGrid();
@@ -12282,6 +12692,7 @@ var ProperCombo =
 	          this._getRenderedHeaderRow()
 	        ),
 	        _react2.default.createElement(_Grid2.default, _extends({}, this.props, {
+	          autoContainerWidth: true,
 	          className: (0, _classnames2.default)('FlexTable__Grid', gridClassName),
 	          cellClassName: this._cellClassName,
 	          cellRenderer: this._createRow,
@@ -12293,7 +12704,7 @@ var ProperCombo =
 	          onScroll: this._onScroll,
 	          onSectionRendered: this._onSectionRendered,
 	          ref: function ref(_ref) {
-	            _this2._grid = _ref;
+	            _this2.Grid = _ref;
 	          },
 	          scrollbarWidth: scrollbarWidth,
 	          scrollToRow: scrollToIndex,
@@ -12360,7 +12771,9 @@ var ProperCombo =
 	    }
 	  }, {
 	    key: '_createHeader',
-	    value: function _createHeader(column, columnIndex) {
+	    value: function _createHeader(_ref5) {
+	      var column = _ref5.column;
+	      var index = _ref5.index;
 	      var _props2 = this.props;
 	      var headerClassName = _props2.headerClassName;
 	      var headerStyle = _props2.headerStyle;
@@ -12423,7 +12836,7 @@ var ProperCombo =
 	      return _react2.default.createElement(
 	        'div',
 	        _extends({}, a11yProps, {
-	          key: 'Header-Col' + columnIndex,
+	          key: 'Header-Col' + index,
 	          className: classNames,
 	          style: style
 	        }),
@@ -12432,11 +12845,11 @@ var ProperCombo =
 	    }
 	  }, {
 	    key: '_createRow',
-	    value: function _createRow(_ref5) {
+	    value: function _createRow(_ref6) {
 	      var _this3 = this;
 
-	      var index = _ref5.rowIndex;
-	      var isScrolling = _ref5.isScrolling;
+	      var index = _ref6.rowIndex;
+	      var isScrolling = _ref6.isScrolling;
 	      var _props3 = this.props;
 	      var children = _props3.children;
 	      var onRowClick = _props3.onRowClick;
@@ -12445,6 +12858,7 @@ var ProperCombo =
 	      var onRowMouseOut = _props3.onRowMouseOut;
 	      var rowClassName = _props3.rowClassName;
 	      var rowGetter = _props3.rowGetter;
+	      var rowRenderer = _props3.rowRenderer;
 	      var rowStyle = _props3.rowStyle;
 	      var scrollbarWidth = this.state.scrollbarWidth;
 
@@ -12453,57 +12867,35 @@ var ProperCombo =
 	      var rowStyleObject = rowStyle instanceof Function ? rowStyle({ index: index }) : rowStyle;
 	      var rowData = rowGetter({ index: index });
 
-	      var renderedRow = _react2.default.Children.toArray(children).map(function (column, columnIndex) {
+	      var columns = _react2.default.Children.toArray(children).map(function (column, columnIndex) {
 	        return _this3._createColumn({
 	          column: column,
 	          columnIndex: columnIndex,
 	          isScrolling: isScrolling,
 	          rowData: rowData,
-	          rowIndex: index
+	          rowIndex: index,
+	          scrollbarWidth: scrollbarWidth
 	        });
 	      });
 
-	      var a11yProps = {};
+	      var className = (0, _classnames2.default)('FlexTable__row', rowClass);
+	      var style = _extends({}, rowStyleObject, {
+	        height: this._getRowHeight(index),
+	        paddingRight: scrollbarWidth
+	      });
 
-	      if (onRowClick || onRowDoubleClick || onRowMouseOver || onRowMouseOut) {
-	        a11yProps['aria-label'] = 'row';
-	        a11yProps.role = 'row';
-	        a11yProps.tabIndex = 0;
-
-	        if (onRowClick) {
-	          a11yProps.onClick = function () {
-	            return onRowClick({ index: index });
-	          };
-	        }
-	        if (onRowDoubleClick) {
-	          a11yProps.onDoubleClick = function () {
-	            return onRowDoubleClick({ index: index });
-	          };
-	        }
-	        if (onRowMouseOut) {
-	          a11yProps.onMouseOut = function () {
-	            return onRowMouseOut({ index: index });
-	          };
-	        }
-	        if (onRowMouseOver) {
-	          a11yProps.onMouseOver = function () {
-	            return onRowMouseOver({ index: index });
-	          };
-	        }
-	      }
-
-	      return _react2.default.createElement(
-	        'div',
-	        _extends({}, a11yProps, {
-	          key: index,
-	          className: (0, _classnames2.default)('FlexTable__row', rowClass),
-	          style: _extends({}, rowStyleObject, {
-	            height: this._getRowHeight(index),
-	            paddingRight: scrollbarWidth
-	          })
-	        }),
-	        renderedRow
-	      );
+	      return rowRenderer({
+	        className: className,
+	        columns: columns,
+	        index: index,
+	        isScrolling: isScrolling,
+	        onRowClick: onRowClick,
+	        onRowDoubleClick: onRowDoubleClick,
+	        onRowMouseOver: onRowMouseOver,
+	        onRowMouseOut: onRowMouseOut,
+	        rowData: rowData,
+	        style: style
+	      });
 	    }
 
 	    /**
@@ -12545,7 +12937,7 @@ var ProperCombo =
 	      var items = disableHeader ? [] : _react2.default.Children.toArray(children);
 
 	      return items.map(function (column, index) {
-	        return _this4._createHeader(column, index);
+	        return _this4._createHeader({ column: column, index: index });
 	      });
 	    }
 	  }, {
@@ -12558,10 +12950,10 @@ var ProperCombo =
 	    }
 	  }, {
 	    key: '_onScroll',
-	    value: function _onScroll(_ref6) {
-	      var clientHeight = _ref6.clientHeight;
-	      var scrollHeight = _ref6.scrollHeight;
-	      var scrollTop = _ref6.scrollTop;
+	    value: function _onScroll(_ref7) {
+	      var clientHeight = _ref7.clientHeight;
+	      var scrollHeight = _ref7.scrollHeight;
+	      var scrollTop = _ref7.scrollTop;
 	      var onScroll = this.props.onScroll;
 
 
@@ -12569,11 +12961,11 @@ var ProperCombo =
 	    }
 	  }, {
 	    key: '_onSectionRendered',
-	    value: function _onSectionRendered(_ref7) {
-	      var rowOverscanStartIndex = _ref7.rowOverscanStartIndex;
-	      var rowOverscanStopIndex = _ref7.rowOverscanStopIndex;
-	      var rowStartIndex = _ref7.rowStartIndex;
-	      var rowStopIndex = _ref7.rowStopIndex;
+	    value: function _onSectionRendered(_ref8) {
+	      var rowOverscanStartIndex = _ref8.rowOverscanStartIndex;
+	      var rowOverscanStopIndex = _ref8.rowOverscanStopIndex;
+	      var rowStartIndex = _ref8.rowStartIndex;
+	      var rowStopIndex = _ref8.rowStopIndex;
 	      var onRowsRendered = this.props.onRowsRendered;
 
 
@@ -12587,7 +12979,7 @@ var ProperCombo =
 	  }, {
 	    key: '_setScrollbarWidth',
 	    value: function _setScrollbarWidth() {
-	      var Grid = (0, _reactDom.findDOMNode)(this._grid);
+	      var Grid = (0, _reactDom.findDOMNode)(this.Grid);
 	      var clientWidth = Grid.clientWidth || 0;
 	      var offsetWidth = Grid.offsetWidth || 0;
 	      var scrollbarWidth = offsetWidth - clientWidth;
@@ -12722,6 +13114,23 @@ var ProperCombo =
 	  /** Number of rows in table. */
 	  rowCount: _react.PropTypes.number.isRequired,
 
+	  /**
+	   * Responsible for rendering a table row given an array of columns:
+	   * Should implement the following interface: ({
+	   *   className: string,
+	   *   columns: Array,
+	   *   index: number,
+	   *   isScrolling: boolean,
+	   *   onRowClick: ?Function,
+	   *   onRowDoubleClick: ?Function,
+	   *   onRowMouseOver: ?Function,
+	   *   onRowMouseOut: ?Function,
+	   *   rowData: any,
+	   *   style: any
+	   * }): PropTypes.node
+	   */
+	  rowRenderer: _react.PropTypes.func,
+
 	  /** Optional custom inline style to attach to table rows. */
 	  rowStyle: _react.PropTypes.oneOfType([_react.PropTypes.object, _react.PropTypes.func]).isRequired,
 
@@ -12776,6 +13185,7 @@ var ProperCombo =
 	    return null;
 	  },
 	  overscanRowCount: 10,
+	  rowRenderer: _defaultRowRenderer2.default,
 	  rowStyle: {},
 	  scrollToAlignment: 'auto',
 	  style: {}
@@ -12783,7 +13193,7 @@ var ProperCombo =
 	exports.default = FlexTable;
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12794,15 +13204,15 @@ var ProperCombo =
 
 	var _react = __webpack_require__(2);
 
-	var _defaultHeaderRenderer = __webpack_require__(53);
+	var _defaultHeaderRenderer = __webpack_require__(54);
 
 	var _defaultHeaderRenderer2 = _interopRequireDefault(_defaultHeaderRenderer);
 
-	var _defaultCellRenderer = __webpack_require__(56);
+	var _defaultCellRenderer = __webpack_require__(57);
 
 	var _defaultCellRenderer2 = _interopRequireDefault(_defaultCellRenderer);
 
-	var _defaultCellDataGetter = __webpack_require__(57);
+	var _defaultCellDataGetter = __webpack_require__(58);
 
 	var _defaultCellDataGetter2 = _interopRequireDefault(_defaultCellDataGetter);
 
@@ -12817,14 +13227,13 @@ var ProperCombo =
 	/**
 	 * Describes the header and cell contents of a table column.
 	 */
-
 	var Column = function (_Component) {
 	  _inherits(Column, _Component);
 
 	  function Column() {
 	    _classCallCheck(this, Column);
 
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Column).apply(this, arguments));
+	    return _possibleConstructorReturn(this, (Column.__proto__ || Object.getPrototypeOf(Column)).apply(this, arguments));
 	  }
 
 	  return Column;
@@ -12833,10 +13242,10 @@ var ProperCombo =
 	Column.defaultProps = {
 	  cellDataGetter: _defaultCellDataGetter2.default,
 	  cellRenderer: _defaultCellRenderer2.default,
-	  cellStyle: {},
 	  flexGrow: 0,
 	  flexShrink: 1,
-	  headerRenderer: _defaultHeaderRenderer2.default
+	  headerRenderer: _defaultHeaderRenderer2.default,
+	  style: {}
 	};
 	Column.propTypes = {
 	  /** Optional aria-label value to set on the column header */
@@ -12899,7 +13308,7 @@ var ProperCombo =
 	exports.default = Column;
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12913,7 +13322,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _SortIndicator = __webpack_require__(54);
+	var _SortIndicator = __webpack_require__(55);
 
 	var _SortIndicator2 = _interopRequireDefault(_SortIndicator);
 
@@ -12952,7 +13361,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12966,11 +13375,11 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	var _SortDirection = __webpack_require__(55);
+	var _SortDirection = __webpack_require__(56);
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
@@ -13004,7 +13413,7 @@ var ProperCombo =
 	};
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13029,7 +13438,7 @@ var ProperCombo =
 	exports.default = SortDirection;
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13059,7 +13468,7 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 57 */
+/* 58 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13088,7 +13497,81 @@ var ProperCombo =
 	}
 
 /***/ },
-/* 58 */
+/* 59 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	exports.default = defaultRowRenderer;
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * Default row renderer for FlexTable.
+	 */
+	function defaultRowRenderer(_ref) {
+	  var className = _ref.className;
+	  var columns = _ref.columns;
+	  var index = _ref.index;
+	  var isScrolling = _ref.isScrolling;
+	  var onRowClick = _ref.onRowClick;
+	  var onRowDoubleClick = _ref.onRowDoubleClick;
+	  var onRowMouseOver = _ref.onRowMouseOver;
+	  var onRowMouseOut = _ref.onRowMouseOut;
+	  var rowData = _ref.rowData;
+	  var style = _ref.style;
+
+	  var a11yProps = {};
+
+	  if (onRowClick || onRowDoubleClick || onRowMouseOver || onRowMouseOut) {
+	    a11yProps['aria-label'] = 'row';
+	    a11yProps.role = 'row';
+	    a11yProps.tabIndex = 0;
+
+	    if (onRowClick) {
+	      a11yProps.onClick = function () {
+	        return onRowClick({ index: index });
+	      };
+	    }
+	    if (onRowDoubleClick) {
+	      a11yProps.onDoubleClick = function () {
+	        return onRowDoubleClick({ index: index });
+	      };
+	    }
+	    if (onRowMouseOut) {
+	      a11yProps.onMouseOut = function () {
+	        return onRowMouseOut({ index: index });
+	      };
+	    }
+	    if (onRowMouseOver) {
+	      a11yProps.onMouseOver = function () {
+	        return onRowMouseOver({ index: index });
+	      };
+	    }
+	  }
+
+	  return _react2.default.createElement(
+	    'div',
+	    _extends({}, a11yProps, {
+	      className: className,
+	      style: style
+	    }),
+	    columns
+	  );
+	}
+
+/***/ },
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13098,7 +13581,7 @@ var ProperCombo =
 	});
 	exports.InfiniteLoader = exports.default = undefined;
 
-	var _InfiniteLoader2 = __webpack_require__(59);
+	var _InfiniteLoader2 = __webpack_require__(61);
 
 	var _InfiniteLoader3 = _interopRequireDefault(_InfiniteLoader2);
 
@@ -13108,7 +13591,7 @@ var ProperCombo =
 	exports.InfiniteLoader = _InfiniteLoader3.default;
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13121,12 +13604,17 @@ var ProperCombo =
 
 	exports.isRangeVisible = isRangeVisible;
 	exports.scanForUnloadedRanges = scanForUnloadedRanges;
+	exports.forceUpdateReactVirtualizedComponent = forceUpdateReactVirtualizedComponent;
 
 	var _react = __webpack_require__(2);
 
 	var _reactAddonsShallowCompare = __webpack_require__(18);
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
+
+	var _createCallbackMemoizer = __webpack_require__(31);
+
+	var _createCallbackMemoizer2 = _interopRequireDefault(_createCallbackMemoizer);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13141,14 +13629,15 @@ var ProperCombo =
 	 * This component decorates a virtual component and just-in-time prefetches rows as a user scrolls.
 	 * It is intended as a convenience component; fork it if you'd like finer-grained control over data-loading.
 	 */
-
 	var InfiniteLoader = function (_Component) {
 	  _inherits(InfiniteLoader, _Component);
 
 	  function InfiniteLoader(props, context) {
 	    _classCallCheck(this, InfiniteLoader);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(InfiniteLoader).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (InfiniteLoader.__proto__ || Object.getPrototypeOf(InfiniteLoader)).call(this, props, context));
+
+	    _this._loadMoreRowsMemoizer = (0, _createCallbackMemoizer2.default)();
 
 	    _this._onRowsRendered = _this._onRowsRendered.bind(_this);
 	    _this._registerChild = _this._registerChild.bind(_this);
@@ -13172,15 +13661,42 @@ var ProperCombo =
 	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
 	    }
 	  }, {
+	    key: '_loadUnloadedRanges',
+	    value: function _loadUnloadedRanges(unloadedRanges) {
+	      var _this2 = this;
+
+	      var loadMoreRows = this.props.loadMoreRows;
+
+
+	      unloadedRanges.forEach(function (unloadedRange) {
+	        var promise = loadMoreRows(unloadedRange);
+	        if (promise) {
+	          promise.then(function () {
+	            // Refresh the visible rows if any of them have just been loaded.
+	            // Otherwise they will remain in their unloaded visual state.
+	            if (isRangeVisible({
+	              lastRenderedStartIndex: _this2._lastRenderedStartIndex,
+	              lastRenderedStopIndex: _this2._lastRenderedStopIndex,
+	              startIndex: unloadedRange.startIndex,
+	              stopIndex: unloadedRange.stopIndex
+	            })) {
+	              if (_this2._registeredChild) {
+	                forceUpdateReactVirtualizedComponent(_this2._registeredChild);
+	              }
+	            }
+	          });
+	        }
+	      });
+	    }
+	  }, {
 	    key: '_onRowsRendered',
 	    value: function _onRowsRendered(_ref) {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      var startIndex = _ref.startIndex;
 	      var stopIndex = _ref.stopIndex;
 	      var _props = this.props;
 	      var isRowLoaded = _props.isRowLoaded;
-	      var loadMoreRows = _props.loadMoreRows;
 	      var minimumBatchSize = _props.minimumBatchSize;
 	      var rowCount = _props.rowCount;
 	      var threshold = _props.threshold;
@@ -13197,24 +13713,16 @@ var ProperCombo =
 	        stopIndex: Math.min(rowCount - 1, stopIndex + threshold)
 	      });
 
-	      unloadedRanges.forEach(function (unloadedRange) {
-	        var promise = loadMoreRows(unloadedRange);
-	        if (promise) {
-	          promise.then(function () {
-	            // Refresh the visible rows if any of them have just been loaded.
-	            // Otherwise they will remain in their unloaded visual state.
-	            if (isRangeVisible({
-	              lastRenderedStartIndex: _this2._lastRenderedStartIndex,
-	              lastRenderedStopIndex: _this2._lastRenderedStopIndex,
-	              startIndex: unloadedRange.startIndex,
-	              stopIndex: unloadedRange.stopIndex
-	            })) {
-	              if (_this2._registeredChild) {
-	                _this2._registeredChild.forceUpdate();
-	              }
-	            }
-	          });
-	        }
+	      // For memoize comparison
+	      var squashedUnloadedRanges = unloadedRanges.reduce(function (reduced, unloadedRange) {
+	        return reduced.concat([unloadedRange.startIndex, unloadedRange.stopIndex]);
+	      }, []);
+
+	      this._loadMoreRowsMemoizer({
+	        callback: function callback() {
+	          _this3._loadUnloadedRanges(unloadedRanges);
+	        },
+	        indices: { squashedUnloadedRanges: squashedUnloadedRanges }
 	      });
 	    }
 	  }, {
@@ -13362,8 +13870,19 @@ var ProperCombo =
 	  return unloadedRanges;
 	}
 
+	/**
+	 * Since RV components use shallowCompare we need to force a render (even though props haven't changed).
+	 * However InfiniteLoader may wrap a Grid or it may wrap a FlexTable or VirtualScroll.
+	 * In the first case the built-in React forceUpdate() method is sufficient to force a re-render,
+	 * But in the latter cases we need to use the RV-specific forceUpdateGrid() method.
+	 * Else the inner Grid will not be re-rendered and visuals may be stale.
+	 */
+	function forceUpdateReactVirtualizedComponent(component) {
+	  typeof component.forceUpdateGrid === 'function' ? component.forceUpdateGrid() : component.forceUpdate();
+	}
+
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13373,7 +13892,7 @@ var ProperCombo =
 	});
 	exports.ScrollSync = exports.default = undefined;
 
-	var _ScrollSync2 = __webpack_require__(61);
+	var _ScrollSync2 = __webpack_require__(63);
 
 	var _ScrollSync3 = _interopRequireDefault(_ScrollSync2);
 
@@ -13383,7 +13902,7 @@ var ProperCombo =
 	exports.ScrollSync = _ScrollSync3.default;
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13411,14 +13930,13 @@ var ProperCombo =
 	/**
 	 * HOC that simplifies the process of synchronizing scrolling between two or more virtualized components.
 	 */
-
 	var ScrollSync = function (_Component) {
 	  _inherits(ScrollSync, _Component);
 
 	  function ScrollSync(props, context) {
 	    _classCallCheck(this, ScrollSync);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollSync).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (ScrollSync.__proto__ || Object.getPrototypeOf(ScrollSync)).call(this, props, context));
 
 	    _this.state = {
 	      clientHeight: 0,
@@ -13489,7 +14007,7 @@ var ProperCombo =
 	exports.default = ScrollSync;
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13499,7 +14017,7 @@ var ProperCombo =
 	});
 	exports.VirtualScroll = exports.default = undefined;
 
-	var _VirtualScroll2 = __webpack_require__(63);
+	var _VirtualScroll2 = __webpack_require__(65);
 
 	var _VirtualScroll3 = _interopRequireDefault(_VirtualScroll2);
 
@@ -13509,7 +14027,7 @@ var ProperCombo =
 	exports.VirtualScroll = _VirtualScroll3.default;
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13522,7 +14040,7 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Grid = __webpack_require__(42);
+	var _Grid = __webpack_require__(43);
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
@@ -13530,7 +14048,7 @@ var ProperCombo =
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _classnames = __webpack_require__(29);
+	var _classnames = __webpack_require__(30);
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
@@ -13554,14 +14072,13 @@ var ProperCombo =
 	 *
 	 * This component renders a virtualized list of elements with either fixed or dynamic heights.
 	 */
-
 	var VirtualScroll = function (_Component) {
 	  _inherits(VirtualScroll, _Component);
 
 	  function VirtualScroll(props, context) {
 	    _classCallCheck(this, VirtualScroll);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VirtualScroll).call(this, props, context));
+	    var _this = _possibleConstructorReturn(this, (VirtualScroll.__proto__ || Object.getPrototypeOf(VirtualScroll)).call(this, props, context));
 
 	    _this._cellRenderer = _this._cellRenderer.bind(_this);
 	    _this._createRowClassNameGetter = _this._createRowClassNameGetter.bind(_this);
@@ -13574,7 +14091,7 @@ var ProperCombo =
 	  _createClass(VirtualScroll, [{
 	    key: 'forceUpdateGrid',
 	    value: function forceUpdateGrid() {
-	      this._grid.forceUpdate();
+	      this.Grid.forceUpdate();
 	    }
 
 	    /** See Grid#measureAllCells */
@@ -13582,7 +14099,7 @@ var ProperCombo =
 	  }, {
 	    key: 'measureAllRows',
 	    value: function measureAllRows() {
-	      this._grid.measureAllCells();
+	      this.Grid.measureAllCells();
 	    }
 
 	    /** See Grid#recomputeGridSize */
@@ -13592,7 +14109,7 @@ var ProperCombo =
 	    value: function recomputeRowHeights() {
 	      var index = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
-	      this._grid.recomputeGridSize({
+	      this.Grid.recomputeGridSize({
 	        rowIndex: index
 	      });
 	      this.forceUpdateGrid();
@@ -13612,6 +14129,7 @@ var ProperCombo =
 	      var classNames = (0, _classnames2.default)('VirtualScroll', className);
 
 	      return _react2.default.createElement(_Grid2.default, _extends({}, this.props, {
+	        autoContainerWidth: true,
 	        cellRenderer: this._cellRenderer,
 	        cellClassName: this._createRowClassNameGetter(),
 	        cellStyle: this._createRowStyleGetter(),
@@ -13622,7 +14140,7 @@ var ProperCombo =
 	        onScroll: this._onScroll,
 	        onSectionRendered: this._onSectionRendered,
 	        ref: function ref(_ref) {
-	          _this2._grid = _ref;
+	          _this2.Grid = _ref;
 	        },
 	        scrollToRow: scrollToIndex
 	      }));
@@ -13807,7 +14325,7 @@ var ProperCombo =
 	exports.default = VirtualScroll;
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13815,19 +14333,24 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.WindowScroller = exports.default = undefined;
+	exports.IS_SCROLLING_TIMEOUT = exports.WindowScroller = exports.default = undefined;
 
-	var _WindowScroller2 = __webpack_require__(65);
+	var _WindowScroller2 = __webpack_require__(67);
 
 	var _WindowScroller3 = _interopRequireDefault(_WindowScroller2);
+
+	var _onScroll = __webpack_require__(68);
+
+	var _onScroll2 = _interopRequireDefault(_onScroll);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = _WindowScroller3.default;
 	exports.WindowScroller = _WindowScroller3.default;
+	exports.IS_SCROLLING_TIMEOUT = _onScroll2.default;
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13850,9 +14373,11 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	var _raf = __webpack_require__(33);
+	var _raf = __webpack_require__(34);
 
 	var _raf2 = _interopRequireDefault(_raf);
+
+	var _onScroll = __webpack_require__(68);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13862,23 +14387,19 @@ var ProperCombo =
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	/**
-	 * Specifies the number of miliseconds during which to disable pointer events while a scroll is in progress.
-	 * This improves performance and makes scrolling smoother.
-	 */
-	var IS_SCROLLING_TIMEOUT = 150;
-
 	var WindowScroller = function (_Component) {
 	  _inherits(WindowScroller, _Component);
 
 	  function WindowScroller(props) {
 	    _classCallCheck(this, WindowScroller);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(WindowScroller).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (WindowScroller.__proto__ || Object.getPrototypeOf(WindowScroller)).call(this, props));
+
+	    var height = typeof window !== 'undefined' ? window.innerHeight : 0;
 
 	    _this.state = {
 	      isScrolling: false,
-	      height: 0,
+	      height: height,
 	      scrollTop: 0
 	    };
 
@@ -13891,17 +14412,27 @@ var ProperCombo =
 	  _createClass(WindowScroller, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      this._positionFromTop = _reactDom2.default.findDOMNode(this).getBoundingClientRect().top;
+	      var height = this.state.height;
 
-	      this.setState({ height: window.innerHeight });
+	      // Subtract documentElement top to handle edge-case where a user is navigating back (history) from an already-scrolled bage.
+	      // In this case the body's top position will be a negative number and this element's top will be increased (by that amount).
 
-	      window.addEventListener('scroll', this._onScrollWindow, false);
+	      this._positionFromTop = _reactDom2.default.findDOMNode(this).getBoundingClientRect().top - document.documentElement.getBoundingClientRect().top;
+
+	      if (height !== window.innerHeight) {
+	        this.setState({
+	          height: window.innerHeight
+	        });
+	      }
+
+	      (0, _onScroll.registerScrollListener)(this);
 	      window.addEventListener('resize', this._onResizeWindow, false);
 	    }
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
-	      window.removeEventListener('scroll', this._onScrollWindow, false);
+	      (0, _onScroll.unregisterScrollListener)(this);
+
 	      window.removeEventListener('resize', this._onResizeWindow, false);
 	    }
 
@@ -13951,23 +14482,8 @@ var ProperCombo =
 	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
 	    }
 	  }, {
-	    key: '_enablePointerEventsAfterDelay',
-	    value: function _enablePointerEventsAfterDelay() {
-	      if (this._disablePointerEventsTimeoutId) {
-	        clearTimeout(this._disablePointerEventsTimeoutId);
-	      }
-
-	      this._disablePointerEventsTimeoutId = setTimeout(this._enablePointerEventsAfterDelayCallback, IS_SCROLLING_TIMEOUT);
-	    }
-	  }, {
 	    key: '_enablePointerEventsAfterDelayCallback',
 	    value: function _enablePointerEventsAfterDelayCallback() {
-	      this._disablePointerEventsTimeoutId = null;
-
-	      document.body.style.pointerEvents = this._originalBodyPointerEvents;
-
-	      this._originalBodyPointerEvents = null;
-
 	      this.setState({
 	        isScrolling: false
 	      });
@@ -13994,14 +14510,6 @@ var ProperCombo =
 	      var scrollY = 'scrollY' in window ? window.scrollY : document.documentElement.scrollTop;
 
 	      var scrollTop = Math.max(0, scrollY - this._positionFromTop);
-
-	      if (this._originalBodyPointerEvents == null) {
-	        this._originalBodyPointerEvents = document.body.style.pointerEvents;
-
-	        document.body.style.pointerEvents = 'none';
-
-	        this._enablePointerEventsAfterDelay();
-	      }
 
 	      var state = {
 	        isScrolling: true,
@@ -14042,7 +14550,86 @@ var ProperCombo =
 	exports.default = WindowScroller;
 
 /***/ },
-/* 66 */
+/* 68 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.registerScrollListener = registerScrollListener;
+	exports.unregisterScrollListener = unregisterScrollListener;
+	var mountedInstances = [];
+	var originalBodyPointerEvents = null;
+	var disablePointerEventsTimeoutId = null;
+
+	/**
+	 * Specifies the number of miliseconds during which to disable pointer events while a scroll is in progress.
+	 * This improves performance and makes scrolling smoother.
+	 */
+	var IS_SCROLLING_TIMEOUT = exports.IS_SCROLLING_TIMEOUT = 150;
+
+	function enablePointerEventsIfDisabled() {
+	  if (disablePointerEventsTimeoutId) {
+	    disablePointerEventsTimeoutId = null;
+
+	    document.body.style.pointerEvents = originalBodyPointerEvents;
+
+	    originalBodyPointerEvents = null;
+	  }
+	}
+
+	function enablePointerEventsAfterDelayCallback() {
+	  enablePointerEventsIfDisabled();
+	  mountedInstances.forEach(function (component) {
+	    return component._enablePointerEventsAfterDelayCallback();
+	  });
+	}
+
+	function enablePointerEventsAfterDelay() {
+	  if (disablePointerEventsTimeoutId) {
+	    clearTimeout(disablePointerEventsTimeoutId);
+	  }
+
+	  disablePointerEventsTimeoutId = setTimeout(enablePointerEventsAfterDelayCallback, IS_SCROLLING_TIMEOUT);
+	}
+
+	function onScrollWindow(event) {
+	  if (originalBodyPointerEvents == null) {
+	    originalBodyPointerEvents = document.body.style.pointerEvents;
+
+	    document.body.style.pointerEvents = 'none';
+
+	    enablePointerEventsAfterDelay();
+	  }
+	  mountedInstances.forEach(function (component) {
+	    return component._onScrollWindow(event);
+	  });
+	}
+
+	function registerScrollListener(component) {
+	  if (!mountedInstances.length) {
+	    window.addEventListener('scroll', onScrollWindow);
+	  }
+	  mountedInstances.push(component);
+	}
+
+	function unregisterScrollListener(component) {
+	  mountedInstances = mountedInstances.filter(function (c) {
+	    return c !== component;
+	  });
+	  if (!mountedInstances.length) {
+	    window.removeEventListener('scroll', onScrollWindow);
+	    if (disablePointerEventsTimeoutId) {
+	      clearTimeout(disablePointerEventsTimeoutId);
+	      enablePointerEventsIfDisabled();
+	    }
+	  }
+	}
+
+/***/ },
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14214,7 +14801,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 67 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14225,13 +14812,13 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _dotObject = __webpack_require__(68);
+	var _dotObject = __webpack_require__(71);
 
 	var _dotObject2 = _interopRequireDefault(_dotObject);
 
 	var _underscore = __webpack_require__(4);
 
-	var _deepmerge = __webpack_require__(69);
+	var _deepmerge = __webpack_require__(72);
 
 	var _deepmerge2 = _interopRequireDefault(_deepmerge);
 
@@ -14249,7 +14836,7 @@ var ProperCombo =
 
 	var RowCache = function () {
 		function RowCache() {
-			var base = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+			var base = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 			_classCallCheck(this, RowCache);
 
@@ -14259,7 +14846,7 @@ var ProperCombo =
 		_createClass(RowCache, [{
 			key: 'init',
 			value: function init() {
-				var base = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+				var base = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
 				cache = base;
 
@@ -14287,7 +14874,7 @@ var ProperCombo =
 		}, {
 			key: 'flush',
 			value: function flush() {
-				var key = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+				var key = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
 				if (key) {
 					var k = parseKey(key);
@@ -14309,7 +14896,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 68 */
+/* 71 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -14455,7 +15042,7 @@ var ProperCombo =
 	DotObject.prototype.str = function (path, v, obj, mod) {
 	  if (path.indexOf(this.seperator) !== -1) {
 	    this._fill(path.split(this.seperator), obj, v, mod)
-	  } else if (this.override) {
+	  } else if (!obj.hasOwnProperty(path) || this.override) {
 	    obj[path] = _process(v, mod)
 	  }
 
@@ -14752,7 +15339,7 @@ var ProperCombo =
 	  tgt = tgt || {}
 	  path = path || []
 	  Object.keys(obj).forEach(function (key) {
-	    if (Object(obj[key]) === obj[key]) {
+	    if (Object(obj[key]) === obj[key] && (Object.prototype.toString.call(obj[key]) === '[object Object]') || Object.prototype.toString.call(obj[key]) === '[object Array]') {
 	      return this.dot(obj[key], tgt, path.concat(key))
 	    } else {
 	      tgt[path.concat(key).join(this.seperator)] = obj[key]
@@ -14798,7 +15385,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 69 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -14856,16 +15443,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 70 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(71)() ? Set : __webpack_require__(72);
+	module.exports = __webpack_require__(74)() ? Set : __webpack_require__(75);
 
 
 /***/ },
-/* 71 */
+/* 74 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14895,22 +15482,22 @@ var ProperCombo =
 
 
 /***/ },
-/* 72 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear          = __webpack_require__(73)
-	  , eIndexOf       = __webpack_require__(75)
-	  , setPrototypeOf = __webpack_require__(81)
-	  , callable       = __webpack_require__(86)
-	  , d              = __webpack_require__(87)
-	  , ee             = __webpack_require__(99)
-	  , Symbol         = __webpack_require__(100)
-	  , iterator       = __webpack_require__(105)
-	  , forOf          = __webpack_require__(109)
-	  , Iterator       = __webpack_require__(119)
-	  , isNative       = __webpack_require__(120)
+	var clear          = __webpack_require__(76)
+	  , eIndexOf       = __webpack_require__(78)
+	  , setPrototypeOf = __webpack_require__(84)
+	  , callable       = __webpack_require__(89)
+	  , d              = __webpack_require__(90)
+	  , ee             = __webpack_require__(102)
+	  , Symbol         = __webpack_require__(103)
+	  , iterator       = __webpack_require__(108)
+	  , forOf          = __webpack_require__(112)
+	  , Iterator       = __webpack_require__(122)
+	  , isNative       = __webpack_require__(123)
 
 	  , call = Function.prototype.call
 	  , defineProperty = Object.defineProperty, getPrototypeOf = Object.getPrototypeOf
@@ -14981,7 +15568,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 73 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Inspired by Google Closure:
@@ -14990,7 +15577,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var value = __webpack_require__(74);
+	var value = __webpack_require__(77);
 
 	module.exports = function () {
 		value(this).length = 0;
@@ -14999,7 +15586,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 74 */
+/* 77 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15011,13 +15598,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 75 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toPosInt = __webpack_require__(76)
-	  , value    = __webpack_require__(74)
+	var toPosInt = __webpack_require__(79)
+	  , value    = __webpack_require__(77)
 
 	  , indexOf = Array.prototype.indexOf
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -15046,12 +15633,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 76 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var toInteger = __webpack_require__(77)
+	var toInteger = __webpack_require__(80)
 
 	  , max = Math.max;
 
@@ -15059,12 +15646,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 77 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var sign = __webpack_require__(78)
+	var sign = __webpack_require__(81)
 
 	  , abs = Math.abs, floor = Math.floor;
 
@@ -15077,18 +15664,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 78 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(79)()
+	module.exports = __webpack_require__(82)()
 		? Math.sign
-		: __webpack_require__(80);
+		: __webpack_require__(83);
 
 
 /***/ },
-/* 79 */
+/* 82 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15101,7 +15688,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 80 */
+/* 83 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15114,18 +15701,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 81 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(82)()
+	module.exports = __webpack_require__(85)()
 		? Object.setPrototypeOf
-		: __webpack_require__(83);
+		: __webpack_require__(86);
 
 
 /***/ },
-/* 82 */
+/* 85 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15142,7 +15729,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 83 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Big thanks to @WebReflection for sorting this out
@@ -15150,8 +15737,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var isObject      = __webpack_require__(84)
-	  , value         = __webpack_require__(74)
+	var isObject      = __webpack_require__(87)
+	  , value         = __webpack_require__(77)
 
 	  , isPrototypeOf = Object.prototype.isPrototypeOf
 	  , defineProperty = Object.defineProperty
@@ -15217,11 +15804,11 @@ var ProperCombo =
 		return false;
 	}())));
 
-	__webpack_require__(85);
+	__webpack_require__(88);
 
 
 /***/ },
-/* 84 */
+/* 87 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15234,7 +15821,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 85 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Workaround for http://code.google.com/p/v8/issues/detail?id=2804
@@ -15243,8 +15830,8 @@ var ProperCombo =
 
 	var create = Object.create, shim;
 
-	if (!__webpack_require__(82)()) {
-		shim = __webpack_require__(83);
+	if (!__webpack_require__(85)()) {
+		shim = __webpack_require__(86);
 	}
 
 	module.exports = (function () {
@@ -15276,7 +15863,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 86 */
+/* 89 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15288,15 +15875,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 87 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign        = __webpack_require__(88)
-	  , normalizeOpts = __webpack_require__(94)
-	  , isCallable    = __webpack_require__(95)
-	  , contains      = __webpack_require__(96)
+	var assign        = __webpack_require__(91)
+	  , normalizeOpts = __webpack_require__(97)
+	  , isCallable    = __webpack_require__(98)
+	  , contains      = __webpack_require__(99)
 
 	  , d;
 
@@ -15357,18 +15944,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 88 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(89)()
+	module.exports = __webpack_require__(92)()
 		? Object.assign
-		: __webpack_require__(90);
+		: __webpack_require__(93);
 
 
 /***/ },
-/* 89 */
+/* 92 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15383,13 +15970,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 90 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keys  = __webpack_require__(91)
-	  , value = __webpack_require__(74)
+	var keys  = __webpack_require__(94)
+	  , value = __webpack_require__(77)
 
 	  , max = Math.max;
 
@@ -15411,18 +15998,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 91 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(92)()
+	module.exports = __webpack_require__(95)()
 		? Object.keys
-		: __webpack_require__(93);
+		: __webpack_require__(96);
 
 
 /***/ },
-/* 92 */
+/* 95 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15436,7 +16023,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 93 */
+/* 96 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15449,7 +16036,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 94 */
+/* 97 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15472,7 +16059,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 95 */
+/* 98 */
 /***/ function(module, exports) {
 
 	// Deprecated
@@ -15483,18 +16070,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 96 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(97)()
+	module.exports = __webpack_require__(100)()
 		? String.prototype.contains
-		: __webpack_require__(98);
+		: __webpack_require__(101);
 
 
 /***/ },
-/* 97 */
+/* 100 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15508,7 +16095,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 98 */
+/* 101 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15521,13 +16108,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 99 */
+/* 102 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var d        = __webpack_require__(87)
-	  , callable = __webpack_require__(86)
+	var d        = __webpack_require__(90)
+	  , callable = __webpack_require__(89)
 
 	  , apply = Function.prototype.apply, call = Function.prototype.call
 	  , create = Object.create, defineProperty = Object.defineProperty
@@ -15659,16 +16246,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 100 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(101)() ? Symbol : __webpack_require__(102);
+	module.exports = __webpack_require__(104)() ? Symbol : __webpack_require__(105);
 
 
 /***/ },
-/* 101 */
+/* 104 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15692,15 +16279,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 102 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// ES2015 Symbol polyfill for environments that do not support it (or partially support it_
 
 	'use strict';
 
-	var d              = __webpack_require__(87)
-	  , validateSymbol = __webpack_require__(103)
+	var d              = __webpack_require__(90)
+	  , validateSymbol = __webpack_require__(106)
 
 	  , create = Object.create, defineProperties = Object.defineProperties
 	  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
@@ -15805,12 +16392,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 103 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isSymbol = __webpack_require__(104);
+	var isSymbol = __webpack_require__(107);
 
 	module.exports = function (value) {
 		if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
@@ -15819,7 +16406,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 104 */
+/* 107 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15830,12 +16417,12 @@ var ProperCombo =
 
 
 /***/ },
-/* 105 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isIterable = __webpack_require__(106);
+	var isIterable = __webpack_require__(109);
 
 	module.exports = function (value) {
 		if (!isIterable(value)) throw new TypeError(value + " is not iterable");
@@ -15844,14 +16431,14 @@ var ProperCombo =
 
 
 /***/ },
-/* 106 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(107)
-	  , isString       = __webpack_require__(108)
-	  , iteratorSymbol = __webpack_require__(100).iterator
+	var isArguments    = __webpack_require__(110)
+	  , isString       = __webpack_require__(111)
+	  , iteratorSymbol = __webpack_require__(103).iterator
 
 	  , isArray = Array.isArray;
 
@@ -15865,7 +16452,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 107 */
+/* 110 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15878,7 +16465,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 108 */
+/* 111 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -15894,15 +16481,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 109 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments = __webpack_require__(107)
-	  , callable    = __webpack_require__(86)
-	  , isString    = __webpack_require__(108)
-	  , get         = __webpack_require__(110)
+	var isArguments = __webpack_require__(110)
+	  , callable    = __webpack_require__(89)
+	  , isString    = __webpack_require__(111)
+	  , get         = __webpack_require__(113)
 
 	  , isArray = Array.isArray, call = Function.prototype.call
 	  , some = Array.prototype.some;
@@ -15946,17 +16533,17 @@ var ProperCombo =
 
 
 /***/ },
-/* 110 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isArguments    = __webpack_require__(107)
-	  , isString       = __webpack_require__(108)
-	  , ArrayIterator  = __webpack_require__(111)
-	  , StringIterator = __webpack_require__(118)
-	  , iterable       = __webpack_require__(105)
-	  , iteratorSymbol = __webpack_require__(100).iterator;
+	var isArguments    = __webpack_require__(110)
+	  , isString       = __webpack_require__(111)
+	  , ArrayIterator  = __webpack_require__(114)
+	  , StringIterator = __webpack_require__(121)
+	  , iterable       = __webpack_require__(108)
+	  , iteratorSymbol = __webpack_require__(103).iterator;
 
 	module.exports = function (obj) {
 		if (typeof iterable(obj)[iteratorSymbol] === 'function') return obj[iteratorSymbol]();
@@ -15967,15 +16554,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 111 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(81)
-	  , contains       = __webpack_require__(96)
-	  , d              = __webpack_require__(87)
-	  , Iterator       = __webpack_require__(112)
+	var setPrototypeOf = __webpack_require__(84)
+	  , contains       = __webpack_require__(99)
+	  , d              = __webpack_require__(90)
+	  , Iterator       = __webpack_require__(115)
 
 	  , defineProperty = Object.defineProperty
 	  , ArrayIterator;
@@ -16003,18 +16590,18 @@ var ProperCombo =
 
 
 /***/ },
-/* 112 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var clear    = __webpack_require__(73)
-	  , assign   = __webpack_require__(88)
-	  , callable = __webpack_require__(86)
-	  , value    = __webpack_require__(74)
-	  , d        = __webpack_require__(87)
-	  , autoBind = __webpack_require__(113)
-	  , Symbol   = __webpack_require__(100)
+	var clear    = __webpack_require__(76)
+	  , assign   = __webpack_require__(91)
+	  , callable = __webpack_require__(89)
+	  , value    = __webpack_require__(77)
+	  , d        = __webpack_require__(90)
+	  , autoBind = __webpack_require__(116)
+	  , Symbol   = __webpack_require__(103)
 
 	  , defineProperty = Object.defineProperty
 	  , defineProperties = Object.defineProperties
@@ -16099,15 +16686,15 @@ var ProperCombo =
 
 
 /***/ },
-/* 113 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var copy       = __webpack_require__(114)
-	  , map        = __webpack_require__(115)
-	  , callable   = __webpack_require__(86)
-	  , validValue = __webpack_require__(74)
+	var copy       = __webpack_require__(117)
+	  , map        = __webpack_require__(118)
+	  , callable   = __webpack_require__(89)
+	  , validValue = __webpack_require__(77)
 
 	  , bind = Function.prototype.bind, defineProperty = Object.defineProperty
 	  , hasOwnProperty = Object.prototype.hasOwnProperty
@@ -16136,13 +16723,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 114 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign = __webpack_require__(88)
-	  , value  = __webpack_require__(74);
+	var assign = __webpack_require__(91)
+	  , value  = __webpack_require__(77);
 
 	module.exports = function (obj) {
 		var copy = Object(value(obj));
@@ -16152,13 +16739,13 @@ var ProperCombo =
 
 
 /***/ },
-/* 115 */
+/* 118 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var callable = __webpack_require__(86)
-	  , forEach  = __webpack_require__(116)
+	var callable = __webpack_require__(89)
+	  , forEach  = __webpack_require__(119)
 
 	  , call = Function.prototype.call;
 
@@ -16173,16 +16760,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 116 */
+/* 119 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(117)('forEach');
+	module.exports = __webpack_require__(120)('forEach');
 
 
 /***/ },
-/* 117 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Internal method, used by iteration functions.
@@ -16191,8 +16778,8 @@ var ProperCombo =
 
 	'use strict';
 
-	var callable = __webpack_require__(86)
-	  , value    = __webpack_require__(74)
+	var callable = __webpack_require__(89)
+	  , value    = __webpack_require__(77)
 
 	  , bind = Function.prototype.bind, call = Function.prototype.call, keys = Object.keys
 	  , propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
@@ -16217,7 +16804,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 118 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Thanks @mathiasbynens
@@ -16225,9 +16812,9 @@ var ProperCombo =
 
 	'use strict';
 
-	var setPrototypeOf = __webpack_require__(81)
-	  , d              = __webpack_require__(87)
-	  , Iterator       = __webpack_require__(112)
+	var setPrototypeOf = __webpack_require__(84)
+	  , d              = __webpack_require__(90)
+	  , Iterator       = __webpack_require__(115)
 
 	  , defineProperty = Object.defineProperty
 	  , StringIterator;
@@ -16260,16 +16847,16 @@ var ProperCombo =
 
 
 /***/ },
-/* 119 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var setPrototypeOf    = __webpack_require__(81)
-	  , contains          = __webpack_require__(96)
-	  , d                 = __webpack_require__(87)
-	  , Iterator          = __webpack_require__(112)
-	  , toStringTagSymbol = __webpack_require__(100).toStringTag
+	var setPrototypeOf    = __webpack_require__(84)
+	  , contains          = __webpack_require__(99)
+	  , d                 = __webpack_require__(90)
+	  , Iterator          = __webpack_require__(115)
+	  , toStringTagSymbol = __webpack_require__(103).toStringTag
 
 	  , defineProperty = Object.defineProperty
 	  , SetIterator;
@@ -16296,7 +16883,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 120 */
+/* 123 */
 /***/ function(module, exports) {
 
 	// Exports true if environment provides native `Set` implementation,
@@ -16311,7 +16898,7 @@ var ProperCombo =
 
 
 /***/ },
-/* 121 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -16320,7 +16907,7 @@ var ProperCombo =
 		value: true
 	});
 
-	var _searchField = __webpack_require__(122);
+	var _searchField = __webpack_require__(125);
 
 	var _searchField2 = _interopRequireDefault(_searchField);
 
@@ -16334,7 +16921,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 122 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16353,7 +16940,7 @@ var ProperCombo =
 
 	var _underscore2 = _interopRequireDefault(_underscore);
 
-	var _reactDimensions = __webpack_require__(66);
+	var _reactDimensions = __webpack_require__(69);
 
 	var _reactDimensions2 = _interopRequireDefault(_reactDimensions);
 
@@ -16370,7 +16957,6 @@ var ProperCombo =
 	// For more info about this read ReadMe.md
 	function getDefaultProps() {
 		return {
-			clearable: true,
 			defaultValue: '',
 			placeholder: 'Search...',
 			searchIcon: 'fa fa-search fa-fw',
@@ -16380,7 +16966,8 @@ var ProperCombo =
 			throttle: 160, // milliseconds
 			sendEmpty: true,
 			minLength: 3,
-			autoComplete: 'off'
+			autoComplete: 'off',
+			uniqueId: null
 		};
 	}
 
@@ -16403,7 +16990,7 @@ var ProperCombo =
 		function SearchField(props) {
 			_classCallCheck(this, SearchField);
 
-			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SearchField).call(this, props));
+			var _this = _possibleConstructorReturn(this, (SearchField.__proto__ || Object.getPrototypeOf(SearchField)).call(this, props));
 
 			_this.state = {
 				showClear: false,
@@ -16590,8 +17177,8 @@ var ProperCombo =
 			key: 'render',
 			value: function render() {
 				var className = 'proper-search-field',
-				    uniqueId = _underscore2['default'].uniqueId('search-'),
 				    clearBtn = null;
+				var uniqueId = undefined;
 
 				if (this.props.className) {
 					className += ' ' + this.props.className;
@@ -16599,6 +17186,8 @@ var ProperCombo =
 
 				if (this.props.uniqueId) {
 					uniqueId = this.props.uniqueId;
+				} else {
+					uniqueId = _underscore2['default'].uniqueId('search-');
 				}
 
 				if (this.state.showClear) {
@@ -16645,7 +17234,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 123 */
+/* 126 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -16680,7 +17269,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 124 */
+/* 127 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -16703,7 +17292,7 @@ var ProperCombo =
 
 	exports['default'] = {
 		normalize: function normalize(value) {
-			var parseToLower = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+			var parseToLower = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
 			var rex = null;
 
@@ -16722,7 +17311,7 @@ var ProperCombo =
 	module.exports = exports['default'];
 
 /***/ },
-/* 125 */
+/* 128 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

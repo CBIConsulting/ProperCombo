@@ -40,7 +40,7 @@ function getDefaultProps() {
 		filter: null, // Optional function (to be used when the displayField is an function too)
 		filterField: null, // By default it will be the displayField
 		afterSelect: null, // Function
-		uniqueId: _.uniqueId('comboField_'),
+		uniqueId: null,
 		allowsEmptySelection: false, // Put this to true to get a diferent ToolBar that allows select empty
 	}
 }
@@ -75,15 +75,15 @@ class ComboField extends React.Component {
 
 		this.state = {
 			selectedData: null,
-			selection: this.props.defaultSelection,
-			uniqueId: this.props.uniqueId,
-			secondaryDisplay: this.props.secondaryDisplay,
-			idField: this.props.idField,
+			selection: props.defaultSelection,
+			secondaryDisplay: props.secondaryDisplay,
+			idField: props.idField,
 			show: false
 		}
 	}
 
 	componentWillMount() {
+		this.uniqueId = this.props.uniqueId ? this.props.uniqueId : _.uniqueId('comboField_');
 		let selection = this.state.selection, data;
 		if (!_.isNull(selection) && selection.length > 0)  {
 			data = !_.isArray(this.props.data) ? this.props.indexed : this.props.data;
@@ -187,7 +187,7 @@ class ComboField extends React.Component {
 			this.setState({
 				selectedData: data,
 				selection: selection
-			}, this.sendSelection(data,selection));
+			}, this.sendSelection.bind(this, data, selection));
 		}
 	}
 
@@ -282,7 +282,7 @@ class ComboField extends React.Component {
 		}
 
 		search = <Search
-			key={this.state.uniqueId+'-content-Search'}
+			key={this.uniqueId + '-content-Search'}
 			className={this.props.searchClassName}
 			data={this.props.data}
 			indexed={this.props.indexed}
@@ -317,7 +317,7 @@ class ComboField extends React.Component {
 		if (CSSTransition) {
 			return (
 				<CSSTransition
-					key={this.state.uniqueId + '-content'}
+					key={this.uniqueId + '-content'}
 					className={contentClass}
 					transitionName='content'
 					component='div'
@@ -329,7 +329,7 @@ class ComboField extends React.Component {
 				</CSSTransition>
 			);
 		} else { // Test - No Animations
-			return <div key={this.state.uniqueId + '-content'} className={contentClass}> {search} </div>
+			return <div key={this.uniqueId + '-content'} className={contentClass}> {search} </div>
 		}
 
 	}
@@ -401,7 +401,7 @@ class ComboField extends React.Component {
 		if (CSSTransition) {
 			return (
 				<CSSTransition
-					key={this.state.uniqueId + '-fieldllist-elements'}
+					key={this.uniqueId + '-fieldllist-elements'}
 					className='proper-combo-virtualField-list'
 					transitionName='list'
 					component='ul'
@@ -411,7 +411,7 @@ class ComboField extends React.Component {
 				</CSSTransition>
 			);
 		} else {
-			return <ul key={this.state.uniqueId + '-fieldllist-elements'} className='proper-combo-virtualField-list'> {list} </ul>
+			return <ul key={this.uniqueId + '-fieldllist-elements'} className='proper-combo-virtualField-list'> {list} </ul>
 		}
 
 		return list;
@@ -430,9 +430,9 @@ class ComboField extends React.Component {
 
 		// CSSTransitionGroups for animations Content and List
 		return (
-			<div key={this.state.uniqueId} className={className}>
-				<div key={this.state.uniqueId + '-field'} className='proper-combo-virtual'>
-					<div key={this.state.uniqueId + '-fieldllist'} className='proper-combo-virtualField' ref={this.state.uniqueId + '_fieldllist'} style={{maxHeight:maxHeight}} onClick={this.onVirtualClick.bind(this)}>
+			<div key={this.uniqueId} className={className}>
+				<div key={this.uniqueId + '-field'} className='proper-combo-virtual'>
+					<div key={this.uniqueId + '-fieldllist'} className='proper-combo-virtualField' ref={this.uniqueId + '_fieldllist'} style={{maxHeight:maxHeight}} onClick={this.onVirtualClick.bind(this)}>
 						{elementsList}
 					</div>
 					<button className={'proper-combo-virtualField-add'} onClick={this.addNewItems.bind(this)}>

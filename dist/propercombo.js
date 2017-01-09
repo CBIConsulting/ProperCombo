@@ -47,9 +47,7 @@ var ProperCombo =
 
 	"use strict";
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 
 	var _combofield = __webpack_require__(1);
 
@@ -70,11 +68,7 @@ var ProperCombo =
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	exports.__esModule = true;
 
 	var _react = __webpack_require__(2);
 
@@ -175,7 +169,7 @@ var ProperCombo =
 		function ComboField(props) {
 			_classCallCheck(this, ComboField);
 
-			var _this = _possibleConstructorReturn(this, (ComboField.__proto__ || Object.getPrototypeOf(ComboField)).call(this, props));
+			var _this = _possibleConstructorReturn(this, _React$Component.call(this, props));
 
 			_this.state = {
 				selectedData: null,
@@ -187,451 +181,457 @@ var ProperCombo =
 			return _this;
 		}
 
-		_createClass(ComboField, [{
-			key: 'componentWillMount',
-			value: function componentWillMount() {
-				this.uniqueId = this.props.uniqueId ? this.props.uniqueId : _underscore2['default'].uniqueId('comboField_');
-				var selection = this.state.selection,
-				    data = void 0;
-				if (!_underscore2['default'].isNull(selection) && selection.length > 0) {
-					data = !_underscore2['default'].isArray(this.props.data) ? this.props.indexed : this.props.data;
+		ComboField.prototype.componentWillMount = function componentWillMount() {
+			this.uniqueId = this.props.uniqueId ? this.props.uniqueId : _underscore2['default'].uniqueId('comboField_');
+			var selection = this.state.selection,
+			    data = void 0;
+			if (!_underscore2['default'].isNull(selection) && selection.length > 0) {
+				data = !_underscore2['default'].isArray(this.props.data) ? this.props.indexed : this.props.data;
 
-					this.prepareData(selection, data, this.props.idField); // Update selectedData in component's state
-				}
+				this.prepareData(selection, data, this.props.idField); // Update selectedData in component's state
 			}
-		}, {
-			key: 'shouldComponentUpdate',
-			value: function shouldComponentUpdate(nextProps, nextState) {
-				var stateChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state, nextState);
-				var propsChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props, nextProps);
-				var somethingChanged = propsChanged || stateChanged;
+		};
 
-				if (propsChanged) {
-					var dataChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.data, nextProps.data);
-					var idFieldChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.idField, nextProps.idField);
-					var selectionChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.defaultSelection, nextProps.defaultSelection);
-					var secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
-					var isInmutable = !_underscore2['default'].isArray(nextProps.data);
+		ComboField.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps, nextState) {
+			var stateChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state, nextState);
+			var propsChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props, nextProps);
+			var somethingChanged = propsChanged || stateChanged;
 
-					if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
-						if (dataChanged || idFieldChanged || selectionChanged) {
-							var selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
-							var data = dataChanged ? nextProps.data : this.props.data;
-							var idField = idFieldChanged ? nextProps.idField : this.props.idField;
-							var fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(data[0])) : new Set(_underscore2['default'].keys(data.get(0).toJSON()));
+			if (propsChanged) {
+				var dataChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.data, nextProps.data);
+				var idFieldChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.idField, nextProps.idField);
+				var selectionChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.props.defaultSelection, nextProps.defaultSelection);
+				var secondaryDisplayChanged = this.props.secondaryDisplay != nextProps.secondaryDisplay;
+				var isInmutable = !_underscore2['default'].isArray(nextProps.data);
 
-							if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
+				if (dataChanged || idFieldChanged || selectionChanged || secondaryDisplayChanged) {
+					if (dataChanged || idFieldChanged || selectionChanged) {
+						var selection = selectionChanged ? nextProps.defaultSelection : this.state.selection;
+						var data = dataChanged ? nextProps.data : this.props.data;
+						var idField = idFieldChanged ? nextProps.idField : this.props.idField;
+						var fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(data[0])) : new Set(_underscore2['default'].keys(data.get(0).toJSON()));
 
-							if (_underscore2['default'].isNull(selection) || _underscore2['default'].isNull(data)) {
-								this.setState({
-									selection: selection,
-									idField: idField
-								});
-							} else {
-								if (isInmutable && this.props.indexed) data = this.props.indexed;
-								this.prepareData(selection, data, idField, isInmutable);
-							}
-						}
+						if (!fieldsSet.has(nextProps.idField)) idField = this.props.idField;
 
-						// If the secondary display change then check if that field
-						if (secondaryDisplayChanged) {
-							var _fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(nextProps.data[0])) : new Set(_underscore2['default'].keys(nextProps.data.get(0).toJSON()));
-							var messages = this.props.messages[this.props.lang];
-
-							// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
-							if (!_fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
-								console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
-							} else {
-								this.setState({
-									secondaryDisplay: nextProps.secondaryDisplay
-								});
-							}
-						}
-
-						return false;
-					}
-				}
-
-				return somethingChanged;
-			}
-		}, {
-			key: 'prepareData',
-			value: function prepareData(selection, newData, idField) {
-				var _this2 = this;
-
-				var isInmutable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-				if (!_underscore2['default'].isNull(selection) && !_underscore2['default'].isNull(newData)) {
-					(function () {
-						var data = newData,
-						    selectedData = [],
-						    dataKeys = void 0;
-
-						if (!isInmutable) data = _underscore2['default'].indexBy(newData, idField);
-						dataKeys = new Set(_underscore2['default'].keys(data));
-
-						if (_underscore2['default'].isArray(selection)) {
-							selection.forEach(function (element) {
-								if (dataKeys.has(element.toString())) {
-									selectedData.push(data[element]);
-								}
+						if (_underscore2['default'].isNull(selection) || _underscore2['default'].isNull(data)) {
+							this.setState({
+								selection: selection,
+								idField: idField
 							});
-						} else if (typeof selection === 'string') {
-							if (dataKeys.has(selection)) {
-								selectedData.push(data[selection]);
-							}
+						} else {
+							if (isInmutable && this.props.indexed) data = this.props.indexed;
+							this.prepareData(selection, data, idField, isInmutable);
 						}
+					}
 
-						_this2.setState({
-							selectedData: selectedData,
-							selection: selection,
-							idField: idField
+					// If the secondary display change then check if that field
+					if (secondaryDisplayChanged) {
+						var _fieldsSet = !isInmutable ? new Set(_underscore2['default'].keys(nextProps.data[0])) : new Set(_underscore2['default'].keys(nextProps.data.get(0).toJSON()));
+						var messages = this.getTranslatedMessages();
+
+						// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
+						if (!_fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
+							console.error(messages.errorSecondaryDisplay + ' ' + nextProps.secondaryDisplay + ' ' + messages.errorData);
+						} else {
+							this.setState({
+								secondaryDisplay: nextProps.secondaryDisplay
+							});
+						}
+					}
+
+					return false;
+				}
+			}
+
+			return somethingChanged;
+		};
+
+		ComboField.prototype.prepareData = function prepareData(selection, newData, idField) {
+			var _this2 = this;
+
+			var isInmutable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+			if (!_underscore2['default'].isNull(selection) && !_underscore2['default'].isNull(newData)) {
+				(function () {
+					var data = newData,
+					    selectedData = [],
+					    dataKeys = void 0;
+
+					if (!isInmutable) data = _underscore2['default'].indexBy(newData, idField);
+					dataKeys = new Set(_underscore2['default'].keys(data));
+
+					if (_underscore2['default'].isArray(selection)) {
+						selection.forEach(function (element) {
+							if (dataKeys.has(element.toString())) {
+								selectedData.push(data[element]);
+							}
 						});
-					})();
-				}
-			}
+					} else if (typeof selection === 'string') {
+						if (dataKeys.has(selection)) {
+							selectedData.push(data[selection]);
+						}
+					}
 
-			/**
-	   * Function called each time the selection has changed. Apply an update in the components state then render again an update the child and
-	   * send the selection and the selected data to a function in props which name is the same (if exist)
-	   *
-	   * @param (Array)	selection 	The selected elements using the idField of data.
-	   * @param (Array)	data 		The selected data
-	   */
-
-		}, {
-			key: 'afterSelect',
-			value: function afterSelect(data, selection) {
-				var selectionChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state.selection, selection);
-
-				if (selectionChanged) {
-					this.setState({
-						selectedData: data,
-						selection: selection
-					}, this.sendSelection.bind(this, data, selection));
-				}
-			}
-
-			/**
-	   * Send the selection and the selected data to a function in props which name is the afterSelect() (if exist)
-	   *
-	   * @param (Set)		selection 	The selected values using the values of the selected data.
-	   * @param (Array)	data 		The selected data
-	   */
-
-		}, {
-			key: 'sendSelection',
-			value: function sendSelection(data, selection) {
-				if (typeof this.props.afterSelect == 'function') {
-					this.props.afterSelect.call(this, data, selection);
-				}
-			}
-
-			/**
-	   * Function called when the someone click in the empty part of the virtual field. Change the `show´ state of the
-	   * component.
-	   *
-	   * @param (Object)	e 	Event which call this function
-	   */
-
-		}, {
-			key: 'onVirtualClick',
-			value: function onVirtualClick(e) {
-				e.preventDefault();
-				if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
-					this.setState({
-						show: !this.state.show
+					_this2.setState({
+						selectedData: selectedData,
+						selection: selection,
+						idField: idField
 					});
-				}
+				})();
+			}
+		};
+
+		/**
+	  * Get the translated messages for the component.
+	  *
+	  * @return object Messages of the selected language or in English if the translation for this lang doesn't exist.
+	  */
+
+
+		ComboField.prototype.getTranslatedMessages = function getTranslatedMessages() {
+			if (!_underscore2['default'].isObject(this.props.messages)) {
+				return {};
 			}
 
-			/**
-	   * Function called when the someone click to the icon in the right of the virtual field. Change the `show´ state of the
-	   * component.
-	   *
-	   * @param (Object)	e 	Event which call this function
-	   */
+			if (this.props.messages[this.props.lang]) {
+				return this.props.messages[this.props.lang];
+			}
 
-		}, {
-			key: 'addNewItems',
-			value: function addNewItems(e) {
-				e.preventDefault();
+			return this.props.messages['ENG'];
+		};
 
+		/**
+	  * Function called each time the selection has changed. Apply an update in the components state then render again an update the child and
+	  * send the selection and the selected data to a function in props which name is the same (if exist)
+	  *
+	  * @param (Array)	selection 	The selected elements using the idField of data.
+	  * @param (Array)	data 		The selected data
+	  */
+
+
+		ComboField.prototype.afterSelect = function afterSelect(data, selection) {
+			var selectionChanged = !(0, _reactImmutableRenderMixin.shallowEqualImmutable)(this.state.selection, selection);
+
+			if (selectionChanged) {
+				this.setState({
+					selectedData: data,
+					selection: selection
+				}, this.sendSelection.bind(this, data, selection));
+			}
+		};
+
+		/**
+	  * Send the selection and the selected data to a function in props which name is the afterSelect() (if exist)
+	  *
+	  * @param (Set)		selection 	The selected values using the values of the selected data.
+	  * @param (Array)	data 		The selected data
+	  */
+
+
+		ComboField.prototype.sendSelection = function sendSelection(data, selection) {
+			if (typeof this.props.afterSelect == 'function') {
+				this.props.afterSelect.call(this, data, selection);
+			}
+		};
+
+		/**
+	  * Function called when the someone click in the empty part of the virtual field. Change the `show´ state of the
+	  * component.
+	  *
+	  * @param (Object)	e 	Event which call this function
+	  */
+
+
+		ComboField.prototype.onVirtualClick = function onVirtualClick(e) {
+			e.preventDefault();
+			if (e.target.className == 'proper-combo-virtualField' || e.target.className == 'proper-combo-virtualField-list') {
 				this.setState({
 					show: !this.state.show
 				});
 			}
+		};
 
-			/**
-	   * Function called when the someone click in the close btn inside each element of the virtual field (selected elements).
-	   * Remove's the element from the selection and data arrays.
-	   *
-	   * @param (Integer)	id 	Id of the element which has to be removed from the virtual field. If it's null that means
-	   *						to many selected or all selected (then unSelect all)
-	   * @param (Object)	e 	Event which call the function
-	   */
+		/**
+	  * Function called when the someone click to the icon in the right of the virtual field. Change the `show´ state of the
+	  * component.
+	  *
+	  * @param (Object)	e 	Event which call this function
+	  */
 
-		}, {
-			key: 'onRemoveElement',
-			value: function onRemoveElement() {
-				var _this3 = this;
 
-				var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-				var e = arguments[1];
+		ComboField.prototype.addNewItems = function addNewItems(e) {
+			e.preventDefault();
 
-				e.preventDefault();
+			this.setState({
+				show: !this.state.show
+			});
+		};
 
-				var selection = _underscore2['default'].clone(this.state.selection),
-				    data = _underscore2['default'].clone(this.state.selectedData),
-				    index = 0;
+		/**
+	  * Function called when the someone click in the close btn inside each element of the virtual field (selected elements).
+	  * Remove's the element from the selection and data arrays.
+	  *
+	  * @param (Integer)	id 	Id of the element which has to be removed from the virtual field. If it's null that means
+	  *						to many selected or all selected (then unSelect all)
+	  * @param (Object)	e 	Event which call the function
+	  */
 
-				// Not all selected or to many elements selected
-				if (!_underscore2['default'].isNull(id)) {
-					if (selection.length > 0) {
-						// Find the index of the element
-						_underscore2['default'].each(data, function (element) {
-							if (element[_this3.props.idField] == id) index = data.indexOf(element);
-						});
 
-						// Then remove it
-						data.splice(index, 1);
-						selection.splice(selection.indexOf(id.toString()), 1);
-					}
-				} else {
-					data = [];
-					selection = [];
-				}
+		ComboField.prototype.onRemoveElement = function onRemoveElement() {
+			var _this3 = this;
 
-				this.setState({
-					selectedData: data,
-					selection: selection
-				}, this.sendSelection(data, selection));
-			}
+			var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+			var e = arguments[1];
 
-			/**
-	   * Build the ProperSearch component to be rendered
-	   *
-	   * @return (Search) search The built ProperSearch component with all it's props set up.
-	   */
+			e.preventDefault();
 
-		}, {
-			key: 'getContent',
-			value: function getContent() {
-				var CSSTransition =  false ? null : _react2['default'].addons.CSSTransitionGroup;
-				var search = null,
-				    placeholder = this.props.placeholder,
-				    contentClass = "proper-combo-content";
+			var selection = _underscore2['default'].clone(this.state.selection),
+			    data = _underscore2['default'].clone(this.state.selectedData),
+			    index = 0;
 
-				if (_underscore2['default'].isNull(placeholder)) {
-					placeholder = this.props.messages[this.props.lang].placeholder;
-				}
-
-				search = _react2['default'].createElement(_reactPropersearch2['default'], {
-					key: this.uniqueId + '-content-Search',
-					className: this.props.searchClassName,
-					data: this.props.data,
-					indexed: this.props.indexed,
-					rawdata: this.props.rawdata,
-					messages: this.props.messages,
-					idField: this.state.idField,
-					displayField: this.props.displayField,
-					lang: this.props.lang,
-					filter: this.props.filter,
-					autoComplete: this.props.autoComplete,
-					searchIcon: this.props.searchIcon,
-					clearIcon: this.props.clearIcon,
-					throttle: this.props.throttle,
-					minLength: this.props.minLength,
-					fieldClass: this.props.searchFieldClass,
-					listClass: this.props.listClass,
-					listElementClass: this.props.listElementClass,
-					listWidth: this.props.listWidth,
-					listHeight: this.props.listHeight,
-					listRowHeight: this.props.listRowHeight,
-					multiSelect: this.props.multiSelect,
-					defaultSelection: this.state.selection,
-					defaultSearch: this.props.defaultSearch,
-					placeholder: placeholder,
-					listShowIcon: this.props.listShowIcon,
-					filterField: this.props.filterField,
-					afterSelect: this.afterSelect.bind(this),
-					allowsEmptySelection: this.props.allowsEmptySelection,
-					hiddenSelection: this.props.hiddenSelection
-				});
-
-				if (CSSTransition) {
-					return _react2['default'].createElement(
-						CSSTransition,
-						{
-							key: this.uniqueId + '-content',
-							className: contentClass,
-							transitionName: 'content',
-							component: 'div',
-							transitionAppear: true,
-							transitionAppearTimeout: 400,
-							transitionEnterTimeout: 400,
-							transitionLeaveTimeout: 400 },
-						search
-					);
-				} else {
-					// Test - No Animations
-					return _react2['default'].createElement(
-						'div',
-						{ key: this.uniqueId + '-content', className: contentClass },
-						' ',
-						search,
-						' '
-					);
-				}
-			}
-
-			/**
-	   * Build the list of elements inside the virtual field. Each element is a div with a span inside which has the display field
-	   * of the selected element and an icon to remove it.
-	   *
-	   * @return (Array)	list 	Array of elements to be rendered inside the virtual field
-	   */
-
-		}, {
-			key: 'getList',
-			value: function getList() {
-				var _this4 = this;
-
-				var CSSTransition =  false ? null : _react2['default'].addons.CSSTransitionGroup;
-				var data = this.state.selectedData,
-				    list = [],
-				    display = null,
-				    item = void 0,
-				    size = 0,
-				    dataLength = void 0;
-
-				if (data) size = data.length;
-				dataLength = !_underscore2['default'].isArray(this.props.data) ? this.props.data.size : this.props.data.length;
-
-				// If all selected then the list will have just one item / element with the size
-				if (dataLength == size && size > 20) {
-					var messages = this.props.messages[this.props.lang];
-
-					item = _react2['default'].createElement(
-						'li',
-						{ key: 'datalist-element-0', className: 'proper-combo-virtualField-list-element' },
-						_react2['default'].createElement(
-							'span',
-							{ key: 'msg-0' },
-							messages.allData + ' (' + size + ')'
-						),
-						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
-					);
-
-					list.push(item);
-				} else if (size > this.props.maxSelection) {
-					// If there are more selected elements than the limit (default 200)
-					var _messages = this.props.messages[this.props.lang];
-
-					// Just one element with the number of selected elements and a message.
-					item = _react2['default'].createElement(
-						'li',
-						{ key: 'datalist-element-0', className: 'proper-combo-virtualField-list-element' },
-						_react2['default'].createElement(
-							'span',
-							{ key: 'msg-0' },
-							size + ' ' + _messages.dataToBig
-						),
-						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
-					);
-
-					list.push(item);
-				} else {
-					// Between 1 element selected and all elements - 1 or maxSelection -1. Build the array of elements using to display the field of data which name is in
-					// props.secondaryDisplay or in props.displayField if the first doesn't exist.
-					_underscore2['default'].each(data, function (element, index) {
-						if (!_underscore2['default'].isNull(_this4.props.secondaryDisplay)) {
-							display = element[_this4.props.secondaryDisplay];
-						} else {
-							display = element[_this4.props.displayField];
-						}
-
-						// If that props contain a function then call it sending the entire element data
-						if (typeof display == 'function') {
-							display = display(element);
-						}
-
-						item = _react2['default'].createElement(
-							'li',
-							{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
-							_react2['default'].createElement(
-								'span',
-								{ key: 'msg-' + index },
-								display
-							),
-							_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: _this4.onRemoveElement.bind(_this4, element[_this4.props.idField]) })
-						);
-
-						list.push(item);
+			// Not all selected or to many elements selected
+			if (!_underscore2['default'].isNull(id)) {
+				if (selection.length > 0) {
+					// Find the index of the element
+					_underscore2['default'].each(data, function (element) {
+						if (element[_this3.props.idField] == id) index = data.indexOf(element);
 					});
-				}
-				if (CSSTransition) {
-					return _react2['default'].createElement(
-						CSSTransition,
-						{
-							key: this.uniqueId + '-fieldllist-elements',
-							className: 'proper-combo-virtualField-list',
-							transitionName: 'list',
-							component: 'ul',
-							transitionEnterTimeout: 250,
-							transitionLeaveTimeout: 250 },
-						list
-					);
-				} else {
-					return _react2['default'].createElement(
-						'ul',
-						{ key: this.uniqueId + '-fieldllist-elements', className: 'proper-combo-virtualField-list' },
-						' ',
-						list,
-						' '
-					);
-				}
 
-				return list;
+					// Then remove it
+					data.splice(index, 1);
+					selection.splice(selection.indexOf(id.toString()), 1);
+				}
+			} else {
+				data = [];
+				selection = [];
 			}
-		}, {
-			key: 'render',
-			value: function render() {
-				var content = this.getContent(),
-				    elementsList = this.getList(),
-				    className = "proper-combo",
-				    maxHeight = this.props.maxHeight;
 
-				if (this.props.className) {
-					className += ' ' + this.props.className;
-				}
+			this.setState({
+				selectedData: data,
+				selection: selection
+			}, this.sendSelection(data, selection));
+		};
 
-				if (!this.state.show) {
-					content = null;
-				}
+		/**
+	  * Build the ProperSearch component to be rendered
+	  *
+	  * @return (Search) search The built ProperSearch component with all it's props set up.
+	  */
 
-				// CSSTransitionGroups for animations Content and List
+
+		ComboField.prototype.getContent = function getContent() {
+			var CSSTransition =  false ? null : _react2['default'].addons.CSSTransitionGroup;
+			var search = null,
+			    placeholder = this.props.placeholder,
+			    contentClass = "proper-combo-content";
+
+			if (_underscore2['default'].isNull(placeholder)) {
+				placeholder = this.getTranslatedMessages().placeholder;
+			}
+
+			search = _react2['default'].createElement(_reactPropersearch2['default'], {
+				key: this.uniqueId + '-content-Search',
+				className: this.props.searchClassName,
+				data: this.props.data,
+				indexed: this.props.indexed,
+				rawdata: this.props.rawdata,
+				messages: this.props.messages,
+				idField: this.state.idField,
+				displayField: this.props.displayField,
+				lang: this.props.lang,
+				filter: this.props.filter,
+				autoComplete: this.props.autoComplete,
+				searchIcon: this.props.searchIcon,
+				clearIcon: this.props.clearIcon,
+				throttle: this.props.throttle,
+				minLength: this.props.minLength,
+				fieldClass: this.props.searchFieldClass,
+				listClass: this.props.listClass,
+				listElementClass: this.props.listElementClass,
+				listWidth: this.props.listWidth,
+				listHeight: this.props.listHeight,
+				listRowHeight: this.props.listRowHeight,
+				multiSelect: this.props.multiSelect,
+				defaultSelection: this.state.selection,
+				defaultSearch: this.props.defaultSearch,
+				placeholder: placeholder,
+				listShowIcon: this.props.listShowIcon,
+				filterField: this.props.filterField,
+				afterSelect: this.afterSelect.bind(this),
+				allowsEmptySelection: this.props.allowsEmptySelection,
+				hiddenSelection: this.props.hiddenSelection
+			});
+
+			if (CSSTransition) {
+				return _react2['default'].createElement(
+					CSSTransition,
+					{
+						key: this.uniqueId + '-content',
+						className: contentClass,
+						transitionName: 'content',
+						component: 'div',
+						transitionAppear: true,
+						transitionAppearTimeout: 400,
+						transitionEnterTimeout: 400,
+						transitionLeaveTimeout: 400 },
+					search
+				);
+			} else {
+				// Test - No Animations
 				return _react2['default'].createElement(
 					'div',
-					{ key: this.uniqueId, className: className },
-					_react2['default'].createElement(
-						'div',
-						{ key: this.uniqueId + '-field', className: 'proper-combo-virtual' },
-						_react2['default'].createElement(
-							'div',
-							{ key: this.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
-							elementsList
-						),
-						_react2['default'].createElement(
-							'button',
-							{ className: 'proper-combo-virtualField-add', onClick: this.addNewItems.bind(this) },
-							_react2['default'].createElement('i', { className: 'fa fa-chevron-down' })
-						)
-					),
-					content
+					{ key: this.uniqueId + '-content', className: contentClass },
+					' ',
+					search,
+					' '
 				);
 			}
-		}]);
+		};
+
+		/**
+	  * Build the list of elements inside the virtual field. Each element is a div with a span inside which has the display field
+	  * of the selected element and an icon to remove it.
+	  *
+	  * @return (Array)	list 	Array of elements to be rendered inside the virtual field
+	  */
+
+
+		ComboField.prototype.getList = function getList() {
+			var _this4 = this;
+
+			var CSSTransition =  false ? null : _react2['default'].addons.CSSTransitionGroup;
+			var data = this.state.selectedData,
+			    list = [],
+			    display = null,
+			    item = void 0,
+			    size = 0,
+			    dataLength = void 0;
+
+			if (data) size = data.length;
+			dataLength = !_underscore2['default'].isArray(this.props.data) ? this.props.data.size : this.props.data.length;
+
+			// If all selected then the list will have just one item / element with the size
+			if (dataLength == size && size > 20) {
+				var messages = this.getTranslatedMessages();
+
+				item = _react2['default'].createElement(
+					'li',
+					{ key: 'datalist-element-0', className: 'proper-combo-virtualField-list-element' },
+					_react2['default'].createElement(
+						'span',
+						{ key: 'msg-0' },
+						messages.allData + ' (' + size + ')'
+					),
+					_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
+				);
+
+				list.push(item);
+			} else if (size > this.props.maxSelection) {
+				// If there are more selected elements than the limit (default 200)
+				var _messages = this.getTranslatedMessages();
+
+				// Just one element with the number of selected elements and a message.
+				item = _react2['default'].createElement(
+					'li',
+					{ key: 'datalist-element-0', className: 'proper-combo-virtualField-list-element' },
+					_react2['default'].createElement(
+						'span',
+						{ key: 'msg-0' },
+						size + ' ' + _messages.dataToBig
+					),
+					_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: this.onRemoveElement.bind(this, null) })
+				);
+
+				list.push(item);
+			} else {
+				// Between 1 element selected and all elements - 1 or maxSelection -1. Build the array of elements using to display the field of data which name is in
+				// props.secondaryDisplay or in props.displayField if the first doesn't exist.
+				_underscore2['default'].each(data, function (element, index) {
+					if (!_underscore2['default'].isNull(_this4.props.secondaryDisplay)) {
+						display = element[_this4.props.secondaryDisplay];
+					} else {
+						display = element[_this4.props.displayField];
+					}
+
+					// If that props contain a function then call it sending the entire element data
+					if (typeof display == 'function') {
+						display = display(element);
+					}
+
+					item = _react2['default'].createElement(
+						'li',
+						{ key: 'datalist-element-' + index, className: 'proper-combo-virtualField-list-element' },
+						_react2['default'].createElement(
+							'span',
+							{ key: 'msg-' + index },
+							display
+						),
+						_react2['default'].createElement('i', { 'aria-hidden': 'true', className: 'fa fa-times proper-combo-virtualField-list-element-delete', onClick: _this4.onRemoveElement.bind(_this4, element[_this4.props.idField]) })
+					);
+
+					list.push(item);
+				});
+			}
+			if (CSSTransition) {
+				return _react2['default'].createElement(
+					CSSTransition,
+					{
+						key: this.uniqueId + '-fieldllist-elements',
+						className: 'proper-combo-virtualField-list',
+						transitionName: 'list',
+						component: 'ul',
+						transitionEnterTimeout: 250,
+						transitionLeaveTimeout: 250 },
+					list
+				);
+			} else {
+				return _react2['default'].createElement(
+					'ul',
+					{ key: this.uniqueId + '-fieldllist-elements', className: 'proper-combo-virtualField-list' },
+					' ',
+					list,
+					' '
+				);
+			}
+
+			return list;
+		};
+
+		ComboField.prototype.render = function render() {
+			var content = this.getContent(),
+			    elementsList = this.getList(),
+			    className = "proper-combo",
+			    maxHeight = this.props.maxHeight;
+
+			if (this.props.className) {
+				className += ' ' + this.props.className;
+			}
+
+			if (!this.state.show) {
+				content = null;
+			}
+
+			// CSSTransitionGroups for animations Content and List
+			return _react2['default'].createElement(
+				'div',
+				{ key: this.uniqueId, className: className },
+				_react2['default'].createElement(
+					'div',
+					{ key: this.uniqueId + '-field', className: 'proper-combo-virtual' },
+					_react2['default'].createElement(
+						'div',
+						{ key: this.uniqueId + '-fieldllist', className: 'proper-combo-virtualField', ref: this.uniqueId + '_fieldllist', style: { maxHeight: maxHeight }, onClick: this.onVirtualClick.bind(this) },
+						elementsList
+					),
+					_react2['default'].createElement(
+						'button',
+						{ className: 'proper-combo-virtualField-add', onClick: this.addNewItems.bind(this) },
+						_react2['default'].createElement('i', { className: 'fa fa-chevron-down' })
+					)
+				),
+				content
+			);
+		};
 
 		return ComboField;
 	}(_react2['default'].Component);
@@ -665,9 +665,7 @@ var ProperCombo =
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	exports['default'] = {
 		'SPA': {
 			all: 'Seleccionar Todo',
@@ -954,7 +952,7 @@ var ProperCombo =
 
 						if (idFieldChanged || displayFieldChanged) {
 							var fieldsSet = new Set(_underscore2['default'].keys(nextProps.data[0]));
-							var _messages = _this2.props.messages[_this2.props.lang];
+							var _messages = _this2.getTranslatedMessages();
 
 							// Change idField / displayField but that field doesn't exist in the data
 							if (!fieldsSet.has(nextProps.idField) || !fieldsSet.has(nextProps.displayField)) {
@@ -1202,7 +1200,27 @@ var ProperCombo =
 			}
 
 			/**
-	   * In case that the new selection array be different than the selection array in the components state, then update
+	   * Get the translated messages for the component.
+	   *
+	   * @return object Messages of the selected language or in English if the translation for this lang doesn't exist.
+	   */
+
+		}, {
+			key: 'getTranslatedMessages',
+			value: function getTranslatedMessages() {
+				if (!_underscore2['default'].isObject(this.props.messages)) {
+					return {};
+				}
+
+				if (this.props.messages[this.props.lang]) {
+					return this.props.messages[this.props.lang];
+				}
+
+				return this.props.messages['ENG'];
+			}
+
+			/**
+	   * In case that the new selection array be different than the selection array in the components state then update
 	   * the components state with the new data.
 	   *
 	   * @param {array}	newSelection	The selected rows
@@ -1583,7 +1601,7 @@ var ProperCombo =
 		}, {
 			key: 'render',
 			value: function render() {
-				var messages = this.props.messages[this.props.lang],
+				var messages = this.getTranslatedMessages(),
 				    content = null,
 				    data = this.state.data,
 				    selection = new Set(),
@@ -6794,7 +6812,7 @@ var ProperCombo =
 
 			/**
 	   * Function called each time an element of the list is selected. Get the value (value of the idField) of the
-	   * element that was selected, them change the selection and call to onSelectionChange function in the props sending
+	   * element that was selected them change the selection and call to onSelectionChange function in the props sending
 	   * the new selection.
 	   *
 	   * @param (String)	itemValue 	Value of the idField of the selected element
@@ -6889,7 +6907,7 @@ var ProperCombo =
 			}
 
 			/**
-	   * Function called each time the buttons in the bar of the list has been clicked. Delete or add all the data elements into the selection, just if it has changed.
+	   * Function called each time the buttons in the bar of the list has been clicked. Delete or add all the data elements into the selection just if it has changed.
 	   *
 	   * @param (Boolean)	selectAll 	If its a select all action or an unselect all.
 	   * @param (Array)	e 			Element which call the function
@@ -7244,7 +7262,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.shallowEqualImmutable = exports.shouldComponentUpdate = exports.immutableRenderDecorator = exports.default = undefined;
+	exports.shallowEqualImmutable = exports.shouldComponentUpdate = exports.immutableRenderDecorator = exports["default"] = undefined;
 
 	var _shouldComponentUpdate = __webpack_require__(11);
 
@@ -7262,12 +7280,12 @@ var ProperCombo =
 
 	var _immutableRenderDecorator2 = _interopRequireDefault(_immutableRenderDecorator);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _immutableRenderMixin2.default;
-	exports.immutableRenderDecorator = _immutableRenderDecorator2.default;
-	exports.shouldComponentUpdate = _shouldComponentUpdate2.default;
-	exports.shallowEqualImmutable = _shallowEqualImmutable2.default;
+	exports["default"] = _immutableRenderMixin2["default"];
+	exports.immutableRenderDecorator = _immutableRenderDecorator2["default"];
+	exports.shouldComponentUpdate = _shouldComponentUpdate2["default"];
+	exports.shallowEqualImmutable = _shallowEqualImmutable2["default"];
 
 /***/ },
 /* 11 */
@@ -7278,16 +7296,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = shouldComponentUpdate;
+	exports["default"] = shouldComponentUpdate;
 
 	var _shallowEqualImmutable = __webpack_require__(12);
 
 	var _shallowEqualImmutable2 = _interopRequireDefault(_shallowEqualImmutable);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function shouldComponentUpdate(nextProps, nextState) {
-	  return !(0, _shallowEqualImmutable2.default)(this.props, nextProps) || !(0, _shallowEqualImmutable2.default)(this.state, nextState);
+	  return !(0, _shallowEqualImmutable2["default"])(this.props, nextProps) || !(0, _shallowEqualImmutable2["default"])(this.state, nextState);
 	}
 
 /***/ },
@@ -7302,15 +7320,15 @@ var ProperCombo =
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	exports.default = shallowEqualImmutable;
+	exports["default"] = shallowEqualImmutable;
 
 	var _immutable = __webpack_require__(8);
 
 	var _immutable2 = _interopRequireDefault(_immutable);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	var is = _immutable2.default.is.bind(_immutable2.default);
+	var is = _immutable2["default"].is.bind(_immutable2["default"]);
 
 	function shallowEqualImmutable(objA, objB) {
 	  if (objA === objB || is(objA, objB)) {
@@ -7353,10 +7371,10 @@ var ProperCombo =
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = {
-	  shouldComponentUpdate: _shouldComponentUpdate2.default
+	exports["default"] = {
+	  shouldComponentUpdate: _shouldComponentUpdate2["default"]
 	};
 
 /***/ },
@@ -7371,7 +7389,7 @@ var ProperCombo =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	exports.default = immutableRenderDecorator;
+	exports["default"] = immutableRenderDecorator;
 
 	var _react = __webpack_require__(2);
 
@@ -7381,7 +7399,7 @@ var ProperCombo =
 
 	var _shouldComponentUpdate2 = _interopRequireDefault(_shouldComponentUpdate);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7407,14 +7425,14 @@ var ProperCombo =
 	    _createClass(Wrapper, [{
 	      key: 'render',
 	      value: function render() {
-	        return _react2.default.createElement(Target, this.props, this.props.children);
+	        return _react2["default"].createElement(Target, this.props, this.props.children);
 	      }
 	    }]);
 
 	    return Wrapper;
 	  }(_react.Component);
 
-	  Wrapper.prototype.shouldComponentUpdate = _shouldComponentUpdate2.default;
+	  Wrapper.prototype.shouldComponentUpdate = _shouldComponentUpdate2["default"];
 
 	  return Wrapper;
 	}
@@ -7597,16 +7615,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.ArrowKeyStepper = exports.default = undefined;
+	exports.ArrowKeyStepper = exports["default"] = undefined;
 
 	var _ArrowKeyStepper2 = __webpack_require__(17);
 
 	var _ArrowKeyStepper3 = _interopRequireDefault(_ArrowKeyStepper2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _ArrowKeyStepper3.default;
-	exports.ArrowKeyStepper = _ArrowKeyStepper3.default;
+	exports["default"] = _ArrowKeyStepper3["default"];
+	exports.ArrowKeyStepper = _ArrowKeyStepper3["default"];
 
 /***/ },
 /* 17 */
@@ -7628,7 +7646,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7673,7 +7691,7 @@ var ProperCombo =
 	      var scrollToRow = _state.scrollToRow;
 
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
 	          className: className,
@@ -7689,7 +7707,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_onKeyDown',
@@ -7752,7 +7770,7 @@ var ProperCombo =
 	  columnCount: _react.PropTypes.number.isRequired,
 	  rowCount: _react.PropTypes.number.isRequired
 	};
-	exports.default = ArrowKeyStepper;
+	exports["default"] = ArrowKeyStepper;
 
 /***/ },
 /* 18 */
@@ -7853,16 +7871,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.AutoSizer = exports.default = undefined;
+	exports.AutoSizer = exports["default"] = undefined;
 
 	var _AutoSizer2 = __webpack_require__(22);
 
 	var _AutoSizer3 = _interopRequireDefault(_AutoSizer2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _AutoSizer3.default;
-	exports.AutoSizer = _AutoSizer3.default;
+	exports["default"] = _AutoSizer3["default"];
+	exports.AutoSizer = _AutoSizer3["default"];
 
 /***/ },
 /* 22 */
@@ -7884,7 +7902,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7963,7 +7981,7 @@ var ProperCombo =
 	        outerStyle.width = 0;
 	      }
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
 	          ref: this._setRef,
@@ -7976,7 +7994,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_onResize',
@@ -8040,7 +8058,7 @@ var ProperCombo =
 	AutoSizer.defaultProps = {
 	  onResize: function onResize() {}
 	};
-	exports.default = AutoSizer;
+	exports["default"] = AutoSizer;
 
 /***/ },
 /* 23 */
@@ -8218,7 +8236,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.defaultCellSizeCache = exports.CellMeasurer = exports.default = undefined;
+	exports.defaultCellSizeCache = exports.CellMeasurer = exports["default"] = undefined;
 
 	var _CellMeasurer2 = __webpack_require__(25);
 
@@ -8228,11 +8246,11 @@ var ProperCombo =
 
 	var _defaultCellSizeCache3 = _interopRequireDefault(_defaultCellSizeCache2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _CellMeasurer3.default;
-	exports.CellMeasurer = _CellMeasurer3.default;
-	exports.defaultCellSizeCache = _defaultCellSizeCache3.default;
+	exports["default"] = _CellMeasurer3["default"];
+	exports.CellMeasurer = _CellMeasurer3["default"];
+	exports.defaultCellSizeCache = _defaultCellSizeCache3["default"];
 
 /***/ },
 /* 25 */
@@ -8262,7 +8280,7 @@ var ProperCombo =
 
 	var _defaultCellSizeCache2 = _interopRequireDefault(_defaultCellSizeCache);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8282,7 +8300,7 @@ var ProperCombo =
 
 	    var _this = _possibleConstructorReturn(this, (CellMeasurer.__proto__ || Object.getPrototypeOf(CellMeasurer)).call(this, props, state));
 
-	    _this._cellSizeCache = props.cellSizeCache || new _defaultCellSizeCache2.default();
+	    _this._cellSizeCache = props.cellSizeCache || new _defaultCellSizeCache2["default"]();
 
 	    _this.getColumnWidth = _this.getColumnWidth.bind(_this);
 	    _this.getRowHeight = _this.getRowHeight.bind(_this);
@@ -8409,7 +8427,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_getContainerNode',
@@ -8418,7 +8436,7 @@ var ProperCombo =
 
 
 	      if (container) {
-	        return _reactDom2.default.findDOMNode(typeof container === 'function' ? container() : container);
+	        return _reactDom2["default"].findDOMNode(typeof container === 'function' ? container() : container);
 	      } else {
 	        return document.body;
 	      }
@@ -8445,14 +8463,14 @@ var ProperCombo =
 
 	      // @TODO Keep an eye on this for future React updates as the interface may change:
 	      // https://twitter.com/soprano/status/737316379712331776
-	      _reactDom2.default.unstable_renderSubtreeIntoContainer(this, rendered, this._div);
+	      _reactDom2["default"].unstable_renderSubtreeIntoContainer(this, rendered, this._div);
 
 	      var measurements = {
 	        height: clientHeight && this._div.clientHeight,
 	        width: clientWidth && this._div.clientWidth
 	      };
 
-	      _reactDom2.default.unmountComponentAtNode(this._div);
+	      _reactDom2["default"].unmountComponentAtNode(this._div);
 
 	      return measurements;
 	    }
@@ -8533,7 +8551,7 @@ var ProperCombo =
 	   * A Node, Component instance, or function that returns either.
 	   * If this property is not specified the document body will be used.
 	   */
-	  container: _react2.default.PropTypes.oneOfType([_react2.default.PropTypes.func, _react2.default.PropTypes.node]),
+	  container: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.node]),
 
 	  /**
 	   * Assign a fixed :height in order to measure dynamic text :width only.
@@ -8550,7 +8568,7 @@ var ProperCombo =
 	   */
 	  width: _react.PropTypes.number
 	};
-	exports.default = CellMeasurer;
+	exports["default"] = CellMeasurer;
 
 /***/ },
 /* 26 */
@@ -8652,7 +8670,7 @@ var ProperCombo =
 	  return CellSizeCache;
 	}();
 
-	exports.default = CellSizeCache;
+	exports["default"] = CellSizeCache;
 
 /***/ },
 /* 27 */
@@ -8663,16 +8681,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Collection = exports.default = undefined;
+	exports.Collection = exports["default"] = undefined;
 
 	var _Collection2 = __webpack_require__(28);
 
 	var _Collection3 = _interopRequireDefault(_Collection2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _Collection3.default;
-	exports.Collection = _Collection3.default;
+	exports["default"] = _Collection3["default"];
+	exports.Collection = _Collection3["default"];
 
 /***/ },
 /* 28 */
@@ -8708,7 +8726,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -8759,7 +8777,7 @@ var ProperCombo =
 
 	      var props = _objectWithoutProperties(this.props, []);
 
-	      return _react2.default.createElement(_CollectionView2.default, _extends({
+	      return _react2["default"].createElement(_CollectionView2["default"], _extends({
 	        cellLayoutManager: this,
 	        isScrollingChange: this._isScrollingChange,
 	        ref: function ref(_ref) {
@@ -8770,7 +8788,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 
 	    /** CellLayoutManager interface */
@@ -8784,7 +8802,7 @@ var ProperCombo =
 	      var sectionSize = _props.sectionSize;
 
 
-	      var data = (0, _calculateSizeAndPositionData3.default)({
+	      var data = (0, _calculateSizeAndPositionData3["default"])({
 	        cellCount: cellCount,
 	        cellSizeAndPositionGetter: cellSizeAndPositionGetter,
 	        sectionSize: sectionSize
@@ -8825,7 +8843,7 @@ var ProperCombo =
 	      if (cellIndex >= 0 && cellIndex < cellCount) {
 	        var cellMetadata = this._cellMetadata[cellIndex];
 
-	        scrollLeft = (0, _getUpdatedOffsetForIndex2.default)({
+	        scrollLeft = (0, _getUpdatedOffsetForIndex2["default"])({
 	          align: align,
 	          cellOffset: cellMetadata.x,
 	          cellSize: cellMetadata.width,
@@ -8834,7 +8852,7 @@ var ProperCombo =
 	          targetIndex: cellIndex
 	        });
 
-	        scrollTop = (0, _getUpdatedOffsetForIndex2.default)({
+	        scrollTop = (0, _getUpdatedOffsetForIndex2["default"])({
 	          align: align,
 	          cellOffset: cellMetadata.y,
 	          cellSize: cellMetadata.height,
@@ -8942,7 +8960,7 @@ var ProperCombo =
 	  'aria-label': 'grid',
 	  cellGroupRenderer: defaultCellGroupRenderer
 	};
-	exports.default = Collection;
+	exports["default"] = Collection;
 
 
 	function defaultCellGroupRenderer(_ref5) {
@@ -8981,7 +8999,7 @@ var ProperCombo =
 	      return null;
 	    }
 
-	    return _react2.default.createElement(
+	    return _react2["default"].createElement(
 	      'div',
 	      {
 	        className: 'Collection__cell',
@@ -9038,7 +9056,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9084,8 +9102,8 @@ var ProperCombo =
 	    };
 
 	    // Invokes callbacks only when their values have changed.
-	    _this._onSectionRenderedMemoizer = (0, _createCallbackMemoizer2.default)();
-	    _this._onScrollMemoizer = (0, _createCallbackMemoizer2.default)(false);
+	    _this._onSectionRenderedMemoizer = (0, _createCallbackMemoizer2["default"])();
+	    _this._onScrollMemoizer = (0, _createCallbackMemoizer2["default"])(false);
 
 	    // Bind functions to instance so they don't lose context when passed around.
 	    _this._invokeOnSectionRenderedHelper = _this._invokeOnSectionRenderedHelper.bind(_this);
@@ -9124,7 +9142,7 @@ var ProperCombo =
 	      // In that event we need to remeasure.
 
 	      if (!this._scrollbarSizeMeasured) {
-	        this._scrollbarSize = (0, _scrollbarSize2.default)();
+	        this._scrollbarSize = (0, _scrollbarSize2["default"])();
 	        this._scrollbarSizeMeasured = true;
 	        this.setState({});
 	      }
@@ -9198,7 +9216,7 @@ var ProperCombo =
 
 	      // If this component is being rendered server-side, getScrollbarSize() will return undefined.
 	      // We handle this case in componentDidMount()
-	      this._scrollbarSize = (0, _scrollbarSize2.default)();
+	      this._scrollbarSize = (0, _scrollbarSize2["default"])();
 	      if (this._scrollbarSize === undefined) {
 	        this._scrollbarSizeMeasured = false;
 	        this._scrollbarSize = 0;
@@ -9214,7 +9232,7 @@ var ProperCombo =
 	      }
 
 	      if (this._setNextStateAnimationFrameId) {
-	        _raf2.default.cancel(this._setNextStateAnimationFrameId);
+	        _raf2["default"].cancel(this._setNextStateAnimationFrameId);
 	      }
 	    }
 
@@ -9223,7 +9241,7 @@ var ProperCombo =
 	     * This method updates scrollLeft/scrollTop in state for the following conditions:
 	     * 1) Empty content (0 rows or columns)
 	     * 2) New scroll props overriding the current state
-	     * 3) Cells-count or cells-size has changed, making previous scroll offsets invalid
+	     * 3) Cells-count or cells-size has changed making previous scroll offsets invalid
 	     */
 
 	  }, {
@@ -9309,20 +9327,20 @@ var ProperCombo =
 	        collectionStyle.overflowY = 'hidden';
 	      }
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
 	          ref: function ref(_ref) {
 	            _this2._scrollingContainer = _ref;
 	          },
 	          'aria-label': this.props['aria-label'],
-	          className: (0, _classnames2.default)('Collection', className),
+	          className: (0, _classnames2["default"])('Collection', className),
 	          onScroll: this._onScroll,
 	          role: 'grid',
 	          style: _extends({}, collectionStyle, style),
 	          tabIndex: 0
 	        },
-	        cellCount > 0 && _react2.default.createElement(
+	        cellCount > 0 && _react2["default"].createElement(
 	          'div',
 	          {
 	            className: 'Collection__innerScrollContainer',
@@ -9342,7 +9360,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 
 	    /* ---------------------------- Helper methods ---------------------------- */
@@ -9437,10 +9455,10 @@ var ProperCombo =
 	      var _this5 = this;
 
 	      if (this._setNextStateAnimationFrameId) {
-	        _raf2.default.cancel(this._setNextStateAnimationFrameId);
+	        _raf2["default"].cancel(this._setNextStateAnimationFrameId);
 	      }
 
-	      this._setNextStateAnimationFrameId = (0, _raf2.default)(function () {
+	      this._setNextStateAnimationFrameId = (0, _raf2["default"])(function () {
 	        _this5._setNextStateAnimationFrameId = null;
 	        _this5.setState(state);
 	      });
@@ -9678,7 +9696,7 @@ var ProperCombo =
 	  style: {},
 	  verticalOverscanSize: 0
 	};
-	exports.default = CollectionView;
+	exports["default"] = CollectionView;
 
 /***/ },
 /* 30 */
@@ -9743,7 +9761,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = createCallbackMemoizer;
+	exports["default"] = createCallbackMemoizer;
 	/**
 	 * Helper utility that updates the specified callback whenever any of the specified indices have changed.
 	 */
@@ -10126,13 +10144,13 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = calculateSizeAndPositionData;
+	exports["default"] = calculateSizeAndPositionData;
 
 	var _SectionManager = __webpack_require__(38);
 
 	var _SectionManager2 = _interopRequireDefault(_SectionManager);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function calculateSizeAndPositionData(_ref) {
 	  var cellCount = _ref.cellCount;
@@ -10140,7 +10158,7 @@ var ProperCombo =
 	  var sectionSize = _ref.sectionSize;
 
 	  var cellMetadata = [];
-	  var sectionManager = new _SectionManager2.default(sectionSize);
+	  var sectionManager = new _SectionManager2["default"](sectionSize);
 	  var height = 0;
 	  var width = 0;
 
@@ -10190,7 +10208,7 @@ var ProperCombo =
 
 	var _Section2 = _interopRequireDefault(_Section);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -10273,7 +10291,7 @@ var ProperCombo =
 	          var key = sectionX + '.' + sectionY;
 
 	          if (!this._sections[key]) {
-	            this._sections[key] = new _Section2.default({
+	            this._sections[key] = new _Section2["default"]({
 	              height: this._sectionSize,
 	              width: this._sectionSize,
 	              x: sectionX * this._sectionSize,
@@ -10327,7 +10345,7 @@ var ProperCombo =
 	  return SectionManager;
 	}();
 
-	exports.default = SectionManager;
+	exports["default"] = SectionManager;
 
 /***/ },
 /* 39 */
@@ -10402,7 +10420,7 @@ var ProperCombo =
 	}(); /** @rlow */
 
 
-	exports.default = Section;
+	exports["default"] = Section;
 
 /***/ },
 /* 40 */
@@ -10413,7 +10431,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = getUpdatedOffsetForIndex;
+	exports["default"] = getUpdatedOffsetForIndex;
 	/**
 	 * Determines a new offset that ensures a certain cell is visible, given the current offset.
 	 * If the cell is already visible then the current offset will be returned.
@@ -10458,16 +10476,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.ColumnSizer = exports.default = undefined;
+	exports.ColumnSizer = exports["default"] = undefined;
 
 	var _ColumnSizer2 = __webpack_require__(42);
 
 	var _ColumnSizer3 = _interopRequireDefault(_ColumnSizer2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _ColumnSizer3.default;
-	exports.ColumnSizer = _ColumnSizer3.default;
+	exports["default"] = _ColumnSizer3["default"];
+	exports.ColumnSizer = _ColumnSizer3["default"];
 
 /***/ },
 /* 42 */
@@ -10491,7 +10509,7 @@ var ProperCombo =
 
 	var _Grid2 = _interopRequireDefault(_Grid);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -10563,12 +10581,12 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_registerChild',
 	    value: function _registerChild(child) {
-	      if (child !== null && !(child instanceof _Grid2.default)) {
+	      if (child !== null && !(child instanceof _Grid2["default"])) {
 	        throw Error('Unexpected child type registered; only Grid children are supported.');
 	      }
 
@@ -10607,7 +10625,7 @@ var ProperCombo =
 	  /** Width of Grid or FlexTable child */
 	  width: _react.PropTypes.number.isRequired
 	};
-	exports.default = ColumnSizer;
+	exports["default"] = ColumnSizer;
 
 /***/ },
 /* 43 */
@@ -10618,7 +10636,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.defaultCellRangeRenderer = exports.Grid = exports.default = undefined;
+	exports.defaultCellRangeRenderer = exports.Grid = exports["default"] = undefined;
 
 	var _Grid2 = __webpack_require__(44);
 
@@ -10628,11 +10646,11 @@ var ProperCombo =
 
 	var _defaultCellRangeRenderer3 = _interopRequireDefault(_defaultCellRangeRenderer2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _Grid3.default;
-	exports.Grid = _Grid3.default;
-	exports.defaultCellRangeRenderer = _defaultCellRangeRenderer3.default;
+	exports["default"] = _Grid3["default"];
+	exports.Grid = _Grid3["default"];
+	exports.defaultCellRangeRenderer = _defaultCellRangeRenderer3["default"];
 
 /***/ },
 /* 44 */
@@ -10693,7 +10711,7 @@ var ProperCombo =
 
 	var _defaultCellRangeRenderer2 = _interopRequireDefault(_defaultCellRangeRenderer);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -10738,8 +10756,8 @@ var ProperCombo =
 	    };
 
 	    // Invokes onSectionRendered callback only when start/stop row or column indices change
-	    _this._onGridRenderedMemoizer = (0, _createCallbackMemoizer2.default)();
-	    _this._onScrollMemoizer = (0, _createCallbackMemoizer2.default)(false);
+	    _this._onGridRenderedMemoizer = (0, _createCallbackMemoizer2["default"])();
+	    _this._onScrollMemoizer = (0, _createCallbackMemoizer2["default"])(false);
 
 	    // Bind functions to instance so they don't lose context when passed around
 	    _this._enablePointerEventsAfterDelayCallback = _this._enablePointerEventsAfterDelayCallback.bind(_this);
@@ -10752,14 +10770,14 @@ var ProperCombo =
 	    _this._columnWidthGetter = _this._wrapSizeGetter(props.columnWidth);
 	    _this._rowHeightGetter = _this._wrapSizeGetter(props.rowHeight);
 
-	    _this._columnSizeAndPositionManager = new _ScalingCellSizeAndPositionManager2.default({
+	    _this._columnSizeAndPositionManager = new _ScalingCellSizeAndPositionManager2["default"]({
 	      cellCount: props.columnCount,
 	      cellSizeGetter: function cellSizeGetter(index) {
 	        return _this._columnWidthGetter(index);
 	      },
 	      estimatedCellSize: _this._getEstimatedColumnSize(props)
 	    });
-	    _this._rowSizeAndPositionManager = new _ScalingCellSizeAndPositionManager2.default({
+	    _this._rowSizeAndPositionManager = new _ScalingCellSizeAndPositionManager2["default"]({
 	      cellCount: props.rowCount,
 	      cellSizeGetter: function cellSizeGetter(index) {
 	        return _this._rowHeightGetter(index);
@@ -10829,7 +10847,7 @@ var ProperCombo =
 	      // In that event we need to remeasure.
 
 	      if (!this._scrollbarSizeMeasured) {
-	        this._scrollbarSize = (0, _scrollbarSize2.default)();
+	        this._scrollbarSize = (0, _scrollbarSize2["default"])();
 	        this._scrollbarSizeMeasured = true;
 	        this.setState({});
 	      }
@@ -10905,7 +10923,7 @@ var ProperCombo =
 
 	      // Update scroll offsets if the current :scrollToColumn or :scrollToRow values requires it
 	      // @TODO Do we also need this check or can the one in componentWillUpdate() suffice?
-	      (0, _updateScrollIndexHelper2.default)({
+	      (0, _updateScrollIndexHelper2["default"])({
 	        cellSizeAndPositionManager: this._columnSizeAndPositionManager,
 	        previousCellsCount: prevProps.columnCount,
 	        previousCellSize: prevProps.columnWidth,
@@ -10920,7 +10938,7 @@ var ProperCombo =
 	          return _this2._updateScrollLeftForScrollToColumn(_extends({}, _this2.props, { scrollToColumn: scrollToColumn }));
 	        }
 	      });
-	      (0, _updateScrollIndexHelper2.default)({
+	      (0, _updateScrollIndexHelper2["default"])({
 	        cellSizeAndPositionManager: this._rowSizeAndPositionManager,
 	        previousCellsCount: prevProps.rowCount,
 	        previousCellSize: prevProps.rowHeight,
@@ -10944,7 +10962,7 @@ var ProperCombo =
 	    value: function componentWillMount() {
 	      // If this component is being rendered server-side, getScrollbarSize() will return undefined.
 	      // We handle this case in componentDidMount()
-	      this._scrollbarSize = (0, _scrollbarSize2.default)();
+	      this._scrollbarSize = (0, _scrollbarSize2["default"])();
 	      if (this._scrollbarSize === undefined) {
 	        this._scrollbarSizeMeasured = false;
 	        this._scrollbarSize = 0;
@@ -10962,7 +10980,7 @@ var ProperCombo =
 	      }
 
 	      if (this._setNextStateAnimationFrameId) {
-	        _raf2.default.cancel(this._setNextStateAnimationFrameId);
+	        _raf2["default"].cancel(this._setNextStateAnimationFrameId);
 	      }
 	    }
 
@@ -10971,7 +10989,7 @@ var ProperCombo =
 	     * This method updates scrollLeft/scrollTop in state for the following conditions:
 	     * 1) Empty content (0 rows or columns)
 	     * 2) New scroll props overriding the current state
-	     * 3) Cells-count or cells-size has changed, making previous scroll offsets invalid
+	     * 3) Cells-count or cells-size has changed making previous scroll offsets invalid
 	     */
 
 	  }, {
@@ -11004,7 +11022,7 @@ var ProperCombo =
 	      });
 
 	      // Update scroll offsets if the size or number of cells have changed, invalidating the previous value
-	      (0, _calculateSizeAndPositionDataAndUpdateScrollOffset2.default)({
+	      (0, _calculateSizeAndPositionDataAndUpdateScrollOffset2["default"])({
 	        cellCount: this.props.columnCount,
 	        cellSize: this.props.columnWidth,
 	        computeMetadataCallback: function computeMetadataCallback() {
@@ -11019,7 +11037,7 @@ var ProperCombo =
 	          return _this3._updateScrollLeftForScrollToColumn(nextProps, nextState);
 	        }
 	      });
-	      (0, _calculateSizeAndPositionDataAndUpdateScrollOffset2.default)({
+	      (0, _calculateSizeAndPositionDataAndUpdateScrollOffset2["default"])({
 	        cellCount: this.props.rowCount,
 	        cellSize: this.props.rowHeight,
 	        computeMetadataCallback: function computeMetadataCallback() {
@@ -11080,20 +11098,20 @@ var ProperCombo =
 
 	      var showNoContentRenderer = childrenToDisplay.length === 0 && height > 0 && width > 0;
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
 	          ref: function ref(_ref2) {
 	            _this4._scrollingContainer = _ref2;
 	          },
 	          'aria-label': this.props['aria-label'],
-	          className: (0, _classnames2.default)('Grid', className),
+	          className: (0, _classnames2["default"])('Grid', className),
 	          onScroll: this._onScroll,
 	          role: 'grid',
 	          style: _extends({}, gridStyle, style),
 	          tabIndex: tabIndex
 	        },
-	        childrenToDisplay.length > 0 && _react2.default.createElement(
+	        childrenToDisplay.length > 0 && _react2["default"].createElement(
 	          'div',
 	          {
 	            className: 'Grid__innerScrollContainer',
@@ -11113,7 +11131,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 
 	    /* ---------------------------- Helper methods ---------------------------- */
@@ -11168,7 +11186,7 @@ var ProperCombo =
 	        this._renderedRowStartIndex = visibleRowIndices.start;
 	        this._renderedRowStopIndex = visibleRowIndices.stop;
 
-	        var overscanColumnIndices = (0, _getOverscanIndices2.default)({
+	        var overscanColumnIndices = (0, _getOverscanIndices2["default"])({
 	          cellCount: columnCount,
 	          overscanCellsCount: overscanColumnCount,
 	          scrollDirection: scrollDirectionHorizontal,
@@ -11176,7 +11194,7 @@ var ProperCombo =
 	          stopIndex: this._renderedColumnStopIndex
 	        });
 
-	        var overscanRowIndices = (0, _getOverscanIndices2.default)({
+	        var overscanRowIndices = (0, _getOverscanIndices2["default"])({
 	          cellCount: rowCount,
 	          overscanCellsCount: overscanRowCount,
 	          scrollDirection: scrollDirectionVertical,
@@ -11320,7 +11338,7 @@ var ProperCombo =
 	      this._nextState = state;
 
 	      if (!this._setNextStateAnimationFrameId) {
-	        this._setNextStateAnimationFrameId = (0, _raf2.default)(this._setNextStateCallback);
+	        this._setNextStateAnimationFrameId = (0, _raf2["default"])(this._setNextStateCallback);
 	      }
 	    }
 	  }, {
@@ -11659,7 +11677,7 @@ var ProperCombo =
 	Grid.defaultProps = {
 	  'aria-label': 'grid',
 	  cellStyle: {},
-	  cellRangeRenderer: _defaultCellRangeRenderer2.default,
+	  cellRangeRenderer: _defaultCellRangeRenderer2["default"],
 	  estimatedColumnSize: 100,
 	  estimatedRowSize: 30,
 	  noContentRenderer: function noContentRenderer() {
@@ -11678,7 +11696,7 @@ var ProperCombo =
 	  style: {},
 	  tabIndex: 0
 	};
-	exports.default = Grid;
+	exports["default"] = Grid;
 
 /***/ },
 /* 45 */
@@ -11689,7 +11707,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = calculateSizeAndPositionDataAndUpdateScrollOffset;
+	exports["default"] = calculateSizeAndPositionDataAndUpdateScrollOffset;
 	/**
 	 * Helper method that determines when to recalculate row or column metadata.
 	 *
@@ -11744,7 +11762,7 @@ var ProperCombo =
 
 	var _CellSizeAndPositionManager2 = _interopRequireDefault(_CellSizeAndPositionManager);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -11771,7 +11789,7 @@ var ProperCombo =
 	    _classCallCheck(this, ScalingCellSizeAndPositionManager);
 
 	    // Favor composition over inheritance to simplify IE10 support
-	    this._cellSizeAndPositionManager = new _CellSizeAndPositionManager2.default(params);
+	    this._cellSizeAndPositionManager = new _CellSizeAndPositionManager2["default"](params);
 	    this._maxScrollSize = maxScrollSize;
 	  }
 
@@ -11946,7 +11964,7 @@ var ProperCombo =
 	  return ScalingCellSizeAndPositionManager;
 	}();
 
-	exports.default = ScalingCellSizeAndPositionManager;
+	exports["default"] = ScalingCellSizeAndPositionManager;
 
 /***/ },
 /* 47 */
@@ -12070,11 +12088,11 @@ var ProperCombo =
 	    }
 
 	    /**
-	     * Determines a new offset that ensures a certain cell is visible, given the current offset.
+	     * Determines a new offset that ensures a certain cell is visible given the current offset.
 	     * If the cell is already visible then the current offset will be returned.
-	     * If the current offset is too great or small, it will be adjusted just enough to ensure the specified index is visible.
+	     * If the current offset is too great or small it will be adjusted just enough to ensure the specified index is visible.
 	     *
-	     * @param align Desired alignment within container; one of "auto" (default), "start", or "end"
+	     * @param align Desired alignment within container; one of "auto" (default) "start" or "end"
 	     * @param containerSize Size (width or height) of the container viewport
 	     * @param currentOffset Container's current (x or y) offset
 	     * @param totalSize Total size (width or height) of all cells
@@ -12248,7 +12266,7 @@ var ProperCombo =
 	  return CellSizeAndPositionManager;
 	}();
 
-	exports.default = CellSizeAndPositionManager;
+	exports["default"] = CellSizeAndPositionManager;
 
 /***/ },
 /* 48 */
@@ -12259,7 +12277,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = getOverscanIndices;
+	exports["default"] = getOverscanIndices;
 	var SCROLL_DIRECTION_BACKWARD = exports.SCROLL_DIRECTION_BACKWARD = -1;
 	var SCROLL_DIRECTION_FIXED = exports.SCROLL_DIRECTION_FIXED = 0;
 	var SCROLL_DIRECTION_FORWARD = exports.SCROLL_DIRECTION_FORWARD = 1;
@@ -12310,7 +12328,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = updateScrollIndexHelper;
+	exports["default"] = updateScrollIndexHelper;
 	/**
 	 * Helper function that determines when to update scroll offsets to ensure that a scroll-to-index remains visible.
 	 * This function also ensures that the scroll ofset isn't past the last column/row of cells.
@@ -12374,7 +12392,7 @@ var ProperCombo =
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	exports.default = defaultCellRangeRenderer;
+	exports["default"] = defaultCellRangeRenderer;
 
 	var _react = __webpack_require__(2);
 
@@ -12384,7 +12402,7 @@ var ProperCombo =
 
 	var _classnames2 = _interopRequireDefault(_classnames);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	/**
 	 * Default implementation of cellRangeRenderer used by Grid.
@@ -12447,11 +12465,11 @@ var ProperCombo =
 
 	      var className = cellClassName({ columnIndex: columnIndex, rowIndex: rowIndex });
 
-	      var child = _react2.default.createElement(
+	      var child = _react2["default"].createElement(
 	        'div',
 	        {
 	          key: key,
-	          className: (0, _classnames2.default)('Grid__cell', className),
+	          className: (0, _classnames2["default"])('Grid__cell', className),
 	          style: _extends({
 	            height: rowDatum.size,
 	            left: columnDatum.offset + horizontalOffsetAdjustment,
@@ -12478,7 +12496,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.defaultRowRenderer = exports.defaultHeaderRenderer = exports.defaultCellRenderer = exports.defaultCellDataGetter = exports.default = undefined;
+	exports.SortIndicator = exports.SortDirection = exports.FlexColumn = exports.FlexTable = exports.defaultRowRenderer = exports.defaultHeaderRenderer = exports.defaultCellRenderer = exports.defaultCellDataGetter = exports["default"] = undefined;
 
 	var _FlexTable2 = __webpack_require__(52);
 
@@ -12512,17 +12530,17 @@ var ProperCombo =
 
 	var _SortIndicator3 = _interopRequireDefault(_SortIndicator2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _FlexTable3.default;
-	exports.defaultCellDataGetter = _defaultCellDataGetter3.default;
-	exports.defaultCellRenderer = _defaultCellRenderer3.default;
-	exports.defaultHeaderRenderer = _defaultHeaderRenderer3.default;
-	exports.defaultRowRenderer = _defaultRowRenderer3.default;
-	exports.FlexTable = _FlexTable3.default;
-	exports.FlexColumn = _FlexColumn3.default;
-	exports.SortDirection = _SortDirection3.default;
-	exports.SortIndicator = _SortIndicator3.default;
+	exports["default"] = _FlexTable3["default"];
+	exports.defaultCellDataGetter = _defaultCellDataGetter3["default"];
+	exports.defaultCellRenderer = _defaultCellRenderer3["default"];
+	exports.defaultHeaderRenderer = _defaultHeaderRenderer3["default"];
+	exports.defaultRowRenderer = _defaultRowRenderer3["default"];
+	exports.FlexTable = _FlexTable3["default"];
+	exports.FlexColumn = _FlexColumn3["default"];
+	exports.SortDirection = _SortDirection3["default"];
+	exports.SortIndicator = _SortIndicator3["default"];
 
 /***/ },
 /* 52 */
@@ -12568,7 +12586,7 @@ var ProperCombo =
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -12666,23 +12684,23 @@ var ProperCombo =
 
 	      // Precompute and cache column styles before rendering rows and columns to speed things up
 	      this._cachedColumnStyles = [];
-	      _react2.default.Children.toArray(children).forEach(function (column, index) {
+	      _react2["default"].Children.toArray(children).forEach(function (column, index) {
 	        _this2._cachedColumnStyles[index] = _this2._getFlexStyleForColumn(column, column.props.style);
 	      });
 
 	      // Note that we specify :numChildren, :scrollbarWidth, :sortBy, and :sortDirection as properties on Grid even though these have nothing to do with Grid.
 	      // This is done because Grid is a pure component and won't update unless its properties or state has changed.
 	      // Any property that should trigger a re-render of Grid then is specified here to avoid a stale display.
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
-	          className: (0, _classnames2.default)('FlexTable', className),
+	          className: (0, _classnames2["default"])('FlexTable', className),
 	          style: style
 	        },
-	        !disableHeader && _react2.default.createElement(
+	        !disableHeader && _react2["default"].createElement(
 	          'div',
 	          {
-	            className: (0, _classnames2.default)('FlexTable__headerRow', rowClass),
+	            className: (0, _classnames2["default"])('FlexTable__headerRow', rowClass),
 	            style: _extends({}, rowStyleObject, {
 	              height: headerHeight,
 	              paddingRight: scrollbarWidth,
@@ -12691,9 +12709,9 @@ var ProperCombo =
 	          },
 	          this._getRenderedHeaderRow()
 	        ),
-	        _react2.default.createElement(_Grid2.default, _extends({}, this.props, {
+	        _react2["default"].createElement(_Grid2["default"], _extends({}, this.props, {
 	          autoContainerWidth: true,
-	          className: (0, _classnames2.default)('FlexTable__Grid', gridClassName),
+	          className: (0, _classnames2["default"])('FlexTable__Grid', gridClassName),
 	          cellClassName: this._cellClassName,
 	          cellRenderer: this._createRow,
 	          cellStyle: this._cellStyle,
@@ -12715,7 +12733,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_cellClassName',
@@ -12758,11 +12776,11 @@ var ProperCombo =
 
 	      var title = typeof renderedCell === 'string' ? renderedCell : null;
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        {
 	          key: 'Row' + rowIndex + '-Col' + columnIndex,
-	          className: (0, _classnames2.default)('FlexTable__rowColumn', className),
+	          className: (0, _classnames2["default"])('FlexTable__rowColumn', className),
 	          style: style,
 	          title: title
 	        },
@@ -12790,7 +12808,7 @@ var ProperCombo =
 
 	      var sortEnabled = !disableSort && sort;
 
-	      var classNames = (0, _classnames2.default)('FlexTable__headerColumn', headerClassName, column.props.headerClassName, {
+	      var classNames = (0, _classnames2["default"])('FlexTable__headerColumn', headerClassName, column.props.headerClassName, {
 	        'FlexTable__sortableHeaderColumn': sortEnabled
 	      });
 	      var style = this._getFlexStyleForColumn(column, headerStyle);
@@ -12809,7 +12827,7 @@ var ProperCombo =
 	      if (sortEnabled || onHeaderClick) {
 	        (function () {
 	          // If this is a sortable header, clicking it should update the table data's sorting.
-	          var newSortDirection = sortBy !== dataKey || sortDirection === _SortDirection2.default.DESC ? _SortDirection2.default.ASC : _SortDirection2.default.DESC;
+	          var newSortDirection = sortBy !== dataKey || sortDirection === _SortDirection2["default"].DESC ? _SortDirection2["default"].ASC : _SortDirection2["default"].DESC;
 
 	          var onClick = function onClick() {
 	            sortEnabled && sort({
@@ -12833,7 +12851,7 @@ var ProperCombo =
 	        })();
 	      }
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        _extends({}, a11yProps, {
 	          key: 'Header-Col' + index,
@@ -12867,7 +12885,7 @@ var ProperCombo =
 	      var rowStyleObject = rowStyle instanceof Function ? rowStyle({ index: index }) : rowStyle;
 	      var rowData = rowGetter({ index: index });
 
-	      var columns = _react2.default.Children.toArray(children).map(function (column, columnIndex) {
+	      var columns = _react2["default"].Children.toArray(children).map(function (column, columnIndex) {
 	        return _this3._createColumn({
 	          column: column,
 	          columnIndex: columnIndex,
@@ -12878,7 +12896,7 @@ var ProperCombo =
 	        });
 	      });
 
-	      var className = (0, _classnames2.default)('FlexTable__row', rowClass);
+	      var className = (0, _classnames2["default"])('FlexTable__row', rowClass);
 	      var style = _extends({}, rowStyleObject, {
 	        height: this._getRowHeight(index),
 	        paddingRight: scrollbarWidth
@@ -12899,7 +12917,7 @@ var ProperCombo =
 	    }
 
 	    /**
-	     * Determines the flex-shrink, flex-grow, and width values for a cell (header or column).
+	     * Determines the flex-shrink flex-grow and width values for a cell (header or column).
 	     */
 
 	  }, {
@@ -12934,7 +12952,7 @@ var ProperCombo =
 	      var children = _props4.children;
 	      var disableHeader = _props4.disableHeader;
 
-	      var items = disableHeader ? [] : _react2.default.Children.toArray(children);
+	      var items = disableHeader ? [] : _react2["default"].Children.toArray(children);
 
 	      return items.map(function (column, index) {
 	        return _this4._createHeader({ column: column, index: index });
@@ -13002,9 +13020,9 @@ var ProperCombo =
 
 	  /** One or more FlexColumns describing the data displayed in this row */
 	  children: function children(props, propName, componentName) {
-	    var children = _react2.default.Children.toArray(props.children);
+	    var children = _react2["default"].Children.toArray(props.children);
 	    for (var i = 0; i < children.length; i++) {
-	      if (children[i].type !== _FlexColumn2.default) {
+	      if (children[i].type !== _FlexColumn2["default"]) {
 	        return new Error('FlexTable only accepts children of type FlexColumn');
 	      }
 	    }
@@ -13159,7 +13177,7 @@ var ProperCombo =
 	  sortBy: _react.PropTypes.string,
 
 	  /** FlexTable data is currently sorted in this direction (if it is sorted at all) */
-	  sortDirection: _react.PropTypes.oneOf([_SortDirection2.default.ASC, _SortDirection2.default.DESC]),
+	  sortDirection: _react.PropTypes.oneOf([_SortDirection2["default"].ASC, _SortDirection2["default"].DESC]),
 
 	  /** Optional inline style */
 	  style: _react.PropTypes.object,
@@ -13185,12 +13203,12 @@ var ProperCombo =
 	    return null;
 	  },
 	  overscanRowCount: 10,
-	  rowRenderer: _defaultRowRenderer2.default,
+	  rowRenderer: _defaultRowRenderer2["default"],
 	  rowStyle: {},
 	  scrollToAlignment: 'auto',
 	  style: {}
 	};
-	exports.default = FlexTable;
+	exports["default"] = FlexTable;
 
 /***/ },
 /* 53 */
@@ -13216,7 +13234,7 @@ var ProperCombo =
 
 	var _defaultCellDataGetter2 = _interopRequireDefault(_defaultCellDataGetter);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13240,11 +13258,11 @@ var ProperCombo =
 	}(_react.Component);
 
 	Column.defaultProps = {
-	  cellDataGetter: _defaultCellDataGetter2.default,
-	  cellRenderer: _defaultCellRenderer2.default,
+	  cellDataGetter: _defaultCellDataGetter2["default"],
+	  cellRenderer: _defaultCellRenderer2["default"],
 	  flexGrow: 0,
 	  flexShrink: 1,
-	  headerRenderer: _defaultHeaderRenderer2.default,
+	  headerRenderer: _defaultHeaderRenderer2["default"],
 	  style: {}
 	};
 	Column.propTypes = {
@@ -13305,7 +13323,7 @@ var ProperCombo =
 	  /** Flex basis (width) for this column; This value can grow or shrink based on :flexGrow and :flexShrink properties. */
 	  width: _react.PropTypes.number.isRequired
 	};
-	exports.default = Column;
+	exports["default"] = Column;
 
 /***/ },
 /* 54 */
@@ -13316,7 +13334,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = defaultHeaderRenderer;
+	exports["default"] = defaultHeaderRenderer;
 
 	var _react = __webpack_require__(2);
 
@@ -13326,7 +13344,7 @@ var ProperCombo =
 
 	var _SortIndicator2 = _interopRequireDefault(_SortIndicator);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	/**
 	 * Default table header renderer.
@@ -13340,7 +13358,7 @@ var ProperCombo =
 	  var sortDirection = _ref.sortDirection;
 
 	  var showSortIndicator = sortBy === dataKey;
-	  var children = [_react2.default.createElement(
+	  var children = [_react2["default"].createElement(
 	    'span',
 	    {
 	      className: 'FlexTable__headerTruncatedText',
@@ -13351,7 +13369,7 @@ var ProperCombo =
 	  )];
 
 	  if (showSortIndicator) {
-	    children.push(_react2.default.createElement(_SortIndicator2.default, {
+	    children.push(_react2["default"].createElement(_SortIndicator2["default"], {
 	      key: 'SortIndicator',
 	      sortDirection: sortDirection
 	    }));
@@ -13369,7 +13387,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = SortIndicator;
+	exports["default"] = SortIndicator;
 
 	var _react = __webpack_require__(2);
 
@@ -13383,7 +13401,7 @@ var ProperCombo =
 
 	var _SortDirection2 = _interopRequireDefault(_SortDirection);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	/**
 	 * Displayed beside a header to indicate that a FlexTable is currently sorted by this column.
@@ -13391,12 +13409,12 @@ var ProperCombo =
 	function SortIndicator(_ref) {
 	  var sortDirection = _ref.sortDirection;
 
-	  var classNames = (0, _classnames2.default)('FlexTable__sortableHeaderIcon', {
-	    'FlexTable__sortableHeaderIcon--ASC': sortDirection === _SortDirection2.default.ASC,
-	    'FlexTable__sortableHeaderIcon--DESC': sortDirection === _SortDirection2.default.DESC
+	  var classNames = (0, _classnames2["default"])('FlexTable__sortableHeaderIcon', {
+	    'FlexTable__sortableHeaderIcon--ASC': sortDirection === _SortDirection2["default"].ASC,
+	    'FlexTable__sortableHeaderIcon--DESC': sortDirection === _SortDirection2["default"].DESC
 	  });
 
-	  return _react2.default.createElement(
+	  return _react2["default"].createElement(
 	    'svg',
 	    {
 	      className: classNames,
@@ -13404,12 +13422,12 @@ var ProperCombo =
 	      height: 18,
 	      viewBox: '0 0 24 24'
 	    },
-	    sortDirection === _SortDirection2.default.ASC ? _react2.default.createElement('path', { d: 'M7 14l5-5 5 5z' }) : _react2.default.createElement('path', { d: 'M7 10l5 5 5-5z' }),
-	    _react2.default.createElement('path', { d: 'M0 0h24v24H0z', fill: 'none' })
+	    sortDirection === _SortDirection2["default"].ASC ? _react2["default"].createElement('path', { d: 'M7 14l5-5 5 5z' }) : _react2["default"].createElement('path', { d: 'M7 10l5 5 5-5z' }),
+	    _react2["default"].createElement('path', { d: 'M0 0h24v24H0z', fill: 'none' })
 	  );
 	}
 	SortIndicator.propTypes = {
-	  sortDirection: _react.PropTypes.oneOf([_SortDirection2.default.ASC, _SortDirection2.default.DESC])
+	  sortDirection: _react.PropTypes.oneOf([_SortDirection2["default"].ASC, _SortDirection2["default"].DESC])
 	};
 
 /***/ },
@@ -13435,7 +13453,7 @@ var ProperCombo =
 	  DESC: 'DESC'
 	};
 
-	exports.default = SortDirection;
+	exports["default"] = SortDirection;
 
 /***/ },
 /* 57 */
@@ -13446,7 +13464,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = defaultCellRenderer;
+	exports["default"] = defaultCellRenderer;
 
 
 	/**
@@ -13476,7 +13494,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = defaultCellDataGetter;
+	exports["default"] = defaultCellDataGetter;
 
 
 	/**
@@ -13508,13 +13526,13 @@ var ProperCombo =
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	exports.default = defaultRowRenderer;
+	exports["default"] = defaultRowRenderer;
 
 	var _react = __webpack_require__(2);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	/**
 	 * Default row renderer for FlexTable.
@@ -13560,7 +13578,7 @@ var ProperCombo =
 	    }
 	  }
 
-	  return _react2.default.createElement(
+	  return _react2["default"].createElement(
 	    'div',
 	    _extends({}, a11yProps, {
 	      className: className,
@@ -13579,16 +13597,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.InfiniteLoader = exports.default = undefined;
+	exports.InfiniteLoader = exports["default"] = undefined;
 
 	var _InfiniteLoader2 = __webpack_require__(61);
 
 	var _InfiniteLoader3 = _interopRequireDefault(_InfiniteLoader2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _InfiniteLoader3.default;
-	exports.InfiniteLoader = _InfiniteLoader3.default;
+	exports["default"] = _InfiniteLoader3["default"];
+	exports.InfiniteLoader = _InfiniteLoader3["default"];
 
 /***/ },
 /* 61 */
@@ -13616,7 +13634,7 @@ var ProperCombo =
 
 	var _createCallbackMemoizer2 = _interopRequireDefault(_createCallbackMemoizer);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13637,7 +13655,7 @@ var ProperCombo =
 
 	    var _this = _possibleConstructorReturn(this, (InfiniteLoader.__proto__ || Object.getPrototypeOf(InfiniteLoader)).call(this, props, context));
 
-	    _this._loadMoreRowsMemoizer = (0, _createCallbackMemoizer2.default)();
+	    _this._loadMoreRowsMemoizer = (0, _createCallbackMemoizer2["default"])();
 
 	    _this._onRowsRendered = _this._onRowsRendered.bind(_this);
 	    _this._registerChild = _this._registerChild.bind(_this);
@@ -13658,7 +13676,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_loadUnloadedRanges',
@@ -13789,7 +13807,7 @@ var ProperCombo =
 	  rowCount: 0,
 	  threshold: 15
 	};
-	exports.default = InfiniteLoader;
+	exports["default"] = InfiniteLoader;
 	function isRangeVisible(_ref2) {
 	  var lastRenderedStartIndex = _ref2.lastRenderedStartIndex;
 	  var lastRenderedStopIndex = _ref2.lastRenderedStopIndex;
@@ -13890,16 +13908,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.ScrollSync = exports.default = undefined;
+	exports.ScrollSync = exports["default"] = undefined;
 
 	var _ScrollSync2 = __webpack_require__(63);
 
 	var _ScrollSync3 = _interopRequireDefault(_ScrollSync2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _ScrollSync3.default;
-	exports.ScrollSync = _ScrollSync3.default;
+	exports["default"] = _ScrollSync3["default"];
+	exports.ScrollSync = _ScrollSync3["default"];
 
 /***/ },
 /* 63 */
@@ -13919,7 +13937,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13977,7 +13995,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_onScroll',
@@ -14004,7 +14022,7 @@ var ProperCombo =
 	   */
 	  children: _react.PropTypes.func.isRequired
 	};
-	exports.default = ScrollSync;
+	exports["default"] = ScrollSync;
 
 /***/ },
 /* 64 */
@@ -14015,16 +14033,16 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.VirtualScroll = exports.default = undefined;
+	exports.VirtualScroll = exports["default"] = undefined;
 
 	var _VirtualScroll2 = __webpack_require__(65);
 
 	var _VirtualScroll3 = _interopRequireDefault(_VirtualScroll2);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _VirtualScroll3.default;
-	exports.VirtualScroll = _VirtualScroll3.default;
+	exports["default"] = _VirtualScroll3["default"];
+	exports.VirtualScroll = _VirtualScroll3["default"];
 
 /***/ },
 /* 65 */
@@ -14056,7 +14074,7 @@ var ProperCombo =
 
 	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -14126,9 +14144,9 @@ var ProperCombo =
 	      var width = _props.width;
 
 
-	      var classNames = (0, _classnames2.default)('VirtualScroll', className);
+	      var classNames = (0, _classnames2["default"])('VirtualScroll', className);
 
-	      return _react2.default.createElement(_Grid2.default, _extends({}, this.props, {
+	      return _react2["default"].createElement(_Grid2["default"], _extends({}, this.props, {
 	        autoContainerWidth: true,
 	        cellRenderer: this._cellRenderer,
 	        cellClassName: this._createRowClassNameGetter(),
@@ -14148,7 +14166,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_cellRenderer',
@@ -14322,7 +14340,7 @@ var ProperCombo =
 	  scrollToAlignment: 'auto',
 	  style: {}
 	};
-	exports.default = VirtualScroll;
+	exports["default"] = VirtualScroll;
 
 /***/ },
 /* 66 */
@@ -14333,7 +14351,7 @@ var ProperCombo =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.IS_SCROLLING_TIMEOUT = exports.WindowScroller = exports.default = undefined;
+	exports.IS_SCROLLING_TIMEOUT = exports.WindowScroller = exports["default"] = undefined;
 
 	var _WindowScroller2 = __webpack_require__(67);
 
@@ -14343,11 +14361,11 @@ var ProperCombo =
 
 	var _onScroll2 = _interopRequireDefault(_onScroll);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-	exports.default = _WindowScroller3.default;
-	exports.WindowScroller = _WindowScroller3.default;
-	exports.IS_SCROLLING_TIMEOUT = _onScroll2.default;
+	exports["default"] = _WindowScroller3["default"];
+	exports.WindowScroller = _WindowScroller3["default"];
+	exports.IS_SCROLLING_TIMEOUT = _onScroll2["default"];
 
 /***/ },
 /* 67 */
@@ -14379,7 +14397,7 @@ var ProperCombo =
 
 	var _onScroll = __webpack_require__(68);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -14417,7 +14435,7 @@ var ProperCombo =
 	      // Subtract documentElement top to handle edge-case where a user is navigating back (history) from an already-scrolled bage.
 	      // In this case the body's top position will be a negative number and this element's top will be increased (by that amount).
 
-	      this._positionFromTop = _reactDom2.default.findDOMNode(this).getBoundingClientRect().top - document.documentElement.getBoundingClientRect().top;
+	      this._positionFromTop = _reactDom2["default"].findDOMNode(this).getBoundingClientRect().top - document.documentElement.getBoundingClientRect().top;
 
 	      if (height !== window.innerHeight) {
 	        this.setState({
@@ -14448,10 +14466,10 @@ var ProperCombo =
 	      var _this2 = this;
 
 	      if (this._setNextStateAnimationFrameId) {
-	        _raf2.default.cancel(this._setNextStateAnimationFrameId);
+	        _raf2["default"].cancel(this._setNextStateAnimationFrameId);
 	      }
 
-	      this._setNextStateAnimationFrameId = (0, _raf2.default)(function () {
+	      this._setNextStateAnimationFrameId = (0, _raf2["default"])(function () {
 	        _this2._setNextStateAnimationFrameId = null;
 	        _this2.setState(state);
 	      });
@@ -14466,7 +14484,7 @@ var ProperCombo =
 	      var height = _state.height;
 
 
-	      return _react2.default.createElement(
+	      return _react2["default"].createElement(
 	        'div',
 	        null,
 	        children({
@@ -14479,7 +14497,7 @@ var ProperCombo =
 	  }, {
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return (0, _reactAddonsShallowCompare2.default)(this, nextProps, nextState);
+	      return (0, _reactAddonsShallowCompare2["default"])(this, nextProps, nextState);
 	    }
 	  }, {
 	    key: '_enablePointerEventsAfterDelayCallback',
@@ -14547,7 +14565,7 @@ var ProperCombo =
 	  onResize: function onResize() {},
 	  onScroll: function onScroll() {}
 	};
-	exports.default = WindowScroller;
+	exports["default"] = WindowScroller;
 
 /***/ },
 /* 68 */
@@ -15465,7 +15483,7 @@ var ProperCombo =
 		if (set.size !== 3) return false;
 		if (typeof set.add !== 'function') return false;
 		if (typeof set.clear !== 'function') return false;
-		if (typeof set.delete !== 'function') return false;
+		if (typeof set["delete"] !== 'function') return false;
 		if (typeof set.entries !== 'function') return false;
 		if (typeof set.forEach !== 'function') return false;
 		if (typeof set.has !== 'function') return false;
@@ -15536,7 +15554,7 @@ var ProperCombo =
 			clear.call(this.__setData__);
 			this.emit('_clear');
 		}),
-		delete: d(function (value) {
+		"delete": d(function (value) {
 			var index = eIndexOf.call(this.__setData__, value);
 			if (index === -1) return false;
 			this.__setData__.splice(index, 1);
@@ -15813,7 +15831,7 @@ var ProperCombo =
 
 	'use strict';
 
-	var map = { function: true, object: true };
+	var map = { "function": true, object: true };
 
 	module.exports = function (x) {
 		return ((x != null) && map[typeof x]) || false;
@@ -16337,7 +16355,7 @@ var ProperCombo =
 		});
 	};
 	defineProperties(SymbolPolyfill, {
-		for: d(function (key) {
+		"for": d(function (key) {
 			if (globalSymbols[key]) return globalSymbols[key];
 			return (globalSymbols[key] = SymbolPolyfill(String(key)));
 		}),
@@ -17296,11 +17314,11 @@ var ProperCombo =
 
 			var rex = null;
 
-			for (var char in charMap) {
-				rex = new RegExp('[' + charMap[char].toString() + ']', 'g');
+			for (var element in charMap) {
+				rex = new RegExp('[' + charMap[element].toString() + ']', 'g');
 
 				try {
-					value = value.replace(rex, char);
+					value = value.replace(rex, element);
 				} catch (e) {
 					console.log('error', value);
 				}

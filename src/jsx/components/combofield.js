@@ -127,7 +127,7 @@ class ComboField extends React.Component {
 				// If the secondary display change then check if that field
 				if (secondaryDisplayChanged) {
 					let fieldsSet = !isInmutable ? new Set(_.keys(nextProps.data[0])) : new Set(_.keys(nextProps.data.get(0).toJSON()));
-					let messages = this.props.messages[this.props.lang];
+					let messages = this.getTranslatedMessages();
 
 					// Change secondaryDisplay, check if the field doesn't exist in the data and then throw an error msg or update the value
 					if (!fieldsSet.has(nextProps.secondaryDisplay) && typeof nextProps.secondaryDisplay != 'function') {
@@ -171,6 +171,23 @@ class ComboField extends React.Component {
 				idField: idField
 			});
 		}
+	}
+
+/**
+ * Get the translated messages for the component.
+ *
+ * @return object Messages of the selected language or in English if the translation for this lang doesn't exist.
+ */
+	getTranslatedMessages() {
+		if (!_.isObject(this.props.messages)) {
+			return {};
+		}
+
+		if (this.props.messages[this.props.lang]) {
+			return this.props.messages[this.props.lang];
+		}
+
+		return this.props.messages['ENG'];
 	}
 
 /**
@@ -278,7 +295,7 @@ class ComboField extends React.Component {
 		let search = null, placeholder = this.props.placeholder, contentClass = "proper-combo-content";
 
 		if (_.isNull(placeholder)) {
-			placeholder = this.props.messages[this.props.lang].placeholder;
+			placeholder = this.getTranslatedMessages().placeholder;
 		}
 
 		search = <Search
@@ -349,7 +366,7 @@ class ComboField extends React.Component {
 
 		// If all selected then the list will have just one item / element with the size
 		if (dataLength == size && size > 20) {
-			let messages = this.props.messages[this.props.lang];
+			let messages = this.getTranslatedMessages();
 
 			item = (
 				<li key={'datalist-element-0'} className="proper-combo-virtualField-list-element">
@@ -361,7 +378,7 @@ class ComboField extends React.Component {
 			list.push(item);
 
 		} else if (size > this.props.maxSelection) { // If there are more selected elements than the limit (default 200)
-			let messages = this.props.messages[this.props.lang];
+			let messages = this.getTranslatedMessages();
 
 			// Just one element with the number of selected elements and a message.
 			item = (

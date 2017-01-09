@@ -125,9 +125,7 @@
 				margin-bottom: 0.1em;
 				padding-top: 0.1em;
 				cursor: pointer;
-				white-space: nowrap;
-			    overflow: hidden;
-			    text-overflow: ellipsis;
+				box-sizing: border-box;
 
 				&.proper-search-selected {
 					i {

@@ -199,11 +199,17 @@ class ComboField extends React.Component {
  */
  	afterSelect(data, selection) {
  		let selectionChanged = !shallowEqualImmutable(this.state.selection, selection);
+		let show = this.state.show;
 
+		if (!this.props.multiSelect) {
+			show = false;
+		}
+		
 	   	if (selectionChanged) {
 			this.setState({
 				selectedData: data,
-				selection: selection
+				selection: selection,
+				show: show
 			}, this.sendSelection.bind(this, data, selection));
 		}
 	}

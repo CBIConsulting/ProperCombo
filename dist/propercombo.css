@@ -249,6 +249,8 @@
       margin-bottom: 0.1em;
       padding-top: 0.1em;
       cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
       box-sizing: border-box; }
       .proper-combo .proper-search .proper-search-list .proper-search-list-virtual .proper-search-list-element.proper-search-selected i {
         color: #10AB10; }

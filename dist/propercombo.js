@@ -335,8 +335,11 @@ var ProperCombo =
 
 			if (!this.props.multiSelect) {
 				show = false;
+				if (!selection.length) {
+					selection = this.state.selection;
+					data = this.state.selectedData;
+				}
 			}
-
 			if (selectionChanged) {
 				this.setState({
 					selectedData: data,

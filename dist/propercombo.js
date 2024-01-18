@@ -160,7 +160,8 @@ var ProperCombo =
 			filterField: null, // By default it will be the displayField
 			afterSelect: null, // Function
 			uniqueId: null,
-			allowsEmptySelection: false // Put this to true to get a diferent ToolBar that allows select empty
+			allowsEmptySelection: false, // Put this to true to get a diferent ToolBar that allows select empty
+			disableUnselect: false // Activate this property so that once there is a selection the field cannot be left empty again, in multiselect it forces you to leave at least one option checked
 		};
 	}
 
@@ -335,11 +336,13 @@ var ProperCombo =
 
 			if (!this.props.multiSelect) {
 				show = false;
-				if (!selection.length) {
-					selection = this.state.selection;
-					data = this.state.selectedData;
-				}
 			}
+
+			if (!selection.length && this.props.disableUnselect) {
+				selection = this.state.selection;
+				data = this.state.selectedData;
+			}
+
 			if (selectionChanged) {
 				this.setState({
 					selectedData: data,

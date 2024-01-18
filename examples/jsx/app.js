@@ -24,6 +24,7 @@ class App extends React.Component {
 			displayField: 'label',
 			defaultSearch: '',
 			multiSelect: true,
+			disableUnselect: false,
 			listHeight: this.props.listHeight,
 			listRowHeight: this.props.listRowHeight,
 			placeholder: 'Search placeHolder',
@@ -102,6 +103,7 @@ class App extends React.Component {
 			this.refs.listElementHeight.value = nextState.listRowHeight;
 			this.refs.lang.value = nextState.language;
 			this.refs.multi.value = nextState.multiSelect;
+			this.refs.disableUnselect.value = nextState.disableUnselect;
 		}
 
 		return somethingChanged;
@@ -138,6 +140,7 @@ class App extends React.Component {
 		let defaultSearch = 'test '+ random, placeholder = 'Search Placeholder ' + random;
 		let listHeight = this.props.listHeight + random, listRowHeight = this.props.listRowHeight + random;
 		let multiSelect = !this.state.multiSelect, dataSize = (Math.floor(Math.random()* 1000) + 10);
+		let disableUnselect = !this.state.disableUnselect;
 
 		if (random % 2 == 0) language = 'ENG';
 		else language = 'SPA';
@@ -159,6 +162,7 @@ class App extends React.Component {
 			listHeight: listHeight,
 			listRowHeight: listRowHeight,
 			multiSelect: multiSelect,
+			disableUnselect: disableUnselect,
 			filter: null,
 			placeholder: placeholder,
 			afterSelect: this.afterSelect.bind(this),
@@ -296,6 +300,17 @@ class App extends React.Component {
 		});
 	}
 
+	onChangeDisableUnselect(e) {
+		e.preventDefault();
+		let disableUnselect = null;
+		if (this.refs.disableUnselect.value == 'true') disableUnselect = true;
+		else disableUnselect = false;
+
+		this.setState({
+			disableUnselect: disableUnselect,
+		});
+	}
+
 	onChangeLang(e) {
 		e.preventDefault();
 
@@ -307,6 +322,7 @@ class App extends React.Component {
 	render() {
 		let filter = !this.state.filterOff ? this.filter.bind(this) : null;
 		let multiSelect = this.state.multiSelect, language = this.state.language;
+		let disableUnselect = this.state.disableUnselect;
 
 	    return (
 	    	<div>
@@ -398,6 +414,15 @@ class App extends React.Component {
 					                  </select>
 					                </div>
 					            </div>
+								<div className="form-group">
+					                <label> Disable Unselect </label>
+					                <div className="form-inline">
+					                  <select ref="disableUnselect" className="form-control" id="disableunselect_id" defaultValue={disableUnselect} onChange={this.onChangeDisableUnselect.bind(this)}>
+					                    <option value={true}>Yes</option>
+					                    <option value={false}>No</option>
+					                  </select>
+					                </div>
+					            </div>
 					            <div className="form-group">
 					                <label> Language: </label>
 					               	<div className="form-inline">
@@ -421,6 +446,7 @@ class App extends React.Component {
 								lang={this.state.language}
 								filter={filter}
 								multiSelect={this.state.multiSelect}
+								disableUnselect={this.state.disableUnselect}
 								defaultSelection={this.state.selection}
 								defaultSearch={this.state.defaultSearch}
 								placeholder={this.state.placeholder}

@@ -42,6 +42,7 @@ function getDefaultProps() {
 		afterSelect: null, // Function
 		uniqueId: null,
 		allowsEmptySelection: false, // Put this to true to get a diferent ToolBar that allows select empty
+		disableUnselect: false, // Activate this property so that once there is a selection the field cannot be left empty again, in multiselect it forces you to leave at least one option checked
 	}
 }
 
@@ -203,6 +204,11 @@ class ComboField extends React.Component {
 
 		if (!this.props.multiSelect) {
 			show = false;
+		}
+		
+		if (!selection.length && this.props.disableUnselect) { 
+			selection = this.state.selection;
+			data = this.state.selectedData;
 		}
 		
 	   	if (selectionChanged) {

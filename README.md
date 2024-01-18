@@ -62,6 +62,7 @@ Check your http://localhost:8080/ or  `open http://localhost:8080/`
 * maxHeight: Max. height of the virtual field when it receive new elements, after overcome the max height a scroll bar will appear (Number) Default 100 (px)
 * maxSelection: Max. elements rendered inside the virtual field, after this number of elements if the user select more elements the virtual field will show a item with the number of selected elements (Integer) Default 200
 * secondaryDisplay: Field that will be used to render the items inside the virtual field. It you don't set this field then the field used will be the display field (String) Default 'label'
+* disableUnselect: (Boolean) Activate this property so that once there is a selection the field cannot be left empty again, in multiselect it forces you to leave at least one option checked
 
 ### Basic Example
 
